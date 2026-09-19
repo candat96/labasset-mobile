@@ -17,6 +17,7 @@ import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
 import '../data/repositories/settings_repository.dart';
 import '../data/repositories/stock_repository.dart';
+import '../data/repositories/stocktakes_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import '../modules/account/lock_controller.dart';
@@ -24,6 +25,8 @@ import '../modules/maintenance/maintenance_task_controller.dart';
 import '../modules/notifications/notifications_controller.dart';
 import '../modules/repairs/repair_detail_controller.dart';
 import 'cache/kv_cache.dart';
+import 'stocktake/stocktake_counts_handler.dart';
+import 'stocktake/stocktake_local_store.dart';
 import 'network/connectivity.dart';
 import 'network/dio_client.dart';
 import 'routes/app_routes.dart';
@@ -64,6 +67,11 @@ Future<void> bootstrap() async {
   Get.put(CatalogsRepository(dio), permanent: true);
   Get.put(CalendarRepository(dio), permanent: true);
   Get.put(CalibrationsRepository(dio), permanent: true);
+  Get.put(StocktakesRepository(dio), permanent: true);
+
+  // Kho cục bộ kiểm kê offline.
+  final stocktakeStore = Get.put(SqfliteStocktakeLocalStore(), permanent: true);
+  await stocktakeStore.init();
 
   // Cache khoá–giá trị (trang chủ offline, lịch sử quét…).
   final cache = Get.put(SqfliteKvCache(), permanent: true);
@@ -86,6 +94,12 @@ Future<void> bootstrap() async {
   outbox.addHandler(AttachmentOutboxHandler(attachments));
   outbox.addHandler(RepairLogOutboxHandler(Get.find<RepairsRepository>()));
   outbox.addHandler(TaskResultOutboxHandler(Get.find<TasksRepository>()));
+  outbox.addHandler(
+    StocktakeCountsOutboxHandler(
+      repo: Get.find<StocktakesRepository>(),
+      store: stocktakeStore,
+    ),
+  );
   await outbox.start(connectivity: networkChanges());
 
   // Dịch vụ chạy suốt phiên: thông báo (polling), khoá sinh trắc.

@@ -4,6 +4,7 @@ import '../core/routes/app_routes.dart';
 import '../core/routes/middlewares.dart';
 import '../core/cache/kv_cache.dart';
 import '../core/services/attachment_service.dart';
+import '../core/stocktake/stocktake_local_store.dart';
 import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
 import '../data/repositories/calendar_repository.dart';
@@ -16,6 +17,7 @@ import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
 import '../data/repositories/stock_repository.dart';
+import '../data/repositories/stocktakes_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import 'account/lock_view.dart';
@@ -38,6 +40,16 @@ import 'repairs/repair_detail_controller.dart';
 import 'repairs/repair_detail_view.dart';
 import 'repairs/repair_form_controller.dart';
 import 'repairs/repair_form_view.dart';
+import 'requests/request_detail_controller.dart';
+import 'requests/request_detail_view.dart';
+import 'requests/requests_list_controller.dart';
+import 'requests/requests_list_view.dart';
+import 'stocktake/offline_data_controller.dart';
+import 'stocktake/offline_data_view.dart';
+import 'stocktake/stocktake_count_controller.dart';
+import 'stocktake/stocktake_count_view.dart';
+import 'stocktake/stocktakes_controller.dart';
+import 'stocktake/stocktakes_view.dart';
 import 'stock/receipt_form_controller.dart';
 import 'stock/receipt_form_view.dart';
 import 'stock/receipts_controller.dart';
@@ -324,6 +336,79 @@ List<GetPage<dynamic>> featurePages() {
           ),
         );
       }),
+    ),
+    GetPage(
+      name: Routes.requests,
+      page: () => const RequestsListView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => RequestsListController(
+            requests: Get.find<RequestsRepository>(),
+            isAdmin: Get.find<SessionStore>().hasRole(const ['HOSPITAL_ADMIN']),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.requestDetail,
+      page: () => const RequestDetailView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        Get.lazyPut(
+          () => RequestDetailController(
+            requests: Get.find<RequestsRepository>(),
+            id: id,
+          ),
+          tag: id,
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.stocktakes,
+      page: () => const StocktakesView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => StocktakesController(
+            repo: Get.find<StocktakesRepository>(),
+            store: Get.find<StocktakeLocalStore>(),
+            userId: Get.find<SessionStore>().user.value?.id ?? '',
+            isAdmin: Get.find<SessionStore>().hasRole(const ['HOSPITAL_ADMIN']),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.stocktakeDetail,
+      page: () => const StocktakeCountView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        Get.lazyPut(
+          () => StocktakeCountController(
+            repo: Get.find<StocktakesRepository>(),
+            store: Get.find<StocktakeLocalStore>(),
+            outbox: Get.find<OutboxService>(),
+            id: id,
+          ),
+          tag: id,
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.offlineData,
+      page: () => const OfflineDataView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => OfflineDataController(
+            store: Get.find<StocktakeLocalStore>(),
+            outbox: Get.find<OutboxService>(),
+          ),
+        ),
+      ),
     ),
     GetPage(
       name: Routes.repairNew,

@@ -85,6 +85,12 @@ class AccountView extends GetView<AccountController> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Get.toNamed(Routes.notificationsPreferences),
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.storage_outlined),
+                    title: Text('offline.title'.tr),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Get.toNamed(Routes.offlineData),
+                  ),
                   SwitchListTile(
                     secondary: const Icon(Icons.fingerprint),
                     title: Text('account.biometric'.tr),

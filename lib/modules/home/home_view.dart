@@ -208,6 +208,7 @@ class HomeView extends GetView<HomeController> {
                         onTap: () => Get.toNamed(switch (s.key) {
                           'equipmentNew' => Routes.equipmentNew,
                           'calendar' => Routes.calendar,
+                          'stocktake' => Routes.stocktakes,
                           _ => Routes.placeholderFor(s.key),
                         }),
                         child: Padding(

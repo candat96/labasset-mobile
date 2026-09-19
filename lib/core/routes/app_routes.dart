@@ -26,6 +26,14 @@ class Routes {
   static String stockIssue(String id) => '/stock/issues/$id';
   static const stockTransferNew = '/stock/transfers/new';
   static const stockAlerts = '/stock/alerts';
+  static const requests = '/requests';
+  static const requestDetail = '/requests/:id';
+  static String request(String id) => '/requests/$id';
+  static const stocktakes = '/stocktakes';
+  static const stocktakeDetail = '/stocktakes/:id';
+  static String stocktake(String id) => '/stocktakes/$id';
+  static String stocktakeCount(String id) => '/stocktakes/$id/count';
+  static const offlineData = '/offline-data';
   static const repairs = '/repairs';
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';
