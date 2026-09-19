@@ -94,6 +94,23 @@ class _ScanViewState extends State<ScanView> {
                     ),
                   ),
                 ),
+                if (controller.continuous)
+                  Positioned(
+                    top: AppSpacing.md,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Obx(
+                        () => Chip(
+                          backgroundColor: theme.colorScheme.surface,
+                          avatar: const Icon(Icons.qr_code_scanner, size: 18),
+                          label: Text(
+                            '${'scan.count'.tr}: ${controller.scanCount.value}',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 Obx(
                   () => controller.busy.value
                       ? const Center(child: CircularProgressIndicator())
@@ -102,6 +119,7 @@ class _ScanViewState extends State<ScanView> {
               ],
             ),
           ),
+          if (controller.continuous) _ContinuousPanel(controller: controller),
           SafeArea(
             top: false,
             child: Padding(
@@ -145,13 +163,79 @@ class _ScanViewState extends State<ScanView> {
                           onPressed: controller.busy.value
                               ? null
                               : controller.submitManual,
-                          child: Text('scan.lookup'.tr),
+                          child: Text(
+                            controller.continuous
+                                ? 'common.add'.tr
+                                : 'scan.lookup'.tr,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bộ đếm + danh sách mã vừa quét + nút "Xong" của chế độ quét liên tục.
+class _ContinuousPanel extends StatelessWidget {
+  const _ContinuousPanel({required this.controller});
+
+  final ScanController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      color: theme.colorScheme.surfaceContainerHighest,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'scan.recent'.tr,
+                  style: theme.textTheme.labelLarge,
+                ),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: controller.finish,
+                icon: const Icon(Icons.check),
+                label: Text('scan.done'.tr),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          SizedBox(
+            height: 40,
+            child: Obx(
+              () => controller.recentCodes.isEmpty
+                  ? Text('scan.hint'.tr, style: theme.textTheme.bodySmall)
+                  : ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: controller.recentCodes.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(width: AppSpacing.xs),
+                      itemBuilder: (_, i) {
+                        final code = controller.recentCodes[i];
+                        return InputChip(
+                          label: Text(code),
+                          onDeleted: () => controller.removeCode(code),
+                        );
+                      },
+                    ),
             ),
           ),
         ],

@@ -1,33 +1,51 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../core/errors/api_error.dart';
 import '../../core/routes/app_routes.dart';
 import '../../data/repositories/equipment_repository.dart';
 
-/// Quét QR/barcode → tra máy → mở hồ sơ. Chống quét lặp 1,5 s.
+/// Quét QR/barcode → tra máy → mở hồ sơ (chế độ đơn) hoặc gom mã (liên tục).
 class ScanController extends GetxController {
   ScanController({
     required this.equipment,
     Future<void> Function(String route)? navigate,
-  }) : _navigate = navigate ?? ((r) async => Get.toNamed(r));
+    void Function(Object? result)? pop,
+    this.continuous = false,
+    this.onCode,
+  }) : _navigate = navigate ?? ((r) async => Get.toNamed(r)),
+       _pop = pop ?? ((r) => Get.back(result: r));
 
   final EquipmentRepository equipment;
   final Future<void> Function(String route) _navigate;
+  final void Function(Object? result) _pop;
+
+  /// Quét liên tục: không tra/mở hồ sơ, gom mã + đếm + rung/tiếng.
+  final bool continuous;
+  final Future<void> Function(String code)? onCode;
 
   final manual = TextEditingController();
   final RxBool busy = false.obs;
   final RxnString message = RxnString();
   final RxBool torch = false.obs;
+  final RxInt scanCount = 0.obs;
+  final RxList<String> recentCodes = <String>[].obs;
 
   DateTime? _lastScan;
 
+  /// Mã QR tem máy là `labasset://eq/<token>`; endpoint chỉ nhận token.
+  static String qrToken(String raw) {
+    final trimmed = raw.trim();
+    final m = RegExp(r'^labasset://eq/(.+)$').firstMatch(trimmed);
+    return m?.group(1) ?? trimmed;
+  }
+
   /// Trả id máy nếu tìm thấy (null nếu không); dùng cho cả quét và nhập tay.
   Future<String?> lookup(String raw) async {
-    final code = raw.trim();
+    final code = qrToken(raw);
     if (code.isEmpty || busy.value) return null;
     busy.value = true;
     message.value = null;
@@ -62,6 +80,21 @@ class ScanController extends GetxController {
     }
   }
 
+  /// Thêm một mã vào danh sách quét liên tục (không gọi API).
+  Future<void> addCode(String raw) async {
+    final code = raw.trim();
+    if (code.isEmpty) return;
+    recentCodes.remove(code);
+    recentCodes.insert(0, code);
+    if (recentCodes.length > 10) recentCodes.removeLast();
+    scanCount.value++;
+    HapticFeedback.mediumImpact().ignore();
+    SystemSound.play(SystemSoundType.click).ignore();
+    await onCode?.call(code);
+  }
+
+  void removeCode(String code) => recentCodes.remove(code);
+
   Future<void> onDetected(String? value) async {
     if (value == null || value.isEmpty) return;
     final now = DateTime.now();
@@ -70,11 +103,19 @@ class ScanController extends GetxController {
       return;
     }
     _lastScan = now;
-    unawaited(HapticFeedback.mediumImpact());
-    await lookup(value);
+    if (continuous) {
+      await addCode(value);
+    } else {
+      unawaited(HapticFeedback.mediumImpact());
+      await lookup(value);
+    }
   }
 
-  Future<void> submitManual() => lookup(manual.text);
+  Future<void> submitManual() =>
+      continuous ? addCode(manual.text) : lookup(manual.text);
+
+  /// Kết thúc quét liên tục: trả danh sách mã cho màn gọi.
+  void finish() => _pop(recentCodes.toList());
 
   @override
   void onClose() {
