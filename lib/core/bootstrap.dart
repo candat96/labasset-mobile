@@ -6,6 +6,9 @@ import '../data/repositories/device_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/settings_repository.dart';
+import '../modules/account/lock_controller.dart';
+import '../modules/notifications/notifications_controller.dart';
+import '../modules/notifications/push_service.dart';
 import 'network/dio_client.dart';
 import 'routes/app_routes.dart';
 import 'storage/session_store.dart';
@@ -29,4 +32,19 @@ Future<void> bootstrap() async {
   Get.put(NotificationsRepository(dio), permanent: true);
   Get.put(DeviceRepository(dio), permanent: true);
   Get.put(SettingsRepository(dio), permanent: true);
+
+  // Dịch vụ chạy suốt phiên: thông báo (polling), push (khung), khoá sinh trắc.
+  Get.put(
+    NotificationsController(
+      store: store,
+      repo: Get.find<NotificationsRepository>(),
+    ),
+    permanent: true,
+  );
+  Get.put(LockController(store: store), permanent: true);
+  await Get.putAsync(
+    () =>
+        PushService(devices: Get.find<DeviceRepository>(), store: store).init(),
+    permanent: true,
+  );
 }

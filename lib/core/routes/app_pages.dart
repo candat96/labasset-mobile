@@ -2,10 +2,12 @@ import 'package:get/get.dart';
 
 import '../../modules/auth/auth_pages.dart';
 import '../../modules/feature_pages.dart';
+import '../../modules/account/account_controller.dart';
 import '../../modules/home/home_controller.dart';
 import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/shell/shell_controller.dart';
 import '../../modules/shell/shell_view.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../storage/session_store.dart';
 import 'app_routes.dart';
@@ -28,6 +30,12 @@ class AppPages {
       middlewares: _protected,
       binding: BindingsBuilder(() {
         Get.lazyPut(ShellController.new);
+        Get.lazyPut(
+          () => AccountController(
+            store: Get.find<SessionStore>(),
+            auth: Get.find<AuthRepository>(),
+          ),
+        );
         Get.lazyPut(
           () => HomeController(
             store: Get.find<SessionStore>(),
