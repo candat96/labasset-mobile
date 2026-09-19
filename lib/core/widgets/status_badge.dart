@@ -12,6 +12,43 @@ StatusTone toneForEquipmentStatus(String status) => switch (status) {
   _ => StatusTone.muted,
 };
 
+/// Map trạng thái phiếu sửa chữa → tone.
+StatusTone toneForRepairStatus(String status) => switch (status) {
+  'new' => StatusTone.muted,
+  'accepted' || 'in_progress' => StatusTone.info,
+  'awaiting_parts' || 'awaiting_vendor' => StatusTone.warning,
+  'completed' || 'acceptance' => StatusTone.success,
+  'cancelled' => StatusTone.danger,
+  _ => StatusTone.muted,
+};
+
+/// Map mức khẩn → tone.
+StatusTone toneForRepairSeverity(String severity) => switch (severity) {
+  'critical' || 'high' => StatusTone.danger,
+  'medium' => StatusTone.warning,
+  _ => StatusTone.info,
+};
+
+/// Map trạng thái công việc bảo dưỡng → tone.
+StatusTone toneForTaskStatus(String status) => switch (status) {
+  'scheduled' => StatusTone.info,
+  'in_progress' => StatusTone.warning,
+  'done' => StatusTone.success,
+  'skipped' => StatusTone.muted,
+  'overdue' => StatusTone.danger,
+  _ => StatusTone.muted,
+};
+
+/// Map trạng thái phiếu yêu cầu → tone.
+StatusTone toneForRequestStatus(String status) => switch (status) {
+  'draft' => StatusTone.muted,
+  'submitted' || 'dept_approved' => StatusTone.info,
+  'approved' || 'partially_approved' => StatusTone.success,
+  'rejected' || 'cancelled' => StatusTone.danger,
+  'issued' || 'received' || 'converted' => StatusTone.success,
+  _ => StatusTone.muted,
+};
+
 /// Badge trạng thái: màu + icon (không chỉ dựa vào màu).
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.tone, required this.label});

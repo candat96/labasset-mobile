@@ -55,6 +55,24 @@ class Ep {
   static const supplies = '/v1/supplies';
   static String supply(String id) => '/v1/supplies/$id';
   static const repairs = '/v1/repairs';
+  static String repair(String id) => '/v1/repairs/$id';
+  static String repairAccept(String id) => '/v1/repairs/$id/accept';
+  static String repairAssign(String id) => '/v1/repairs/$id/assign';
+  static const repairAssignSuggest = '/v1/repairs/assign/suggest';
+  static String repairAssignmentsRespond(String id) =>
+      '/v1/repairs/$id/assignments/respond';
+  static String repairDiagnosis(String id) => '/v1/repairs/$id/diagnosis';
+  static String repairStatus(String id) => '/v1/repairs/$id/status';
+  static String repairComplete(String id) => '/v1/repairs/$id/complete';
+  static String repairAcceptance(String id) => '/v1/repairs/$id/acceptance';
+  static String repairClose(String id) => '/v1/repairs/$id/close';
+  static String repairCancel(String id) => '/v1/repairs/$id/cancel';
+  static String repairLogs(String id) => '/v1/repairs/$id/logs';
+  static String repairParts(String id) => '/v1/repairs/$id/parts';
+  static String repairCosts(String id) => '/v1/repairs/$id/costs';
+  static String repairVendors(String id) => '/v1/repairs/$id/vendors';
+  static String repairSignatures(String id) => '/v1/repairs/$id/signatures';
+  static String repairReportPdf(String id) => '/v1/repairs/$id/report.pdf';
   static const requests = '/v1/requests';
 
   static const notifications = '/v1/notifications';
@@ -65,6 +83,7 @@ class Ep {
   static const maintenanceTasks = '/v1/maintenance/tasks';
   static const departments = '/v1/departments';
   static const faults = '/v1/faults';
+  static const faultsSuggest = '/v1/faults/suggest';
 
   static const stockAlerts = '/v1/stock/alerts';
   static const stockLots = '/v1/stock/lots';

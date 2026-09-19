@@ -18,6 +18,7 @@ class RepairSummary {
     this.createdAt,
     this.dueAt,
     this.isOverdue = false,
+    this.equipmentDown = false,
     this.equipment,
   });
 
@@ -32,6 +33,8 @@ class RepairSummary {
   final String? dueAt;
   @JsonKey(defaultValue: false)
   final bool isOverdue;
+  @JsonKey(defaultValue: false)
+  final bool equipmentDown;
   final EquipmentRef? equipment;
 
   String get equipmentLabel => equipment?.name ?? equipmentId;

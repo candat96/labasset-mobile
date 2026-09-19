@@ -11,6 +11,10 @@ class Routes {
   static const shell = '/';
   static const scan = '/scan';
   static const search = '/search';
+  static const repairs = '/repairs';
+  static const repairNew = '/repairs/new';
+  static const repairDetail = '/repairs/:id';
+  static String repair(String id) => '/repairs/$id';
   static const equipmentDetail = '/equipment/:id';
   static const equipmentNew = '/equipment/new-quick';
   static String equipment(String id) => '/equipment/$id';

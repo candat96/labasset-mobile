@@ -17,6 +17,7 @@ import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import '../modules/account/lock_controller.dart';
 import '../modules/notifications/notifications_controller.dart';
+import '../modules/repairs/repair_detail_controller.dart';
 import 'cache/kv_cache.dart';
 import 'network/connectivity.dart';
 import 'network/dio_client.dart';
@@ -74,6 +75,7 @@ Future<void> bootstrap() async {
     permanent: true,
   );
   outbox.addHandler(AttachmentOutboxHandler(attachments));
+  outbox.addHandler(RepairLogOutboxHandler(Get.find<RepairsRepository>()));
   await outbox.start(connectivity: networkChanges());
 
   // Dịch vụ chạy suốt phiên: thông báo (polling), khoá sinh trắc.

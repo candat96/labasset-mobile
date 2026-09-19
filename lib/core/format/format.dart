@@ -43,6 +43,24 @@ String formatRelative(Object? v, {DateTime? now}) {
   return past ? '$unit trước' : '$unit nữa';
 }
 
+/// Đếm ngược SLA: "Còn 3 giờ" / "Quá hạn 2 ngày".
+String formatSla(Object? v, {DateTime? now}) {
+  final d = _parse(v);
+  if (d == null) return '';
+  final diff = d.difference(now ?? DateTime.now());
+  final overdue = diff.isNegative;
+  final abs = diff.abs();
+  String unit;
+  if (abs.inMinutes < 60) {
+    unit = '${abs.inMinutes} phút';
+  } else if (abs.inHours < 24) {
+    unit = '${abs.inHours} giờ';
+  } else {
+    unit = '${abs.inDays} ngày';
+  }
+  return overdue ? 'Quá hạn $unit' : 'Còn $unit';
+}
+
 /// Tiền VND từ chuỗi số thập phân của API; không chuyển sang num.
 String formatVnd(String? amount, {bool symbol = true}) {
   if (amount == null || amount.isEmpty) return '';

@@ -8,6 +8,7 @@ import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
+import '../data/repositories/faults_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
@@ -22,6 +23,10 @@ import 'notifications/notifications_view.dart';
 import 'notifications/notifications_preferences_controller.dart';
 import 'notifications/notifications_preferences_view.dart';
 import 'equipment/equipment_detail_view.dart';
+import 'repairs/repair_detail_controller.dart';
+import 'repairs/repair_detail_view.dart';
+import 'repairs/repair_form_controller.dart';
+import 'repairs/repair_form_view.dart';
 import 'equipment/tabs/accessories_tab.dart';
 import 'equipment/tabs/components_tab.dart';
 import 'equipment/tabs/network_tab.dart';
@@ -102,6 +107,41 @@ List<GetPage<dynamic>> featurePages() {
             continuous: continuous,
             onLot: LotCardSheet.show,
           ),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.repairNew,
+      page: () => const RepairFormView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => RepairFormController(
+            repairs: Get.find<RepairsRepository>(),
+            equipment: Get.find<EquipmentRepository>(),
+            faults: Get.find<FaultsRepository>(),
+            attachments: Get.find<AttachmentService>(),
+            equipmentId: Get.parameters['equipmentId'],
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.repairDetail,
+      page: () => const RepairDetailView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        final user = Get.find<SessionStore>().user.value;
+        Get.lazyPut(
+          () => RepairDetailController(
+            repairs: Get.find<RepairsRepository>(),
+            outbox: Get.find<OutboxService>(),
+            id: id,
+            userId: user?.id ?? '',
+            roles: user?.roles ?? const [],
+          ),
+          tag: id,
         );
       }),
     ),
