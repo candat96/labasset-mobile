@@ -8,7 +8,13 @@ import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/shell/shell_controller.dart';
 import '../../modules/shell/shell_view.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/equipment_repository.dart';
+import '../../data/repositories/repairs_repository.dart';
+import '../../data/repositories/requests_repository.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../data/repositories/stock_repository.dart';
+import '../../data/repositories/tasks_repository.dart';
+import '../cache/kv_cache.dart';
 import '../storage/session_store.dart';
 import 'app_routes.dart';
 import 'middlewares.dart';
@@ -40,6 +46,12 @@ class AppPages {
           () => HomeController(
             store: Get.find<SessionStore>(),
             settings: Get.find<SettingsRepository>(),
+            repairs: Get.find<RepairsRepository>(),
+            tasks: Get.find<TasksRepository>(),
+            requests: Get.find<RequestsRepository>(),
+            equipment: Get.find<EquipmentRepository>(),
+            stock: Get.find<StockRepository>(),
+            cache: Get.find<KvCache>(),
           ),
         );
       }),

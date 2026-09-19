@@ -10,9 +10,12 @@ import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
 import '../data/repositories/settings_repository.dart';
+import '../data/repositories/stock_repository.dart';
 import '../data/repositories/supplies_repository.dart';
+import '../data/repositories/tasks_repository.dart';
 import '../modules/account/lock_controller.dart';
 import '../modules/notifications/notifications_controller.dart';
+import 'cache/kv_cache.dart';
 import 'network/connectivity.dart';
 import 'network/dio_client.dart';
 import 'routes/app_routes.dart';
@@ -45,6 +48,12 @@ Future<void> bootstrap() async {
   Get.put(SettingsRepository(dio), permanent: true);
   Get.put(AttachmentsRepository(dio), permanent: true);
   Get.put(FilesRepository(dio), permanent: true);
+  Get.put(TasksRepository(dio), permanent: true);
+  Get.put(StockRepository(dio), permanent: true);
+
+  // Cache khoá–giá trị (trang chủ offline, lịch sử quét…).
+  final cache = Get.put(SqfliteKvCache(), permanent: true);
+  await cache.init();
 
   // Hàng đợi offline: sqflite + lắng nghe mạng, handler tệp đính kèm.
   final outbox = Get.put(

@@ -6,18 +6,41 @@ import '../errors/api_error.dart';
 class AppSnackbar {
   AppSnackbar._();
 
-  static void success(String message) =>
-      _show(message, Get.theme.colorScheme.primary);
+  static void success(String message) => _show(message, _success);
 
-  static void error(Object e) =>
-      _show(ApiError.messageFor(e), Get.theme.colorScheme.error);
+  static void error(Object e) => _show(ApiError.messageFor(e), _danger);
 
-  static void info(String message) =>
-      _show(message, Get.theme.colorScheme.onSurface);
+  static void info(String message) => _show(message, _neutral);
 
-  static void _show(String message, Color color) {
-    if (Get.context == null) return; // chưa runApp / unit test
+  /// Màu lấy trong try — Get.theme ném khi chưa runApp (unit test).
+  static Color? get _success {
     try {
+      return Get.theme.colorScheme.primary;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Color? get _danger {
+    try {
+      return Get.theme.colorScheme.error;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Color? get _neutral {
+    try {
+      return Get.theme.colorScheme.onSurface;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static void _show(String message, Color? color) {
+    if (color == null) return; // chưa runApp / unit test
+    try {
+      if (Get.context == null) return;
       Get.rawSnackbar(
         message: message,
         backgroundColor: color,

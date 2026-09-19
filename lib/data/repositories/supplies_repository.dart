@@ -25,4 +25,9 @@ class SuppliesRepository {
     );
     return SupplyPage.fromJson(res.data!);
   }
+
+  Future<SupplySummary> byId(String id) async {
+    final res = await _dio.get<Map<String, dynamic>>(Ep.supply(id));
+    return SupplySummary.fromJson(res.data!);
+  }
 }

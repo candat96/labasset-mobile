@@ -109,6 +109,20 @@ const Map<String, String> vi = {
   'scan.recent': 'Mã vừa quét',
   'scan.done': 'Xong',
   'scan.duplicate': 'Mã vừa quét, bỏ qua',
+  'scan.history': 'Mã gần đây',
+  'scan.lot.title': 'Thẻ lô vật tư',
+  'scan.lot.supply': 'Vật tư',
+  'scan.lot.lotNo': 'Số lô',
+  'scan.lot.warehouse': 'Kho',
+  'scan.lot.qty': 'Tồn khả dụng',
+  'scan.lot.expiry': 'Hạn dùng',
+  'scan.lot.status': 'Trạng thái',
+  'scan.lot.open': 'Mở nắp',
+  'scan.lot.opened': 'Đã mở nắp lô',
+  'scan.lot.viewSupply': 'Xem vật tư',
+  'scan.lot.issue': 'Xuất kho lô này',
+  'scan.reprint': 'Yêu cầu in lại tem',
+  'scan.reprint.sent': 'Đã ghi yêu cầu in lại tem vào timeline máy',
 
   // status
   'status.active': 'Hoạt động',
@@ -141,6 +155,19 @@ const Map<String, String> vi = {
   'status.request.received': 'Đã nhận',
   'status.request.cancelled': 'Đã huỷ',
   'status.request.converted': 'Đã chuyển',
+
+  // status bảo dưỡng (TaskStatus)
+  'status.task.scheduled': 'Đã lên lịch',
+  'status.task.in_progress': 'Đang thực hiện',
+  'status.task.done': 'Hoàn thành',
+  'status.task.skipped': 'Bỏ qua',
+  'status.task.overdue': 'Quá hạn',
+
+  // status lô vật tư (StockLotStatus)
+  'status.lot.available': 'Sẵn dùng',
+  'status.lot.quarantine': 'Cách ly',
+  'status.lot.expired': 'Hết hạn',
+  'status.lot.disposed': 'Đã huỷ',
 
   // tabs
   'tab.home': 'Trang chủ',
@@ -212,9 +239,14 @@ const Map<String, String> vi = {
   'home.myTasks': 'Việc của tôi hôm nay',
   'home.alerts': 'Cảnh báo',
   'home.shortcuts': 'Lối tắt',
+  'home.viewAll': 'Xem tất cả',
+  'home.cachedAt': 'Dữ liệu lúc @time',
+  'home.noWork': 'Hôm nay chưa có việc nào',
   'home.task.repairsAssigned': 'Sửa chữa được giao',
   'home.task.maintenanceDue': 'Bảo dưỡng đến hạn',
   'home.task.stocktakesOpen': 'Kiểm kê đang mở',
+  'home.task.requestsPending': 'Phiếu chờ duyệt',
+  'home.task.requestsApproved': 'Phiếu đã duyệt chờ cấp',
   'home.alert.brokenUnassigned': 'Máy hỏng chưa tiếp nhận',
   'home.alert.suppliesLow': 'Hoá chất sắp hết / hết hạn',
   'home.alert.calibrationOverdue': 'Kiểm định quá hạn',
@@ -235,6 +267,9 @@ const Map<String, String> vi = {
   'placeholder.issueSupplies': 'Xuất vật tư cho máy',
   'placeholder.counters': 'Cập nhật bộ đếm',
   'placeholder.updateStatus': 'Cập nhật tình trạng',
+  'placeholder.stockIssue': 'Xuất kho',
+  'placeholder.stockReceipt': 'Nhập kho',
+  'placeholder.calendar': 'Lịch',
   'placeholder.unknown': 'Màn hình',
 
   // scan

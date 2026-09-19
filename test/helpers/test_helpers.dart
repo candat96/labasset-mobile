@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:labasset_mobile/core/cache/kv_cache.dart';
 import 'package:labasset_mobile/core/i18n/app_translations.dart';
 import 'package:labasset_mobile/core/storage/session_store.dart';
 import 'package:labasset_mobile/core/theme/app_theme.dart';
@@ -9,6 +10,24 @@ import 'package:labasset_mobile/data/models/user_view.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockStorage extends Mock implements FlutterSecureStorage {}
+
+class FakeKvCache implements KvCache {
+  final Map<String, CachedValue> store = {};
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<void> put(String key, Map<String, dynamic> value) async {
+    store[key] = CachedValue(value, DateTime.now());
+  }
+
+  @override
+  Future<CachedValue?> get(String key) async => store[key];
+
+  @override
+  Future<void> delete(String key) async => store.remove(key);
+}
 
 SessionStore fakeStore() {
   final storage = MockStorage();

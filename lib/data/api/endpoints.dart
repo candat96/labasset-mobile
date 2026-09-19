@@ -19,8 +19,10 @@ class Ep {
   static String equipment(String id) => '/v1/equipment/$id';
   static String equipmentByQr(String token) =>
       '/v1/equipment/by-qr/${Uri.encodeComponent(token)}';
+  static String equipmentNotes(String id) => '/v1/equipment/$id/notes';
 
   static const supplies = '/v1/supplies';
+  static String supply(String id) => '/v1/supplies/$id';
   static const repairs = '/v1/repairs';
   static const requests = '/v1/requests';
 
@@ -28,6 +30,12 @@ class Ep {
   static const notificationsReadAll = '/v1/notifications/read-all';
   static const notificationsPreferences = '/v1/notifications/preferences';
   static String notificationRead(String id) => '/v1/notifications/$id/read';
+
+  static const maintenanceTasks = '/v1/maintenance/tasks';
+
+  static const stockAlerts = '/v1/stock/alerts';
+  static const stockLots = '/v1/stock/lots';
+  static String stockLotOpen(String id) => '/v1/stock/lots/$id/open';
 
   static const attachments = '/v1/attachments';
   static String attachment(String id) => '/v1/attachments/$id';
