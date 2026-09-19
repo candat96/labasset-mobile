@@ -20,9 +20,21 @@ class Ep {
   static String equipmentByQr(String token) =>
       '/v1/equipment/by-qr/${Uri.encodeComponent(token)}';
 
+  static const supplies = '/v1/supplies';
+  static const repairs = '/v1/repairs';
+  static const requests = '/v1/requests';
+
   static const notifications = '/v1/notifications';
   static const notificationsReadAll = '/v1/notifications/read-all';
+  static const notificationsPreferences = '/v1/notifications/preferences';
   static String notificationRead(String id) => '/v1/notifications/$id/read';
+
+  static const attachments = '/v1/attachments';
+  static String attachment(String id) => '/v1/attachments/$id';
+
+  static const filesPresign = '/v1/files/presign';
+  static String fileComplete(String id) => '/v1/files/$id/complete';
+  static String fileUrl(String id) => '/v1/files/$id/url';
 
   static const devices = '/v1/devices';
   static String device(String token) =>
