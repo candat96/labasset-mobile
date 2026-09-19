@@ -10,16 +10,18 @@ Tài liệu: `docs/superpowers/specs/2026-09-19-mobile-base-design.md`, design s
 
 ## Stack
 
-Flutter 3.41 · Dart 3.11 · **GetX** (route + middleware, controller, DI, i18n) · dio · flutter_secure_storage ·
-json_serializable · mobile_scanner · local_auth · firebase_messaging (khung) · intl.
-Package `labasset_mobile`, id `vn.labasset.mobile`, Android minSdk 24, iOS 15+ (firebase_messaging yêu cầu).
+Flutter 3.47 (FVM) · Dart 3.13 · **GetX** (route + middleware, controller, DI, i18n) · dio · flutter_secure_storage ·
+json_serializable · mobile_scanner · local_auth · intl.
+Package `labasset_mobile`, id `vn.labasset.mobile`, Android minSdk 24, iOS 15+.
 
 ## Chạy
 
+Project ghim Flutter qua FVM (`.fvmrc`): dùng `fvm flutter ...` (hoặc cài đúng bản trong `.fvmrc`). iOS dùng CocoaPods (`disable-swift-package-manager: true` trong pubspec).
+
 ```bash
-flutter pub get
-dart run build_runner build -d          # sinh *.g.dart
-flutter run --dart-define=API_URL=http://localhost:3000        # iOS simulator
+fvm flutter pub get
+fvm dart run build_runner build -d      # sinh *.g.dart
+fvm flutter run --dart-define=API_URL=http://localhost:3000        # iOS simulator
 flutter run --dart-define=API_URL=http://10.0.2.2:3000         # Android emulator (mặc định)
 flutter run --dart-define=API_URL=http://192.168.1.10:3000     # thiết bị thật (IP LAN máy chạy API)
 ```
@@ -58,7 +60,7 @@ lib/
     home/       việc của tôi / cảnh báo (MOCK có nhãn) + lối tắt module
     scan/       mobile_scanner + nhập tay → by-qr → fallback tìm theo mã → hồ sơ máy
     equipment/  thẻ tóm tắt hồ sơ máy (màn mẫu)
-    notifications/  polling 60 s, badge, danh sách, push_service.dart (FCM khung)
+    notifications/  polling 60 s, badge, danh sách
     account/    cài đặt, sinh trắc (lock_controller/lock_view), đăng xuất
     placeholder/ trang "Đang phát triển" (/placeholder/:key)
     feature_pages.dart  route nghiệp vụ
@@ -75,15 +77,11 @@ tool/check_openapi.dart · integration_test/smoke_test.dart
 - `mustChangePassword` → `PasswordMiddleware` ép `/change-password`; đổi xong API thu hồi mọi phiên → login lại.
 - Sinh trắc: bật trong Cá nhân; `LockController` khoá khi app quay lại sau > 30 s nền; sai 3 lần → đăng xuất.
 
-## Thông báo & push
+## Thông báo
 
-Polling `GET /v1/notifications` mỗi 60 s khi foreground (badge = `unreadCount`). FCM là khung:
-`PushService.init()` gọi `Firebase.initializeApp()` trong try/catch — thiếu cấu hình thì bỏ qua.
-Để bật: `dart pub global activate flutterfire_cli && flutterfire configure` (sinh `lib/firebase_options.dart`,
-`android/app/google-services.json`, `ios/Runner/GoogleService-Info.plist` — đã ignore trong git), thêm plugin
-`com.google.gms.google-services` vào Gradle theo hướng dẫn FlutterFire, rồi đổi `Firebase.initializeApp()`
-thành `Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)`. Token gửi `POST /v1/devices`,
-xoá `DELETE /v1/devices/{token}` khi đăng xuất. Backend cần `FCM_ENABLED=true` + service account.
+Polling `GET /v1/notifications` mỗi 60 s khi foreground (badge = `unreadCount`), danh sách, đọc/đọc tất cả,
+mở đối tượng theo `data.path`. **Push (FCM) đã gỡ khỏi base** theo quyết định 2026-09-19; khi cần, thêm
+`firebase_messaging` và một `PushService` gọi `DeviceRepository.register/unregister` (đã có sẵn, `POST/DELETE /v1/devices`).
 
 ## Quy ước thêm module mới
 
@@ -112,6 +110,6 @@ Smoke tự skip khi thiếu `E2E_PASSWORD`. CI: format, analyze, test, build apk
 1. Chưa có API "Việc của tôi hôm nay" & cảnh báo tổng hợp — trang chủ dùng mock có nhãn.
 2. `GET /v1/equipment/by-qr/{token}` chỉ nhận token QR; barcode mã máy phải fallback `GET /v1/equipment?q=`.
 3. Chưa có tra lô vật tư theo mã quét (`/v1/stock/lots?barcode=`).
-4. Chưa có cách biết server đã bật FCM để app quyết định xin quyền push.
+4. Khi bổ sung push: cần cách biết server đã bật FCM để app quyết định xin quyền.
 5. Thiếu response schema (như web): `/v1/settings/public`, `/v1/users`, `/v1/departments`; `page/limit` khai `Object`.
 6. Quên mật khẩu chỉ gửi link web; mobile không có màn reset (theo thiết kế).

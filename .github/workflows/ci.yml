@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
       - uses: subosito/flutter-action@v2
-        with: { channel: stable, flutter-version: 3.41.5, cache: true }
+        with: { channel: stable, flutter-version: 3.47.5, cache: true }
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: dart format --output=none --set-exit-if-changed lib test

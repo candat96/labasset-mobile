@@ -41,9 +41,6 @@ dependencies:
   intl: ^0.20.3
   mobile_scanner: ^7.4.2
   local_auth: ^3.0.2
-  firebase_core: ^4.15.0
-  firebase_messaging: ^16.7.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

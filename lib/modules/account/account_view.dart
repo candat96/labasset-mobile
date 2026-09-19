@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
-import '../notifications/push_service.dart';
 import 'account_controller.dart';
 
 class AccountView extends GetView<AccountController> {
@@ -13,9 +12,6 @@ class AccountView extends GetView<AccountController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final store = controller.store;
-    final push = Get.isRegistered<PushService>()
-        ? Get.find<PushService>()
-        : null;
     return Scaffold(
       appBar: AppBar(title: Text('account.title'.tr)),
       body: Obx(() {
@@ -83,15 +79,6 @@ class AccountView extends GetView<AccountController> {
                             child: Text('account.theme.${m.name}'.tr),
                           ),
                       ],
-                    ),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.notifications_active_outlined),
-                    title: Text('account.push'.tr),
-                    subtitle: Text(
-                      push?.available.value == true
-                          ? 'common.yes'.tr
-                          : 'account.pushOff'.tr,
                     ),
                   ),
                 ],

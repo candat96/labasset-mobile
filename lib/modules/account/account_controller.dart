@@ -7,7 +7,6 @@ import '../../core/storage/session_store.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../data/repositories/auth_repository.dart';
-import '../notifications/push_service.dart';
 
 class AccountController extends GetxController {
   AccountController({
@@ -62,9 +61,6 @@ class AccountController extends GetxController {
       destructive: true,
     );
     if (!ok) return;
-    if (Get.isRegistered<PushService>()) {
-      await Get.find<PushService>().unregisterBeforeLogout();
-    }
     try {
       await auth.logout(all: false, refreshToken: store.refreshToken);
     } catch (_) {

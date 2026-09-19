@@ -170,8 +170,6 @@ const Map<String, String> vi = {
   'account.theme.light': 'Sáng',
   'account.theme.dark': 'Tối',
   'account.theme.system': 'Theo hệ thống',
-  'account.push': 'Thông báo đẩy',
-  'account.pushOff': 'Chưa cấu hình Firebase — dùng cập nhật định kỳ',
   'account.version': 'Phiên bản',
   'profile.username': 'Tài khoản',
   'profile.fullName': 'Họ tên',
