@@ -62,6 +62,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # iOS/macOS dùng CocoaPods (Flutter >=3.47 mặc định SwiftPM; project Runner cấu hình theo Pods)
+  config:
+    enable-swift-package-manager: false
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
