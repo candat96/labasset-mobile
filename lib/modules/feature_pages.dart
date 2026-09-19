@@ -42,10 +42,17 @@ import 'stock/receipt_form_controller.dart';
 import 'stock/receipt_form_view.dart';
 import 'stock/receipts_controller.dart';
 import 'stock/receipts_view.dart';
+import 'stock/issue_detail_view.dart';
+import 'stock/issue_form_controller.dart';
+import 'stock/issue_form_view.dart';
+import 'stock/issues_controller.dart';
+import 'stock/stock_alerts_view.dart';
 import 'stock/stock_lookup_controller.dart';
 import 'stock/stock_lookup_view.dart';
 import 'stock/supply_detail_controller.dart';
 import 'stock/supply_detail_view.dart';
+import 'stock/transfer_form_controller.dart';
+import 'stock/transfer_form_view.dart';
 import 'equipment/tabs/accessories_tab.dart';
 import 'equipment/tabs/components_tab.dart';
 import 'equipment/tabs/network_tab.dart';
@@ -252,6 +259,71 @@ List<GetPage<dynamic>> featurePages() {
       name: Routes.stockReceiptDetail,
       page: () => ReceiptDetailView(id: Get.parameters['id'] ?? ''),
       middlewares: protected,
+    ),
+    GetPage(
+      name: Routes.stockIssues,
+      page: () => const IssuesView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => IssuesController(stock: Get.find<StockRepository>()),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.stockIssueNew,
+      page: () => const IssueFormView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final args = Get.arguments;
+        final map = args is Map ? args : const {};
+        Get.lazyPut(
+          () => IssueFormController(
+            stock: Get.find<StockRepository>(),
+            supplies: Get.find<SuppliesRepository>(),
+            departments: Get.find<DepartmentsRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
+            initialType: map['type'] as String?,
+            equipmentId: map['equipmentId'] as String?,
+            repairTicketId: map['repairTicketId'] as String?,
+            maintenanceTaskId: map['maintenanceTaskId'] as String?,
+            lotId: map['lotId'] as String?,
+            supplyId: map['supplyId'] as String?,
+          ),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.stockIssueDetail,
+      page: () => IssueDetailView(id: Get.parameters['id'] ?? ''),
+      middlewares: protected,
+    ),
+    GetPage(
+      name: Routes.stockTransferNew,
+      page: () => const TransferFormView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => TransferFormController(
+            stock: Get.find<StockRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.stockAlerts,
+      page: () => const StockAlertsView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final args = Get.arguments;
+        Get.lazyPut(
+          () => StockAlertsController(
+            stock: Get.find<StockRepository>(),
+            initialType: args is Map ? args['type'] as String? : null,
+          ),
+        );
+      }),
     ),
     GetPage(
       name: Routes.repairNew,

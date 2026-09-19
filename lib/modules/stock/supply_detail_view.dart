@@ -8,9 +8,11 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/qty_field.dart';
 import '../../core/widgets/section_card.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock.dart';
+import '../../data/repositories/departments_repository.dart';
 import 'supply_detail_controller.dart';
 
 /// Màn Vật tư: tồn theo kho/lô + thao tác lô.
@@ -177,8 +179,7 @@ class _LotTile extends StatelessWidget {
                 child: Text('scan.lot.open'.tr),
               ),
               TextButton(
-                onPressed: () =>
-                    Get.toNamed(Routes.placeholderFor('stockIssue')),
+                onPressed: () => _quickIssue(context, controller, lot),
                 child: Text('scan.lot.issue'.tr),
               ),
               if (controller.isAdmin)
@@ -265,4 +266,77 @@ Future<void> _adjust(
   );
   qty.dispose();
   reason.dispose();
+}
+
+Future<void> _quickIssue(
+  BuildContext context,
+  SupplyDetailController c,
+  StockLotSummary lot,
+) async {
+  final qty = TextEditingController(text: '1');
+  final departments = Get.find<DepartmentsRepository>();
+  final list = await departments.list(limit: 50);
+  if (list.isEmpty) return;
+  var dept = list.first;
+  await Get.bottomSheet<void>(
+    SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          top: AppSpacing.lg,
+          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
+        ),
+        child: StatefulBuilder(
+          builder: (context, setState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'stock.issue.quick'.tr,
+                style: Get.theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              DropdownButtonFormField<String>(
+                initialValue: dept.id,
+                decoration: InputDecoration(
+                  labelText: 'stock.issue.toDepartment'.tr,
+                ),
+                items: [
+                  for (final d in list)
+                    DropdownMenuItem(
+                      value: d.id,
+                      child: Text('${d.code} — ${d.name}'),
+                    ),
+                ],
+                onChanged: (v) => setState(
+                  () => dept = list.firstWhere(
+                    (d) => d.id == v,
+                    orElse: () => dept,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              QtyField(controller: qty, label: 'repairs.parts.quantity'.tr),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton(
+                onPressed: () async {
+                  final ok = await c.quickIssue(
+                    lot: lot,
+                    toDepartmentId: dept.id,
+                    quantity: qty.text.trim().isEmpty ? '1' : qty.text.trim(),
+                  );
+                  if (ok) Get.back();
+                },
+                child: Text('common.confirm'.tr),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+    isScrollControlled: true,
+    backgroundColor: Get.theme.colorScheme.surface,
+  );
+  qty.dispose();
 }

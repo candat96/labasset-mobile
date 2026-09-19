@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/stock.dart';
 import '../../data/models/stock_extra.dart';
+import '../../data/models/stock_issue.dart';
 import '../../data/models/supply.dart';
 import '../../data/repositories/stock_repository.dart';
 import '../../data/repositories/supplies_repository.dart';
@@ -78,6 +79,37 @@ class SupplyDetailController extends GetxController {
     try {
       await stock.adjust(lotId: lot.id, newQty: newQty, reason: reason);
       AppSnackbar.success('stock.adjust.saved'.tr);
+      await load();
+      return true;
+    } catch (e) {
+      AppSnackbar.error(e);
+      return false;
+    } finally {
+      busy.value = false;
+    }
+  }
+
+  /// Xuất nhanh 1 bước từ lô (POST /quick).
+  Future<bool> quickIssue({
+    required StockLotSummary lot,
+    required String toDepartmentId,
+    required String quantity,
+  }) async {
+    if (lot.warehouseId == null) {
+      AppSnackbar.error('stock.issue.noWarehouse'.tr);
+      return false;
+    }
+    busy.value = true;
+    try {
+      await stock.quickIssue(
+        type: 'to_department',
+        warehouseId: lot.warehouseId!,
+        toDepartmentId: toDepartmentId,
+        items: [
+          IssueItem(supplyId: lot.supplyId, lotId: lot.id, quantity: quantity),
+        ],
+      );
+      AppSnackbar.success('stock.issue.quickDone'.tr);
       await load();
       return true;
     } catch (e) {

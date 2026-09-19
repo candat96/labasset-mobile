@@ -306,7 +306,10 @@ class _QuickActions extends StatelessWidget {
       case 'adhocMaintenance':
         await _adhoc();
       case 'issueSupplies':
-        await Get.toNamed(Routes.placeholderFor('stockIssue'));
+        await Get.toNamed(
+          Routes.stockIssueNew,
+          arguments: {'equipmentId': e.id},
+        );
       case 'counters':
         await _counters();
       case 'updateStatus':

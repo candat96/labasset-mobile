@@ -144,6 +144,15 @@ class Ep {
       '/v1/stock/receipts/$id/cancel';
   static String stockReceiptPdf(String id) =>
       '/v1/stock/receipts/$id/print.pdf';
+  static const stockIssues = '/v1/stock/issues';
+  static const stockIssuesQuick = '/v1/stock/issues/quick';
+  static const stockIssueSuggestLots = '/v1/stock/issues/suggest-lots';
+  static String stockIssue(String id) => '/v1/stock/issues/$id';
+  static String stockIssuePost(String id) => '/v1/stock/issues/$id/post';
+  static String stockIssueCancel(String id) => '/v1/stock/issues/$id/cancel';
+  static String stockIssuePdf(String id) => '/v1/stock/issues/$id/print.pdf';
+  static const stockTransfers = '/v1/stock/transfers';
+  static String stockAlertResolve(String id) => '/v1/stock/alerts/$id/resolve';
 
   static const attachments = '/v1/attachments';
   static String attachment(String id) => '/v1/attachments/$id';

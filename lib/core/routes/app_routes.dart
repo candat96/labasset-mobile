@@ -20,6 +20,12 @@ class Routes {
   static const stockReceiptNew = '/stock/receipts/new';
   static const stockReceiptDetail = '/stock/receipts/:id';
   static String stockReceipt(String id) => '/stock/receipts/$id';
+  static const stockIssues = '/stock/issues';
+  static const stockIssueNew = '/stock/issues/new';
+  static const stockIssueDetail = '/stock/issues/:id';
+  static String stockIssue(String id) => '/stock/issues/$id';
+  static const stockTransferNew = '/stock/transfers/new';
+  static const stockAlerts = '/stock/alerts';
   static const repairs = '/repairs';
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';

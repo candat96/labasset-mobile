@@ -76,7 +76,7 @@ class StockOverviewView extends GetView<StockOverviewController> {
                               }
                             : StatusTone.success,
                         onTap: () => Get.toNamed(
-                          Routes.placeholderFor('stockAlerts'),
+                          Routes.stockAlerts,
                           arguments: {'type': t},
                         ),
                       ),
@@ -139,13 +139,13 @@ class StockOverviewView extends GetView<StockOverviewController> {
       case 'receipt':
         await Get.toNamed(Routes.stockReceipts);
       case 'issue':
-        await Get.toNamed(Routes.placeholderFor('stockIssue'));
+        await Get.toNamed(Routes.stockIssues);
       case 'transfer':
-        await Get.toNamed(Routes.placeholderFor('stockTransfer'));
+        await Get.toNamed(Routes.stockTransferNew);
       case 'pending':
         await Get.toNamed(Routes.placeholderFor('requests'));
       case 'alerts':
-        await Get.toNamed(Routes.placeholderFor('stockAlerts'));
+        await Get.toNamed(Routes.stockAlerts);
     }
   }
 }
