@@ -12,7 +12,7 @@ Tài liệu: `docs/superpowers/specs/2026-09-19-mobile-base-design.md`, design s
 
 Flutter 3.41 · Dart 3.11 · **GetX** (route + middleware, controller, DI, i18n) · dio · flutter_secure_storage ·
 json_serializable · mobile_scanner · local_auth · firebase_messaging (khung) · intl.
-Package `labasset_mobile`, id `vn.labasset.mobile`, Android minSdk 24, iOS 13+.
+Package `labasset_mobile`, id `vn.labasset.mobile`, Android minSdk 24, iOS 15+ (firebase_messaging yêu cầu).
 
 ## Chạy
 
