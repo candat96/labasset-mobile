@@ -149,10 +149,12 @@ void main() {
   test('retries POST with body after refresh', () async {
     Object? received;
     route = (o) async {
-      if (o.path == '/v1/auth/refresh')
+      if (o.path == '/v1/auth/refresh') {
         return (200, _session(a: 'A2', r: 'R2'));
-      if (o.headers['Authorization'] != 'Bearer A2')
+      }
+      if (o.headers['Authorization'] != 'Bearer A2') {
         return (401, unauthorized());
+      }
       received = o.data;
       return (201, {'id': 'd1'});
     };

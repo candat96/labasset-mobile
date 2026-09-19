@@ -22,7 +22,7 @@ class AuthRepository {
           'hospitalCode': hospitalCode,
         'username': username,
         'password': password,
-        if (deviceInfo != null) 'deviceInfo': deviceInfo,
+        'deviceInfo': ?deviceInfo,
       },
     );
     return LoginOutcome.fromJson(res.data!);
@@ -72,6 +72,6 @@ class AuthRepository {
       _dio.post<void>(
         Ep.logout,
         queryParameters: {'all': all.toString()},
-        data: {if (refreshToken != null) 'refreshToken': refreshToken},
+        data: {'refreshToken': ?refreshToken},
       );
 }

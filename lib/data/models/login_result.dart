@@ -40,8 +40,9 @@ sealed class LoginOutcome {
   const LoginOutcome();
 
   static LoginOutcome fromJson(Map<String, dynamic> json) {
-    if (json['otpRequired'] == true)
+    if (json['otpRequired'] == true) {
       return OtpRequired(OtpChallenge.fromJson(json));
+    }
     return LoggedIn(LoginResult.fromJson(json));
   }
 }
