@@ -103,16 +103,43 @@ class NotificationsController extends GetxController
     }
   }
 
-  /// Mở đối tượng liên quan: chỉ map các path mobile hỗ trợ.
+  /// Mở đối tượng liên quan: map `data` (00 §2.10) rồi tới `path`.
   Future<void> open(NotificationItem n) async {
     await markRead(n);
-    final path = n.data?['path'];
-    if (path == null) return;
-    final route = mapPath(path);
+    final route = mapData(n.data) ?? mapPath(n.data?['path'] ?? '');
     if (route != null) await Get.toNamed(route);
   }
 
+  /// Map `data` thông báo → route mobile.
+  ///
+  /// TODO(module): `/repairs/:id`, `/maintenance/tasks/:id`, `/stock/issues/:id`…
+  /// chưa dựng ở mobile — hiện mở màn giữ chỗ, thay bằng route thật khi module xong.
+  static String? mapData(Map<String, dynamic>? data) {
+    if (data == null) return null;
+    final equipmentId = data['equipmentId'];
+    if (equipmentId is String && equipmentId.isNotEmpty) {
+      return Routes.equipment(equipmentId);
+    }
+    const keys = {
+      'repairTicketId': 'repairs',
+      'taskId': 'maintenance',
+      'requestId': 'requests',
+      'issueId': 'stock',
+      'receiptId': 'stock',
+      'sessionId': 'stocktake',
+      'alertId': 'stock',
+    };
+    for (final entry in keys.entries) {
+      final v = data[entry.key];
+      if (v is String && v.isNotEmpty) {
+        return Routes.placeholderFor(entry.value);
+      }
+    }
+    return null;
+  }
+
   static String? mapPath(String path) {
+    if (path.isEmpty) return null;
     final eq = RegExp(r'^/equipment/([^/]+)$').firstMatch(path);
     if (eq != null) return Routes.equipment(eq.group(1)!);
     final first = path.split('/').where((s) => s.isNotEmpty).firstOrNull;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
+import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -18,6 +19,11 @@ class NotificationsView extends GetView<NotificationsController> {
       appBar: AppBar(
         title: Text('notifications.title'.tr),
         actions: [
+          IconButton(
+            tooltip: 'notifications.preferences.title'.tr,
+            icon: const Icon(Icons.tune),
+            onPressed: () => Get.toNamed(Routes.notificationsPreferences),
+          ),
           Obx(
             () => TextButton(
               onPressed: controller.unreadCount.value == 0
