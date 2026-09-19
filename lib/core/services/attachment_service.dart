@@ -43,6 +43,31 @@ class AttachmentService {
   final Dio _uploadDio;
   final Future<String> Function(Uint8List bytes, String name) _persist;
 
+  /// Chọn/chụp ảnh nhưng chưa gắn vào đối tượng nào (trả bytes để upload sau).
+  Future<({Uint8List bytes, String name, String mime})?> pickImageBytes({
+    ImageSource source = ImageSource.gallery,
+  }) async {
+    final XFile? picked;
+    try {
+      picked = await _picker.pickImage(source: source);
+    } catch (_) {
+      return null;
+    }
+    if (picked == null) return null;
+    var bytes = await picked.readAsBytes();
+    var name = picked.name;
+    var mime = _mimeOf(name);
+    if (mime.startsWith('image/')) {
+      final compressed = await _compress(picked);
+      if (compressed != null) {
+        bytes = compressed;
+        if (name.toLowerCase().endsWith('.png')) name = '$name.jpg';
+        mime = 'image/jpeg';
+      }
+    }
+    return (bytes: bytes, name: name, mime: mime);
+  }
+
   /// Chọn/chụp ảnh rồi tải lên (nén ≤ 1600 px nếu cần).
   Future<AttachmentUploadResult> addImage({
     required String entityType,

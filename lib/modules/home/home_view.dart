@@ -22,6 +22,7 @@ class HomeView extends GetView<HomeController> {
     (key: 'stockReceipt', icon: Icons.move_to_inbox_outlined),
     (key: 'stocktake', icon: Icons.fact_check_outlined),
     (key: 'calendar', icon: Icons.calendar_month_outlined),
+    (key: 'equipmentNew', icon: Icons.add_box_outlined),
   ];
 
   @override
@@ -206,7 +207,11 @@ class HomeView extends GetView<HomeController> {
                     Card(
                       child: InkWell(
                         borderRadius: BorderRadius.circular(AppRadius.lg),
-                        onTap: () => Get.toNamed(Routes.placeholderFor(s.key)),
+                        onTap: () => Get.toNamed(
+                          s.key == 'equipmentNew'
+                              ? Routes.equipmentNew
+                              : Routes.placeholderFor(s.key),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.sm),
                           child: Column(
