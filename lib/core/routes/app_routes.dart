@@ -12,6 +12,7 @@ class Routes {
   static const scan = '/scan';
   static const search = '/search';
   static const equipmentDetail = '/equipment/:id';
+  static const equipmentNew = '/equipment/new-quick';
   static String equipment(String id) => '/equipment/$id';
   static const notifications = '/notifications';
   static const notificationsPreferences = '/notifications/preferences';

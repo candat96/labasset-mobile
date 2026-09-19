@@ -3,19 +3,31 @@ import 'package:get/get.dart';
 import '../core/routes/app_routes.dart';
 import '../core/routes/middlewares.dart';
 import '../core/cache/kv_cache.dart';
+import '../core/services/attachment_service.dart';
+import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
+import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
 import '../data/repositories/stock_repository.dart';
 import '../data/repositories/supplies_repository.dart';
+import '../data/repositories/tasks_repository.dart';
 import 'account/lock_view.dart';
 import 'equipment/equipment_detail_controller.dart';
+import 'equipment/new_equipment_controller.dart';
+import 'equipment/new_equipment_view.dart';
 import 'notifications/notifications_view.dart';
 import 'notifications/notifications_preferences_controller.dart';
 import 'notifications/notifications_preferences_view.dart';
 import 'equipment/equipment_detail_view.dart';
+import 'equipment/tabs/accessories_tab.dart';
+import 'equipment/tabs/components_tab.dart';
+import 'equipment/tabs/network_tab.dart';
+import 'equipment/tabs/software_tab.dart';
+import 'equipment/tabs/supplies_tab.dart';
+import 'equipment/tabs/timeline_tab.dart';
 import 'scan/lot_card_sheet.dart';
 import 'scan/scan_controller.dart';
 import 'scan/scan_view.dart';
@@ -94,18 +106,72 @@ List<GetPage<dynamic>> featurePages() {
       }),
     ),
     GetPage(
-      name: Routes.equipmentDetail,
-      page: () => const EquipmentDetailView(),
+      name: Routes.equipmentNew,
+      page: () => const NewEquipmentView(),
       middlewares: protected,
       binding: BindingsBuilder(
         () => Get.lazyPut(
-          () => EquipmentDetailController(
+          () => NewEquipmentController(
             equipment: Get.find<EquipmentRepository>(),
-            id: Get.parameters['id'] ?? '',
+            departments: Get.find<DepartmentsRepository>(),
+            attachments: Get.find<AttachmentService>(),
           ),
-          tag: Get.parameters['id'],
         ),
       ),
+    ),
+    GetPage(
+      name: Routes.equipmentDetail,
+      page: () => const EquipmentDetailView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        Get.lazyPut(
+          () => EquipmentDetailController(
+            equipment: Get.find<EquipmentRepository>(),
+            tasks: Get.find<TasksRepository>(),
+            id: id,
+            userId: Get.find<SessionStore>().user.value?.id ?? '',
+          ),
+          tag: id,
+        );
+        Get.lazyPut(
+          () => NetworkTabController(
+            equipment: Get.find<EquipmentRepository>(),
+            id: id,
+          ),
+        );
+        Get.lazyPut(
+          () => AccessoriesTabController(
+            equipment: Get.find<EquipmentRepository>(),
+            id: id,
+          ),
+        );
+        Get.lazyPut(
+          () => SoftwareTabController(
+            equipment: Get.find<EquipmentRepository>(),
+            id: id,
+          ),
+        );
+        Get.lazyPut(
+          () => ComponentsTabController(
+            equipment: Get.find<EquipmentRepository>(),
+            id: id,
+          ),
+        );
+        Get.lazyPut(
+          () => SuppliesTabController(
+            equipment: Get.find<EquipmentRepository>(),
+            supplies: Get.find<SuppliesRepository>(),
+            id: id,
+          ),
+        );
+        Get.lazyPut(
+          () => TimelineTabController(
+            equipment: Get.find<EquipmentRepository>(),
+            id: id,
+          ),
+        );
+      }),
     ),
   ];
 }

@@ -20,6 +20,37 @@ class Ep {
   static String equipmentByQr(String token) =>
       '/v1/equipment/by-qr/${Uri.encodeComponent(token)}';
   static String equipmentNotes(String id) => '/v1/equipment/$id/notes';
+  static String equipmentStatus(String id) => '/v1/equipment/$id/status';
+  static String equipmentCounters(String id) => '/v1/equipment/$id/counters';
+  static String equipmentNetwork(String id) => '/v1/equipment/$id/network';
+  static String equipmentSupplies(String id) => '/v1/equipment/$id/supplies';
+  static String equipmentRunway(String id) =>
+      '/v1/equipment/$id/supplies/runway';
+  static String equipmentEvents(String id) => '/v1/equipment/$id/events';
+  static String equipmentTransfers(String id) => '/v1/equipment/$id/transfers';
+  static String equipmentTransferApprove(String id, String tid) =>
+      '/v1/equipment/$id/transfers/$tid/approve';
+  static String equipmentTransferReject(String id, String tid) =>
+      '/v1/equipment/$id/transfers/$tid/reject';
+  static String equipmentTransferCancel(String id, String tid) =>
+      '/v1/equipment/$id/transfers/$tid/cancel';
+  static String equipmentAccessories(String id) =>
+      '/v1/equipment/$id/accessories';
+  static String equipmentAccessory(String id, String aid) =>
+      '/v1/equipment/$id/accessories/$aid';
+  static String equipmentSoftware(String id) => '/v1/equipment/$id/software';
+  static String equipmentSoftwareItem(String id, String sid) =>
+      '/v1/equipment/$id/software/$sid';
+  static String equipmentSoftwareLicenseKey(String id, String sid) =>
+      '/v1/equipment/$id/software/$sid/license-key';
+  static String equipmentSoftwareUpgrade(String id, String sid) =>
+      '/v1/equipment/$id/software/$sid/upgrade';
+  static String equipmentSoftwareHistory(String id, String sid) =>
+      '/v1/equipment/$id/software/$sid/history';
+  static String equipmentComponents(String id) =>
+      '/v1/equipment/$id/components';
+  static String equipmentComponentReplace(String id, String cid) =>
+      '/v1/equipment/$id/components/$cid/replace';
 
   static const supplies = '/v1/supplies';
   static String supply(String id) => '/v1/supplies/$id';
@@ -32,6 +63,8 @@ class Ep {
   static String notificationRead(String id) => '/v1/notifications/$id/read';
 
   static const maintenanceTasks = '/v1/maintenance/tasks';
+  static const departments = '/v1/departments';
+  static const faults = '/v1/faults';
 
   static const stockAlerts = '/v1/stock/alerts';
   static const stockLots = '/v1/stock/lots';

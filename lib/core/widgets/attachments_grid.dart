@@ -27,6 +27,7 @@ class AttachmentsGrid extends StatefulWidget {
     required this.entityId,
     this.kinds = const ['photo'],
     this.canEdit = true,
+    this.downloadable = false,
   });
 
   final String entityType;
@@ -35,6 +36,9 @@ class AttachmentsGrid extends StatefulWidget {
   /// Các kind cho phép thêm; kind đầu là mặc định.
   final List<String> kinds;
   final bool canEdit;
+
+  /// Hiện nút "Tải về" trong hộp xem (lưu offline bằng path_provider).
+  final bool downloadable;
 
   @override
   State<AttachmentsGrid> createState() => _AttachmentsGridState();
@@ -173,6 +177,18 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
     backgroundColor: Get.theme.colorScheme.surface,
   );
 
+  Future<void> _download(String url, AttachmentView a) async {
+    try {
+      await _service.files.downloadTo(
+        url,
+        a.label.isNotEmpty ? a.label : 'attachment-${a.id}',
+      );
+      AppSnackbar.success('attachment.downloaded'.tr);
+    } catch (e) {
+      AppSnackbar.error(e);
+    }
+  }
+
   Future<void> _open(AttachmentView a) async {
     final url = _urls[a.fileId];
     if (url == null) {
@@ -206,6 +222,11 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
               ),
               OverflowBar(
                 children: [
+                  if (widget.downloadable)
+                    TextButton(
+                      onPressed: () => _download(url, a),
+                      child: Text('attachment.download'.tr),
+                    ),
                   TextButton(
                     onPressed: () => Get.back(),
                     child: Text('common.close'.tr),
@@ -230,6 +251,33 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
         ),
       );
     } else {
+      if (widget.downloadable) {
+        await showDialog<void>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text(
+              a.label.isNotEmpty ? a.label : attachmentKindLabel(a.kind),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  _download(url, a);
+                },
+                child: Text('attachment.download'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: url));
+                  AppSnackbar.info('common.copied'.tr);
+                },
+                child: Text('common.copy'.tr),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
       await Clipboard.setData(ClipboardData(text: url));
       AppSnackbar.info('common.copied'.tr);
     }

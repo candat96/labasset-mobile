@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 
 import '../data/repositories/attachments_repository.dart';
 import '../data/repositories/auth_repository.dart';
+import '../data/repositories/departments_repository.dart';
 import '../data/repositories/device_repository.dart';
 import '../data/repositories/equipment_repository.dart';
+import '../data/repositories/faults_repository.dart';
 import '../data/repositories/files_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
@@ -50,6 +52,8 @@ Future<void> bootstrap() async {
   Get.put(FilesRepository(dio), permanent: true);
   Get.put(TasksRepository(dio), permanent: true);
   Get.put(StockRepository(dio), permanent: true);
+  Get.put(DepartmentsRepository(dio), permanent: true);
+  Get.put(FaultsRepository(dio), permanent: true);
 
   // Cache khoá–giá trị (trang chủ offline, lịch sử quét…).
   final cache = Get.put(SqfliteKvCache(), permanent: true);
