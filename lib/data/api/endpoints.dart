@@ -76,6 +76,12 @@ class Ep {
   static String repairSignatures(String id) => '/v1/repairs/$id/signatures';
   static String repairReportPdf(String id) => '/v1/repairs/$id/report.pdf';
   static const requests = '/v1/requests';
+  static String request(String id) => '/v1/requests/$id';
+  static String requestApprove(String id) => '/v1/requests/$id/approve';
+  static String requestReject(String id) => '/v1/requests/$id/reject';
+  static String requestIssue(String id) => '/v1/requests/$id/issue';
+  static String requestComments(String id) => '/v1/requests/$id/comments';
+  static const requestsApproveBulk = '/v1/requests/approve-bulk';
 
   static const notifications = '/v1/notifications';
   static const notificationsReadAll = '/v1/notifications/read-all';
@@ -153,6 +159,14 @@ class Ep {
   static String stockIssuePdf(String id) => '/v1/stock/issues/$id/print.pdf';
   static const stockTransfers = '/v1/stock/transfers';
   static String stockAlertResolve(String id) => '/v1/stock/alerts/$id/resolve';
+
+  static const stocktakes = '/v1/stocktakes';
+  static String stocktake(String id) => '/v1/stocktakes/$id';
+  static String stocktakePackage(String id) => '/v1/stocktakes/$id/package';
+  static String stocktakeProgress(String id) => '/v1/stocktakes/$id/progress';
+  static String stocktakeCounts(String id) => '/v1/stocktakes/$id/counts';
+  static String stocktakeItems(String id) => '/v1/stocktakes/$id/items';
+  static String stocktakeExtras(String id) => '/v1/stocktakes/$id/extras';
 
   static const attachments = '/v1/attachments';
   static String attachment(String id) => '/v1/attachments/$id';
