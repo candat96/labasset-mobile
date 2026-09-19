@@ -16,13 +16,18 @@ class AppSnackbar {
       _show(message, Get.theme.colorScheme.onSurface);
 
   static void _show(String message, Color color) {
-    Get.rawSnackbar(
-      message: message,
-      backgroundColor: color,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(12),
-      borderRadius: 6,
-      duration: const Duration(seconds: 3),
-    );
+    if (Get.context == null) return; // chưa runApp / unit test
+    try {
+      Get.rawSnackbar(
+        message: message,
+        backgroundColor: color,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 6,
+        duration: const Duration(seconds: 3),
+      );
+    } catch (_) {
+      // Chưa có overlay (unit test / chưa runApp) → bỏ qua.
+    }
   }
 }
