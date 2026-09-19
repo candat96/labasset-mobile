@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../modules/auth/auth_pages.dart';
+import '../../modules/feature_pages.dart';
 import '../../modules/home/home_controller.dart';
 import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/shell/shell_controller.dart';
@@ -41,9 +42,6 @@ class AppPages {
       middlewares: _protected,
     ),
     ...authPages(),
-    ...featurePages,
+    ...featurePages(),
   ];
-
-  /// Điền ở Task 5–6.
-  static List<GetPage<dynamic>> featurePages = [];
 }
