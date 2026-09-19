@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
+import '../../core/sync/outbox_service.dart';
 import '../../core/theme/tokens.dart';
 import 'account_controller.dart';
 
@@ -52,6 +53,37 @@ class AccountView extends GetView<AccountController> {
                     title: Text('account.sessions'.tr),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Get.toNamed(Routes.sessions),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.cloud_sync_outlined),
+                    title: Text('account.sync'.tr),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Obx(() {
+                          final outbox = Get.find<OutboxService>();
+                          final n = outbox.pending.value;
+                          if (n == 0) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              right: AppSpacing.xs,
+                            ),
+                            child: Chip(
+                              visualDensity: VisualDensity.compact,
+                              label: Text('$n'),
+                            ),
+                          );
+                        }),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                    onTap: () => Get.toNamed(Routes.sync),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: Text('account.notifications'.tr),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Get.toNamed(Routes.notificationsPreferences),
                   ),
                   SwitchListTile(
                     secondary: const Icon(Icons.fingerprint),

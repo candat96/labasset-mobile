@@ -10,9 +10,12 @@ class Routes {
 
   static const shell = '/';
   static const scan = '/scan';
+  static const search = '/search';
   static const equipmentDetail = '/equipment/:id';
   static String equipment(String id) => '/equipment/$id';
   static const notifications = '/notifications';
+  static const notificationsPreferences = '/notifications/preferences';
+  static const sync = '/sync';
   static const sessions = '/sessions';
   static const profile = '/profile';
   static const placeholder = '/placeholder/:key';
