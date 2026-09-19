@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../data/repositories/attachments_repository.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/calendar_repository.dart';
+import '../data/repositories/calibrations_repository.dart';
 import '../data/repositories/catalogs_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/device_repository.dart';
@@ -19,6 +20,7 @@ import '../data/repositories/stock_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import '../modules/account/lock_controller.dart';
+import '../modules/maintenance/maintenance_task_controller.dart';
 import '../modules/notifications/notifications_controller.dart';
 import '../modules/repairs/repair_detail_controller.dart';
 import 'cache/kv_cache.dart';
@@ -61,6 +63,7 @@ Future<void> bootstrap() async {
   Get.put(FaultsRepository(dio), permanent: true);
   Get.put(CatalogsRepository(dio), permanent: true);
   Get.put(CalendarRepository(dio), permanent: true);
+  Get.put(CalibrationsRepository(dio), permanent: true);
 
   // Cache khoá–giá trị (trang chủ offline, lịch sử quét…).
   final cache = Get.put(SqfliteKvCache(), permanent: true);
@@ -82,6 +85,7 @@ Future<void> bootstrap() async {
   );
   outbox.addHandler(AttachmentOutboxHandler(attachments));
   outbox.addHandler(RepairLogOutboxHandler(Get.find<RepairsRepository>()));
+  outbox.addHandler(TaskResultOutboxHandler(Get.find<TasksRepository>()));
   await outbox.start(connectivity: networkChanges());
 
   // Dịch vụ chạy suốt phiên: thông báo (polling), khoá sinh trắc.

@@ -81,6 +81,23 @@ class Ep {
   static String notificationRead(String id) => '/v1/notifications/$id/read';
 
   static const maintenanceTasks = '/v1/maintenance/tasks';
+  static String maintenanceTask(String id) => '/v1/maintenance/tasks/$id';
+  static String maintenanceTaskStart(String id) =>
+      '/v1/maintenance/tasks/$id/start';
+  static String maintenanceTaskResults(String id) =>
+      '/v1/maintenance/tasks/$id/results';
+  static String maintenanceTaskFinish(String id) =>
+      '/v1/maintenance/tasks/$id/finish';
+  static String maintenanceTaskSkip(String id) =>
+      '/v1/maintenance/tasks/$id/skip';
+  static String maintenanceTaskSignatures(String id) =>
+      '/v1/maintenance/tasks/$id/signatures';
+  static String maintenanceTaskReportPdf(String id) =>
+      '/v1/maintenance/tasks/$id/report.pdf';
+  static const calibrations = '/v1/calibrations';
+  static String calibration(String id) => '/v1/calibrations/$id';
+  static String calibrationComplete(String id) =>
+      '/v1/calibrations/$id/complete';
   static const departments = '/v1/departments';
   static const faults = '/v1/faults';
   static const faultsSuggest = '/v1/faults/suggest';

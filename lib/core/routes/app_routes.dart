@@ -16,6 +16,10 @@ class Routes {
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';
   static String repair(String id) => '/repairs/$id';
+  static const maintenanceTasks = '/maintenance/tasks';
+  static const maintenanceTaskDetail = '/maintenance/tasks/:id';
+  static String maintenanceTask(String id) => '/maintenance/tasks/$id';
+  static const calibrations = '/calibrations';
   static const equipmentDetail = '/equipment/:id';
   static const equipmentNew = '/equipment/new-quick';
   static String equipment(String id) => '/equipment/$id';

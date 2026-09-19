@@ -89,7 +89,7 @@ class HomeView extends GetView<HomeController> {
                     _WorkGroup(
                       title: 'home.task.maintenanceDue'.tr,
                       total: controller.tasksDueTotal.value,
-                      route: Routes.placeholderFor('maintenance'),
+                      route: Routes.maintenanceTasks,
                       children: [
                         for (final t in controller.tasksDue)
                           _WorkRow(
@@ -97,9 +97,8 @@ class HomeView extends GetView<HomeController> {
                             status:
                                 '${'status.task.${t.status}'.tr} · ${formatDate(t.scheduledAt)}',
                             icon: Icons.event_available_outlined,
-                            onTap: () => Get.toNamed(
-                              Routes.placeholderFor('maintenance'),
-                            ),
+                            onTap: () =>
+                                Get.toNamed(Routes.maintenanceTask(t.id)),
                           ),
                       ],
                     ),
@@ -185,8 +184,7 @@ class HomeView extends GetView<HomeController> {
                         tone: controller.calibrationOverdue.value > 0
                             ? StatusTone.danger
                             : StatusTone.success,
-                        onTap: () =>
-                            Get.toNamed(Routes.placeholderFor('maintenance')),
+                        onTap: () => Get.toNamed(Routes.calibrations),
                       ),
                     ),
                   ],

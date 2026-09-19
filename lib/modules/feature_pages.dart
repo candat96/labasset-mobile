@@ -7,6 +7,7 @@ import '../core/services/attachment_service.dart';
 import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
 import '../data/repositories/calendar_repository.dart';
+import '../data/repositories/calibrations_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/faults_repository.dart';
@@ -26,6 +27,12 @@ import 'notifications/notifications_view.dart';
 import 'notifications/notifications_preferences_controller.dart';
 import 'notifications/notifications_preferences_view.dart';
 import 'equipment/equipment_detail_view.dart';
+import 'maintenance/calibrations_controller.dart';
+import 'maintenance/calibrations_view.dart';
+import 'maintenance/maintenance_task_controller.dart';
+import 'maintenance/maintenance_task_view.dart';
+import 'maintenance/maintenance_tasks_controller.dart';
+import 'maintenance/maintenance_tasks_view.dart';
 import 'repairs/repair_detail_controller.dart';
 import 'repairs/repair_detail_view.dart';
 import 'repairs/repair_form_controller.dart';
@@ -112,6 +119,53 @@ List<GetPage<dynamic>> featurePages() {
           ),
         );
       }),
+    ),
+    GetPage(
+      name: Routes.maintenanceTasks,
+      page: () => const MaintenanceTasksView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => MaintenanceTasksController(
+            tasks: Get.find<TasksRepository>(),
+            userId: Get.find<SessionStore>().user.value?.id ?? '',
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.maintenanceTaskDetail,
+      page: () => const MaintenanceTaskView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        final user = Get.find<SessionStore>().user.value;
+        Get.lazyPut(
+          () => MaintenanceTaskController(
+            tasks: Get.find<TasksRepository>(),
+            outbox: Get.find<OutboxService>(),
+            cache: Get.find<KvCache>(),
+            attachments: Get.find<AttachmentService>(),
+            id: id,
+            userId: user?.id ?? '',
+            roles: user?.roles ?? const [],
+          ),
+          tag: id,
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.calibrations,
+      page: () => const CalibrationsView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => CalibrationsController(
+            repo: Get.find<CalibrationsRepository>(),
+            userId: Get.find<SessionStore>().user.value?.id ?? '',
+          ),
+        ),
+      ),
     ),
     GetPage(
       name: Routes.calendar,
