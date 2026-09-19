@@ -2,11 +2,13 @@ import 'package:get/get.dart';
 
 import '../core/routes/app_routes.dart';
 import '../core/routes/middlewares.dart';
+import '../core/cache/kv_cache.dart';
 import '../core/sync/outbox_service.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
+import '../data/repositories/stock_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import 'account/lock_view.dart';
 import 'equipment/equipment_detail_controller.dart';
@@ -14,6 +16,7 @@ import 'notifications/notifications_view.dart';
 import 'notifications/notifications_preferences_controller.dart';
 import 'notifications/notifications_preferences_view.dart';
 import 'equipment/equipment_detail_view.dart';
+import 'scan/lot_card_sheet.dart';
 import 'scan/scan_controller.dart';
 import 'scan/scan_view.dart';
 import 'search/search_controller.dart';
@@ -82,7 +85,10 @@ List<GetPage<dynamic>> featurePages() {
         Get.lazyPut(
           () => ScanController(
             equipment: Get.find<EquipmentRepository>(),
+            stock: Get.find<StockRepository>(),
+            cache: Get.find<KvCache>(),
             continuous: continuous,
+            onLot: LotCardSheet.show,
           ),
         );
       }),
