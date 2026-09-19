@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:get/get.dart';
 
+import '../data/repositories/ai_repository.dart';
 import '../data/repositories/attachments_repository.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/calendar_repository.dart';
@@ -68,6 +69,7 @@ Future<void> bootstrap() async {
   Get.put(CalendarRepository(dio), permanent: true);
   Get.put(CalibrationsRepository(dio), permanent: true);
   Get.put(StocktakesRepository(dio), permanent: true);
+  Get.put(AiRepository(dio), permanent: true);
 
   // Kho cục bộ kiểm kê offline.
   final stocktakeStore = Get.put(SqfliteStocktakeLocalStore(), permanent: true);

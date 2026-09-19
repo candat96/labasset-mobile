@@ -16,6 +16,7 @@ class RepairsRepository {
     String? severity,
     String? departmentId,
     bool? overdue,
+    String? from,
     int page = 1,
     int limit = 20,
   }) async {
@@ -32,6 +33,7 @@ class RepairsRepository {
         if (departmentId != null && departmentId.isNotEmpty)
           'departmentId': departmentId,
         'overdue': ?overdue,
+        'from': ?from,
         'page': page,
         'limit': limit,
       },
@@ -229,6 +231,24 @@ class RepairsRepository {
     return (res.data ?? [])
         .whereType<Map<String, dynamic>>()
         .map(AssignSuggestItem.fromJson)
+        .toList();
+  }
+
+  /// Thống kê sửa chữa (`GET /v1/repairs/stats`).
+  Future<RepairStats> stats({String? from, String? to}) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      Ep.repairStats,
+      queryParameters: {'from': ?from, 'to': ?to},
+    );
+    return RepairStats.fromJson(res.data!);
+  }
+
+  /// Khối lượng việc theo nhân viên (`GET /v1/repairs/workload`).
+  Future<List<WorkloadItem>> workload() async {
+    final res = await _dio.get<List<dynamic>>(Ep.repairWorkload);
+    return (res.data ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(WorkloadItem.fromJson)
         .toList();
   }
 

@@ -34,6 +34,8 @@ class Routes {
   static String stocktake(String id) => '/stocktakes/$id';
   static String stocktakeCount(String id) => '/stocktakes/$id/count';
   static const offlineData = '/offline-data';
+  static const reports = '/reports';
+  static const ai = '/ai';
   static const repairs = '/repairs';
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';

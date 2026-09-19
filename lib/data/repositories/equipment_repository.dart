@@ -34,16 +34,33 @@ class EquipmentRepository {
   }
 
   /// Tổng số máy theo bộ lọc (limit 1 chỉ lấy `total`).
-  Future<num> count({bool? calibrationOverdue}) async {
+  Future<num> count({bool? calibrationOverdue, String? status}) async {
     final res = await _dio.get<Map<String, dynamic>>(
       Ep.equipmentList,
       queryParameters: {
         'calibrationOverdue': ?calibrationOverdue,
+        'status': ?status,
         'page': 1,
         'limit': 1,
       },
     );
     return EquipmentPage.fromJson(res.data!).total;
+  }
+
+  /// Danh sách gọn theo khoa (báo cáo thực địa) — limit tối đa 200.
+  Future<EquipmentPage> listByDepartment(
+    String departmentId, {
+    int limit = 200,
+  }) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      Ep.equipmentList,
+      queryParameters: {
+        'departmentId': departmentId,
+        'page': 1,
+        'limit': limit,
+      },
+    );
+    return EquipmentPage.fromJson(res.data!);
   }
 
   Future<EquipmentDetail> create(Map<String, dynamic> data) async {

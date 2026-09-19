@@ -10,6 +10,7 @@ import '../core/sync/outbox_service.dart';
 import '../data/repositories/calendar_repository.dart';
 import '../data/repositories/calibrations_repository.dart';
 import '../data/repositories/catalogs_repository.dart';
+import '../data/repositories/ai_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/faults_repository.dart';
@@ -21,6 +22,8 @@ import '../data/repositories/stocktakes_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import 'account/lock_view.dart';
+import 'ai/ai_controller.dart';
+import 'ai/ai_view.dart';
 import 'calendar/calendar_controller.dart';
 import 'calendar/calendar_view.dart';
 import 'equipment/equipment_detail_controller.dart';
@@ -40,6 +43,8 @@ import 'repairs/repair_detail_controller.dart';
 import 'repairs/repair_detail_view.dart';
 import 'repairs/repair_form_controller.dart';
 import 'repairs/repair_form_view.dart';
+import 'reports/reports_controller.dart';
+import 'reports/reports_view.dart';
 import 'requests/request_detail_controller.dart';
 import 'requests/request_detail_view.dart';
 import 'requests/requests_list_controller.dart';
@@ -408,6 +413,30 @@ List<GetPage<dynamic>> featurePages() {
             outbox: Get.find<OutboxService>(),
           ),
         ),
+      ),
+    ),
+    GetPage(
+      name: Routes.reports,
+      page: () => const ReportsView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => ReportsController(
+            equipment: Get.find<EquipmentRepository>(),
+            repairs: Get.find<RepairsRepository>(),
+            stock: Get.find<StockRepository>(),
+            departments: Get.find<DepartmentsRepository>(),
+            cache: Get.find<KvCache>(),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.ai,
+      page: () => const AiView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(() => AiController(repo: Get.find<AiRepository>())),
       ),
     ),
     GetPage(

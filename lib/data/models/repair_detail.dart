@@ -356,3 +356,56 @@ class SuggestedFault {
       _$SuggestedFaultFromJson(json);
   Map<String, dynamic> toJson() => _$SuggestedFaultToJson(this);
 }
+
+/// `GET /v1/repairs/stats` → totals.
+@JsonSerializable()
+class RepairStats {
+  const RepairStats({
+    this.tickets = 0,
+    this.completed = 0,
+    this.cost = '0',
+    this.mttrHours = 0,
+    this.downtimeHours = 0,
+  });
+
+  final num tickets;
+  final num completed;
+  final String cost;
+  final num mttrHours;
+  final num downtimeHours;
+
+  factory RepairStats.fromJson(Map<String, dynamic> json) {
+    final totals = json['totals'] as Map<String, dynamic>? ?? json;
+    return RepairStats(
+      tickets: (totals['tickets'] as num?) ?? 0,
+      completed: (totals['completed'] as num?) ?? 0,
+      cost: (totals['cost'] as String?) ?? '0',
+      mttrHours: (totals['mttrHours'] as num?) ?? 0,
+      downtimeHours: (totals['downtimeHours'] as num?) ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => _$RepairStatsToJson(this);
+}
+
+/// `GET /v1/repairs/workload`.
+@JsonSerializable()
+class WorkloadItem {
+  const WorkloadItem({
+    required this.id,
+    this.fullName = '',
+    this.open = 0,
+    this.overdue = 0,
+    this.awaitingResponse = 0,
+  });
+
+  final String id;
+  final String fullName;
+  final num open;
+  final num overdue;
+  final num awaitingResponse;
+
+  factory WorkloadItem.fromJson(Map<String, dynamic> json) =>
+      _$WorkloadItemFromJson(json);
+  Map<String, dynamic> toJson() => _$WorkloadItemToJson(this);
+}

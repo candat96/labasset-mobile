@@ -300,3 +300,37 @@ Map<String, dynamic> _$SuggestedFaultToJson(SuggestedFault instance) =>
       'severity': instance.severity,
       'model': instance.model,
     };
+
+RepairStats _$RepairStatsFromJson(Map<String, dynamic> json) => RepairStats(
+  tickets: json['tickets'] as num? ?? 0,
+  completed: json['completed'] as num? ?? 0,
+  cost: json['cost'] as String? ?? '0',
+  mttrHours: json['mttrHours'] as num? ?? 0,
+  downtimeHours: json['downtimeHours'] as num? ?? 0,
+);
+
+Map<String, dynamic> _$RepairStatsToJson(RepairStats instance) =>
+    <String, dynamic>{
+      'tickets': instance.tickets,
+      'completed': instance.completed,
+      'cost': instance.cost,
+      'mttrHours': instance.mttrHours,
+      'downtimeHours': instance.downtimeHours,
+    };
+
+WorkloadItem _$WorkloadItemFromJson(Map<String, dynamic> json) => WorkloadItem(
+  id: json['id'] as String,
+  fullName: json['fullName'] as String? ?? '',
+  open: json['open'] as num? ?? 0,
+  overdue: json['overdue'] as num? ?? 0,
+  awaitingResponse: json['awaitingResponse'] as num? ?? 0,
+);
+
+Map<String, dynamic> _$WorkloadItemToJson(WorkloadItem instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'fullName': instance.fullName,
+      'open': instance.open,
+      'overdue': instance.overdue,
+      'awaitingResponse': instance.awaitingResponse,
+    };
