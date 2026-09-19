@@ -16,7 +16,7 @@ Package `labasset_mobile`, id `vn.labasset.mobile`, Android minSdk 24, iOS 15+.
 
 ## Chạy
 
-Project ghim Flutter qua FVM (`.fvmrc`): dùng `fvm flutter ...` (hoặc cài đúng bản trong `.fvmrc`). iOS dùng CocoaPods (`disable-swift-package-manager: true` trong pubspec).
+Project ghim Flutter qua FVM (`.fvmrc`): dùng `fvm flutter ...` (hoặc cài đúng bản trong `.fvmrc`). iOS: plugin resolve qua Swift Package Manager (mặc định Flutter 3.47); vẫn cần `pod install` cho phần Flutter.
 
 ```bash
 fvm flutter pub get
