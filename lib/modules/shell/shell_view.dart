@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import '../../core/routes/app_routes.dart';
 import '../account/account_view.dart';
 import '../home/home_view.dart';
-import '../placeholder/placeholder_view.dart';
 import '../repairs/repairs_controller.dart';
 import '../repairs/repairs_view.dart';
+import '../stock/stock_overview_view.dart';
 import 'shell_controller.dart';
 
 /// Khung chính: 4 tab + FAB (Quét / Báo hỏng theo tab).
@@ -23,7 +23,7 @@ class ShellView extends GetView<ShellController> {
           children: const [
             HomeView(),
             RepairsView(),
-            PlaceholderView(keyName: 'stock'),
+            StockOverviewView(),
             AccountView(),
           ],
         ),

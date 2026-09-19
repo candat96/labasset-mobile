@@ -8,6 +8,7 @@ import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
 import '../data/repositories/calendar_repository.dart';
 import '../data/repositories/calibrations_repository.dart';
+import '../data/repositories/catalogs_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/faults_repository.dart';
@@ -37,6 +38,14 @@ import 'repairs/repair_detail_controller.dart';
 import 'repairs/repair_detail_view.dart';
 import 'repairs/repair_form_controller.dart';
 import 'repairs/repair_form_view.dart';
+import 'stock/receipt_form_controller.dart';
+import 'stock/receipt_form_view.dart';
+import 'stock/receipts_controller.dart';
+import 'stock/receipts_view.dart';
+import 'stock/stock_lookup_controller.dart';
+import 'stock/stock_lookup_view.dart';
+import 'stock/supply_detail_controller.dart';
+import 'stock/supply_detail_view.dart';
 import 'equipment/tabs/accessories_tab.dart';
 import 'equipment/tabs/components_tab.dart';
 import 'equipment/tabs/network_tab.dart';
@@ -179,6 +188,70 @@ List<GetPage<dynamic>> featurePages() {
           ),
         ),
       ),
+    ),
+    GetPage(
+      name: Routes.stockLookup,
+      page: () => const StockLookupView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final args = Get.arguments;
+        Get.lazyPut(
+          () => StockLookupController(
+            supplies: Get.find<SuppliesRepository>(),
+            stock: Get.find<StockRepository>(),
+            equipment: Get.find<EquipmentRepository>(),
+            initialQuery: args is Map ? args['q'] as String? : null,
+          ),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.supplyDetail,
+      page: () => const SupplyDetailView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        Get.lazyPut(
+          () => SupplyDetailController(
+            supplies: Get.find<SuppliesRepository>(),
+            stock: Get.find<StockRepository>(),
+            id: id,
+            isAdmin: Get.find<SessionStore>().hasRole(const ['HOSPITAL_ADMIN']),
+          ),
+          tag: id,
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.stockReceipts,
+      page: () => const ReceiptsView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => ReceiptsController(stock: Get.find<StockRepository>()),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.stockReceiptNew,
+      page: () => const ReceiptFormView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => ReceiptFormController(
+            stock: Get.find<StockRepository>(),
+            supplies: Get.find<SuppliesRepository>(),
+            departments: Get.find<DepartmentsRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
+            attachments: Get.find<AttachmentService>(),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.stockReceiptDetail,
+      page: () => ReceiptDetailView(id: Get.parameters['id'] ?? ''),
+      middlewares: protected,
     ),
     GetPage(
       name: Routes.repairNew,

@@ -12,6 +12,14 @@ class Routes {
   static const scan = '/scan';
   static const search = '/search';
   static const calendar = '/calendar';
+  static const stock = '/stock';
+  static const stockLookup = '/stock/lookup';
+  static const supplyDetail = '/supplies/:id';
+  static String supply(String id) => '/supplies/$id';
+  static const stockReceipts = '/stock/receipts';
+  static const stockReceiptNew = '/stock/receipts/new';
+  static const stockReceiptDetail = '/stock/receipts/:id';
+  static String stockReceipt(String id) => '/stock/receipts/$id';
   static const repairs = '/repairs';
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';

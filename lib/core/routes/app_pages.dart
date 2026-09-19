@@ -6,6 +6,7 @@ import '../../modules/account/account_controller.dart';
 import '../../modules/home/home_controller.dart';
 import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/repairs/repairs_controller.dart';
+import '../../modules/stock/stock_overview_controller.dart';
 import '../../modules/shell/shell_controller.dart';
 import '../../modules/shell/shell_view.dart';
 import '../../data/repositories/auth_repository.dart';
@@ -59,6 +60,12 @@ class AppPages {
           () => RepairsController(
             repairs: Get.find<RepairsRepository>(),
             userId: Get.find<SessionStore>().user.value?.id ?? '',
+          ),
+        );
+        Get.lazyPut(
+          () => StockOverviewController(
+            stock: Get.find<StockRepository>(),
+            requests: Get.find<RequestsRepository>(),
           ),
         );
       }),

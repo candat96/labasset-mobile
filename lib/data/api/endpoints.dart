@@ -54,6 +54,8 @@ class Ep {
 
   static const supplies = '/v1/supplies';
   static String supply(String id) => '/v1/supplies/$id';
+  static String supplyStock(String id) => '/v1/supplies/$id/stock';
+  static String supplyEquipment(String id) => '/v1/supplies/$id/equipment';
   static const repairs = '/v1/repairs';
   static String repair(String id) => '/v1/repairs/$id';
   static String repairAccept(String id) => '/v1/repairs/$id/accept';
@@ -132,6 +134,16 @@ class Ep {
   static const stockAlerts = '/v1/stock/alerts';
   static const stockLots = '/v1/stock/lots';
   static String stockLotOpen(String id) => '/v1/stock/lots/$id/open';
+  static const stockAdjust = '/v1/stock/adjust';
+  static const stockForecast = '/v1/stock/forecast';
+  static const stockReceipts = '/v1/stock/receipts';
+  static String stockReceipt(String id) => '/v1/stock/receipts/$id';
+  static String stockReceiptPost(String id) => '/v1/stock/receipts/$id/post';
+  static String stockReceiptQc(String id) => '/v1/stock/receipts/$id/qc';
+  static String stockReceiptCancel(String id) =>
+      '/v1/stock/receipts/$id/cancel';
+  static String stockReceiptPdf(String id) =>
+      '/v1/stock/receipts/$id/print.pdf';
 
   static const attachments = '/v1/attachments';
   static String attachment(String id) => '/v1/attachments/$id';

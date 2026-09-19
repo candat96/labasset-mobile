@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../api/endpoints.dart';
 import '../models/stock.dart';
+import '../models/stock_extra.dart';
 
 class StockRepository {
   StockRepository(this._dio);
@@ -59,6 +60,102 @@ class StockRepository {
 
   /// Mở nắp lô (hoá chất): POST /v1/stock/lots/:id/open.
   Future<void> openLot(String id) => _dio.post<void>(Ep.stockLotOpen(id));
+
+  /// Điều chỉnh tồn lô (ADM): POST /v1/stock/adjust.
+  Future<void> adjust({
+    required String lotId,
+    required String newQty,
+    required String reason,
+  }) => _dio.post<void>(
+    Ep.stockAdjust,
+    data: {'lotId': lotId, 'newQty': newQty, 'reason': reason},
+  );
+
+  Future<StockForecast> forecast(String supplyId) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      Ep.stockForecast,
+      queryParameters: {'supplyId': supplyId},
+    );
+    return StockForecast.fromJson(res.data!);
+  }
+
+  // ── Nhập kho ───────────────────────────────────────────────
+  Future<StockReceiptPage> receipts({
+    String? q,
+    String? status,
+    String? warehouseId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      Ep.stockReceipts,
+      queryParameters: {
+        'q': ?q,
+        'status': ?status,
+        'warehouseId': ?warehouseId,
+        'page': page,
+        'limit': limit,
+      },
+    );
+    return StockReceiptPage.fromJson(res.data!);
+  }
+
+  Future<StockReceipt> receipt(String id) async {
+    final res = await _dio.get<Map<String, dynamic>>(Ep.stockReceipt(id));
+    return StockReceipt.fromJson(res.data!);
+  }
+
+  Future<StockReceipt> createReceipt({
+    required String type,
+    required String warehouseId,
+    String? supplierId,
+    String? fromDepartmentId,
+    String? invoiceNo,
+    String? invoiceDate,
+    String? receivedAt,
+    String qcStatus = 'pending',
+    String? qcNote,
+    String? notes,
+    required List<ReceiptItem> items,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      Ep.stockReceipts,
+      data: {
+        'type': type,
+        'warehouseId': warehouseId,
+        'supplierId': ?supplierId,
+        'fromDepartmentId': ?fromDepartmentId,
+        'invoiceNo': ?invoiceNo,
+        'invoiceDate': ?invoiceDate,
+        'receivedAt': ?receivedAt,
+        'qcStatus': qcStatus,
+        'qcNote': ?qcNote,
+        'notes': ?notes,
+        'items': items.map((i) => i.toJson()).toList(),
+      },
+    );
+    return StockReceipt.fromJson(res.data!);
+  }
+
+  Future<void> postReceipt(String id) =>
+      _dio.post<void>(Ep.stockReceiptPost(id));
+
+  Future<void> qcReceipt(String id, {required String status, String? note}) =>
+      _dio.post<void>(
+        Ep.stockReceiptQc(id),
+        data: {'status': status, 'note': ?note},
+      );
+
+  Future<void> cancelReceipt(String id) =>
+      _dio.post<void>(Ep.stockReceiptCancel(id));
+
+  Future<List<int>> receiptPdf(String id) async {
+    final res = await _dio.get<List<int>>(
+      Ep.stockReceiptPdf(id),
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return res.data ?? const [];
+  }
 }
 
 String? _nonEmpty(String? v) => v == null || v.isEmpty ? null : v;
