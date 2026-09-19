@@ -57,6 +57,8 @@ class Ep {
   static String supplyStock(String id) => '/v1/supplies/$id/stock';
   static String supplyEquipment(String id) => '/v1/supplies/$id/equipment';
   static const repairs = '/v1/repairs';
+  static const repairStats = '/v1/repairs/stats';
+  static const repairWorkload = '/v1/repairs/workload';
   static String repair(String id) => '/v1/repairs/$id';
   static String repairAccept(String id) => '/v1/repairs/$id/accept';
   static String repairAssign(String id) => '/v1/repairs/$id/assign';

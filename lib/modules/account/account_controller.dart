@@ -54,6 +54,9 @@ class AccountController extends GetxController {
 
   Future<void> setTheme(ThemeMode m) => store.setThemeMode(m);
 
+  Future<void> setTextScale(bool large) =>
+      store.setTextScale(large ? 1.15 : 1.0);
+
   Future<void> logout() async {
     final ok = await ConfirmSheet.show(
       title: 'auth.logoutConfirm'.tr,

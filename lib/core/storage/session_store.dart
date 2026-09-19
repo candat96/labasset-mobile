@@ -21,6 +21,7 @@ class SessionStore extends GetxService {
   static const _kBiometric = 'biometricEnabled';
   static const _kTheme = 'themeMode';
   static const _kPushToken = 'pushToken';
+  static const _kTextScale = 'textScale';
 
   String? accessToken;
   String? refreshToken;
@@ -29,6 +30,9 @@ class SessionStore extends GetxService {
   final Rxn<UserView> user = Rxn<UserView>();
   final RxBool biometricEnabled = false.obs;
   final Rx<ThemeMode> themeMode = ThemeMode.system.obs;
+
+  /// Cỡ chữ lớn (1.0 = mặc định, 1.15 = lớn).
+  final RxDouble textScale = 1.0.obs;
 
   /// Lý do rời phiên gần nhất (hiển thị ở màn login).
   String? lastLogoutReason;
@@ -54,6 +58,8 @@ class SessionStore extends GetxService {
       }
     }
     biometricEnabled.value = (await _storage.read(key: _kBiometric)) == 'true';
+    textScale.value =
+        double.tryParse(await _storage.read(key: _kTextScale) ?? '') ?? 1.0;
     themeMode.value = switch (await _storage.read(key: _kTheme)) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
@@ -90,6 +96,11 @@ class SessionStore extends GetxService {
   Future<void> setThemeMode(ThemeMode m) async {
     themeMode.value = m;
     await _storage.write(key: _kTheme, value: m.name);
+  }
+
+  Future<void> setTextScale(double v) async {
+    textScale.value = v;
+    await _storage.write(key: _kTextScale, value: '$v');
   }
 
   Future<void> setPushToken(String? t) async {

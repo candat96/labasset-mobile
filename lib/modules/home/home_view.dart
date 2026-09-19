@@ -209,6 +209,8 @@ class HomeView extends GetView<HomeController> {
                           'equipmentNew' => Routes.equipmentNew,
                           'calendar' => Routes.calendar,
                           'stocktake' => Routes.stocktakes,
+                          'reports' => Routes.reports,
+                          'assistant' => Routes.ai,
                           _ => Routes.placeholderFor(s.key),
                         }),
                         child: Padding(

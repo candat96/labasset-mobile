@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../modules/auth/auth_pages.dart';
 import '../../modules/feature_pages.dart';
 import '../../modules/account/account_controller.dart';
+import '../../modules/account/my_stats_controller.dart';
 import '../../modules/home/home_controller.dart';
 import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/repairs/repairs_controller.dart';
@@ -66,6 +67,12 @@ class AppPages {
           () => StockOverviewController(
             stock: Get.find<StockRepository>(),
             requests: Get.find<RequestsRepository>(),
+          ),
+        );
+        Get.lazyPut(
+          () => MyStatsController(
+            repairs: Get.find<RepairsRepository>(),
+            tasks: Get.find<TasksRepository>(),
           ),
         );
       }),

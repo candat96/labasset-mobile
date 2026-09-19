@@ -23,6 +23,11 @@ class LabAssetApp extends StatelessWidget {
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: store.themeMode.value,
+        builder: (context, child) => MediaQuery.withClampedTextScaling(
+          minScaleFactor: store.textScale.value,
+          maxScaleFactor: store.textScale.value,
+          child: child ?? const SizedBox.shrink(),
+        ),
         initialRoute: store.isLoggedIn ? Routes.shell : Routes.login,
         getPages: AppPages.pages,
         defaultTransition: Transition.cupertino,

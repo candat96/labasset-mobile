@@ -5,6 +5,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/sync/outbox_service.dart';
 import '../../core/theme/tokens.dart';
 import 'account_controller.dart';
+import 'my_stats_controller.dart';
 
 class AccountView extends GetView<AccountController> {
   const AccountView({super.key});
@@ -38,6 +39,8 @@ class AccountView extends GetView<AccountController> {
                   onTap: () => Get.toNamed(Routes.profile),
                 ),
               ),
+            const SizedBox(height: AppSpacing.md),
+            _MyStatsCard(),
             const SizedBox(height: AppSpacing.md),
             Card(
               child: Column(
@@ -91,6 +94,24 @@ class AccountView extends GetView<AccountController> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Get.toNamed(Routes.offlineData),
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.pie_chart_outline),
+                    title: Text('reports.title'.tr),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Get.toNamed(Routes.reports),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.smart_toy_outlined),
+                    title: Text('ai.title'.tr),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Get.toNamed(Routes.ai),
+                  ),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.text_fields),
+                    title: Text('account.textScale'.tr),
+                    value: store.textScale.value > 1.05,
+                    onChanged: controller.setTextScale,
+                  ),
                   SwitchListTile(
                     secondary: const Icon(Icons.fingerprint),
                     title: Text('account.biometric'.tr),
@@ -137,4 +158,72 @@ class AccountView extends GetView<AccountController> {
       }),
     );
   }
+}
+
+class _MyStatsCard extends StatelessWidget {
+  const _MyStatsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<MyStatsController>();
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('account.myStats'.tr, style: theme.textTheme.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Obx(
+              () => Row(
+                children: [
+                  _stat(
+                    context,
+                    'account.stats.completed'.tr,
+                    '${controller.completed.value}',
+                  ),
+                  _stat(
+                    context,
+                    'account.stats.overdue'.tr,
+                    '${controller.overdue.value}',
+                  ),
+                  _stat(
+                    context,
+                    'account.stats.maintenance'.tr,
+                    '${controller.maintenanceDone.value}',
+                  ),
+                  _stat(
+                    context,
+                    'account.stats.rating'.tr,
+                    controller.avgRating.value == null
+                        ? '—'
+                        : controller.avgRating.value!.toStringAsFixed(1),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stat(BuildContext context, String label, String value) => Expanded(
+    child: Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
+    ),
+  );
 }
