@@ -172,6 +172,38 @@ class _ScanViewState extends State<ScanView> {
                       ),
                     ],
                   ),
+                  Obx(() {
+                    if (controller.history.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'scan.history'.tr,
+                            style: theme.textTheme.labelMedium,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Wrap(
+                            spacing: AppSpacing.xs,
+                            runSpacing: AppSpacing.xs,
+                            children: [
+                              for (final code in controller.history)
+                                ActionChip(
+                                  label: Text(code),
+                                  onPressed: () {
+                                    controller.manual.text = code;
+                                    controller.submitManual();
+                                  },
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
