@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/routes/app_routes.dart';
 import '../notifications/notification_bell.dart';
 import 'home_controller.dart';
 
@@ -55,7 +56,14 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       appBar: AppBar(
         title: Obx(() => Text(controller.hospitalName.value ?? 'app.name'.tr)),
-        actions: const [NotificationBell()],
+        actions: [
+          IconButton(
+            tooltip: 'search.title'.tr,
+            icon: const Icon(Icons.search),
+            onPressed: () => Get.toNamed(Routes.search),
+          ),
+          const NotificationBell(),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
