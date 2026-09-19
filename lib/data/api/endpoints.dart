@@ -84,6 +84,33 @@ class Ep {
   static const departments = '/v1/departments';
   static const faults = '/v1/faults';
   static const faultsSuggest = '/v1/faults/suggest';
+  static const calendar = '/v1/calendar';
+  static const catalogSuppliers = '/v1/catalogs/suppliers';
+  static const catalogManufacturers = '/v1/catalogs/manufacturers';
+  static const catalogEquipmentGroups = '/v1/catalogs/equipment-groups';
+  static const catalogSupplyGroups = '/v1/catalogs/supply-groups';
+  static const catalogUnits = '/v1/catalogs/units';
+  static const catalogWarehouses = '/v1/catalogs/warehouses';
+  static const catalogFundingSources = '/v1/catalogs/funding-sources';
+  static const catalogConnectionTypes = '/v1/catalogs/connection-types';
+  static const catalogComponentTypes = '/v1/catalogs/component-types';
+  static const catalogCalibrationAgencies = '/v1/catalogs/calibration-agencies';
+  static const catalogFaultGroups = '/v1/catalogs/fault-groups';
+
+  static String? catalog(String slug) => switch (slug) {
+    'suppliers' => catalogSuppliers,
+    'manufacturers' => catalogManufacturers,
+    'equipment-groups' => catalogEquipmentGroups,
+    'supply-groups' => catalogSupplyGroups,
+    'units' => catalogUnits,
+    'warehouses' => catalogWarehouses,
+    'funding-sources' => catalogFundingSources,
+    'connection-types' => catalogConnectionTypes,
+    'component-types' => catalogComponentTypes,
+    'calibration-agencies' => catalogCalibrationAgencies,
+    'fault-groups' => catalogFaultGroups,
+    _ => null,
+  };
 
   static const stockAlerts = '/v1/stock/alerts';
   static const stockLots = '/v1/stock/lots';

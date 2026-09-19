@@ -5,6 +5,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/attachments_grid.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -15,6 +16,10 @@ import '../../core/widgets/status_badge.dart';
 import '../../core/widgets/timeline_list.dart';
 import '../../data/models/repair_detail.dart';
 import 'repair_detail_controller.dart';
+import 'tabs/costs_tab.dart';
+import 'tabs/docs_tab.dart';
+import 'tabs/parts_tab.dart';
+import 'tabs/vendors_tab.dart';
 
 /// Chi tiết phiếu sửa chữa: header + thanh hành động + tab Tổng quan/Nhật ký.
 class RepairDetailView extends GetView<RepairDetailController> {
@@ -41,14 +46,21 @@ class RepairDetailView extends GetView<RepairDetailController> {
       }
       final d = controller.item.value!;
       return DefaultTabController(
-        length: 2,
+        length: 7,
         child: Scaffold(
           appBar: AppBar(
             title: Text(d.code),
             bottom: TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
               tabs: [
                 Tab(text: 'repairs.tab.overview'.tr),
                 Tab(text: 'repairs.tab.logs'.tr),
+                Tab(text: 'repairs.tab.parts'.tr),
+                Tab(text: 'repairs.tab.vendors'.tr),
+                Tab(text: 'repairs.tab.costs'.tr),
+                Tab(text: 'repairs.tab.docs'.tr),
+                Tab(text: 'repairs.tab.report'.tr),
               ],
             ),
           ),
@@ -61,6 +73,11 @@ class RepairDetailView extends GetView<RepairDetailController> {
                   children: [
                     _Overview(d: d),
                     _Logs(controller: controller),
+                    PartsTab(equipmentId: d.equipmentId),
+                    const VendorsTab(),
+                    const CostsTab(),
+                    DocsTab(ticketId: d.id),
+                    _ReportTab(ticketId: d.id),
                   ],
                 ),
               ),
@@ -801,4 +818,48 @@ Future<void> _cancel(BuildContext context, RepairDetailController c) async {
     ),
   );
   reason.dispose();
+}
+
+/// Tab "Biên bản": mở/chia sẻ PDF.
+class _ReportTab extends StatelessWidget {
+  const _ReportTab({required this.ticketId});
+
+  final String ticketId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.picture_as_pdf_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'repairs.report.hint'.tr,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            FilledButton.icon(
+              onPressed: () async {
+                try {
+                  await exportRepairPdf(ticketId);
+                } catch (e) {
+                  AppSnackbar.error(e);
+                }
+              },
+              icon: const Icon(Icons.open_in_new),
+              label: Text('repairs.report.open'.tr),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

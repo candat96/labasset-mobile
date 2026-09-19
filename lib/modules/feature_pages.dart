@@ -6,6 +6,7 @@ import '../core/cache/kv_cache.dart';
 import '../core/services/attachment_service.dart';
 import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
+import '../data/repositories/calendar_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/faults_repository.dart';
@@ -16,6 +17,8 @@ import '../data/repositories/stock_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import 'account/lock_view.dart';
+import 'calendar/calendar_controller.dart';
+import 'calendar/calendar_view.dart';
 import 'equipment/equipment_detail_controller.dart';
 import 'equipment/new_equipment_controller.dart';
 import 'equipment/new_equipment_view.dart';
@@ -109,6 +112,19 @@ List<GetPage<dynamic>> featurePages() {
           ),
         );
       }),
+    ),
+    GetPage(
+      name: Routes.calendar,
+      page: () => const CalendarView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => CalendarController(
+            calendar: Get.find<CalendarRepository>(),
+            userId: Get.find<SessionStore>().user.value?.id ?? '',
+          ),
+        ),
+      ),
     ),
     GetPage(
       name: Routes.repairNew,

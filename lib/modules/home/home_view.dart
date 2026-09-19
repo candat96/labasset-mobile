@@ -207,11 +207,11 @@ class HomeView extends GetView<HomeController> {
                     Card(
                       child: InkWell(
                         borderRadius: BorderRadius.circular(AppRadius.lg),
-                        onTap: () => Get.toNamed(
-                          s.key == 'equipmentNew'
-                              ? Routes.equipmentNew
-                              : Routes.placeholderFor(s.key),
-                        ),
+                        onTap: () => Get.toNamed(switch (s.key) {
+                          'equipmentNew' => Routes.equipmentNew,
+                          'calendar' => Routes.calendar,
+                          _ => Routes.placeholderFor(s.key),
+                        }),
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.sm),
                           child: Column(

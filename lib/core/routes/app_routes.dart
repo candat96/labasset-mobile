@@ -11,6 +11,7 @@ class Routes {
   static const shell = '/';
   static const scan = '/scan';
   static const search = '/search';
+  static const calendar = '/calendar';
   static const repairs = '/repairs';
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';

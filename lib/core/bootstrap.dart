@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:get/get.dart';
 
 import '../data/repositories/attachments_repository.dart';
 import '../data/repositories/auth_repository.dart';
+import '../data/repositories/calendar_repository.dart';
+import '../data/repositories/catalogs_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/device_repository.dart';
 import '../data/repositories/equipment_repository.dart';
@@ -29,6 +32,7 @@ import 'sync/outbox_store.dart';
 
 /// Khởi tạo dịch vụ dùng chung trước runApp: session, dio, repositories, outbox.
 Future<void> bootstrap() async {
+  await initializeDateFormatting('vi_VN');
   final store = await Get.putAsync(
     () => SessionStore().load(),
     permanent: true,
@@ -55,6 +59,8 @@ Future<void> bootstrap() async {
   Get.put(StockRepository(dio), permanent: true);
   Get.put(DepartmentsRepository(dio), permanent: true);
   Get.put(FaultsRepository(dio), permanent: true);
+  Get.put(CatalogsRepository(dio), permanent: true);
+  Get.put(CalendarRepository(dio), permanent: true);
 
   // Cache khoá–giá trị (trang chủ offline, lịch sử quét…).
   final cache = Get.put(SqfliteKvCache(), permanent: true);
