@@ -13,6 +13,7 @@ import '../data/repositories/catalogs_repository.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
+import '../data/repositories/files_repository.dart';
 import '../data/repositories/faults_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
@@ -446,6 +447,8 @@ List<GetPage<dynamic>> featurePages() {
             repo: Get.find<StocktakesRepository>(),
             store: Get.find<StocktakeLocalStore>(),
             outbox: Get.find<OutboxService>(),
+            attachments: Get.find<AttachmentService>(),
+            files: Get.find<FilesRepository>(),
             id: id,
           ),
           tag: id,

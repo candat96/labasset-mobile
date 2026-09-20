@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../core/services/attachment_service.dart';
 import '../../core/stocktake/stocktake_counts_handler.dart';
 import '../../core/stocktake/stocktake_local_store.dart';
 import '../../core/sync/outbox_service.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/stocktake.dart';
 import '../../data/repositories/stocktakes_repository.dart';
+import '../../data/repositories/files_repository.dart';
 
 enum StocktakeTab { uncounted, counted, extras }
 
@@ -18,12 +20,16 @@ class StocktakeCountController extends GetxController {
     required this.repo,
     required this.store,
     required this.outbox,
+    required this.attachments,
+    required this.files,
     required this.id,
   });
 
   final StocktakesRepository repo;
   final StocktakeLocalStore store;
   final OutboxService outbox;
+  final AttachmentService attachments;
+  final FilesRepository files;
   final String id;
 
   final Rxn<StocktakeLocalMeta> meta = Rxn<StocktakeLocalMeta>();
@@ -36,6 +42,7 @@ class StocktakeCountController extends GetxController {
   final RxBool sending = false.obs;
   final Rxn<Object> error = Rxn<Object>();
   final search = TextEditingController();
+  final Map<String, String> _photoUrls = {};
 
   List<StocktakeLocalItem> get uncounted =>
       items.where((i) => !i.counted).toList();
@@ -128,6 +135,7 @@ class StocktakeCountController extends GetxController {
     String? location,
     String? note,
     String? photoFileId,
+    String? clientId,
   }) async {
     item
       ..countedQty = qty
@@ -136,11 +144,56 @@ class StocktakeCountController extends GetxController {
       ..note = note
       ..photoFileId = photoFileId
       ..countedAt = DateTime.now().toUtc().toIso8601String()
-      ..clientId = _clientId()
+      ..clientId = clientId ?? _clientId()
       ..synced = false
       ..conflict = false;
     await store.upsertCount(item);
     await load();
+  }
+
+  String createClientId() => _clientId();
+
+  /// Chụp/chọn ảnh dòng đếm. Offline được xếp hàng cùng clientId của dòng.
+  Future<AttachmentUploadResult?> attachPhoto(
+    StocktakeLocalItem item, {
+    required String clientId,
+  }) async {
+    final picked = await attachments.pickImageBytes();
+    if (picked == null) return null;
+    try {
+      final result = await attachments.uploadBytes(
+        entityType: 'stocktake_count',
+        entityId: clientId,
+        kind: 'photo',
+        name: picked.name,
+        mime: picked.mime,
+        bytes: picked.bytes,
+        outboxPayload: {
+          'clientId': clientId,
+          'sessionId': id,
+          'itemId': item.itemId,
+        },
+      );
+      if (result.status == AttachmentUploadStatus.queued) {
+        AppSnackbar.info('attachment.queued'.tr);
+      }
+      return result;
+    } catch (e) {
+      AppSnackbar.error(e);
+      return null;
+    }
+  }
+
+  Future<String?> photoUrl(String fileId) async {
+    final cached = _photoUrls[fileId];
+    if (cached != null) return cached;
+    try {
+      final value = (await files.url(fileId)).url;
+      _photoUrls[fileId] = value;
+      return value;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> addExtra({

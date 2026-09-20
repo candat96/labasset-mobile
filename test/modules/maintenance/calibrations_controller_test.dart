@@ -5,6 +5,7 @@ import 'package:labasset_mobile/core/i18n/app_translations.dart';
 import 'package:labasset_mobile/core/errors/api_error.dart';
 import 'package:labasset_mobile/core/services/attachment_service.dart';
 import 'package:labasset_mobile/data/models/maintenance.dart';
+import 'package:labasset_mobile/data/models/department.dart';
 import 'package:labasset_mobile/data/repositories/calibrations_repository.dart';
 import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
 import 'package:labasset_mobile/modules/maintenance/calibrations_controller.dart';
@@ -18,6 +19,7 @@ class _MockAttachments extends Mock implements AttachmentService {}
 
 void main() {
   late _MockCalibrations repo;
+  late _MockCatalogs catalogs;
   late CalibrationsController c;
 
   setUp(() {
@@ -25,6 +27,7 @@ void main() {
     Get.addTranslations(AppTranslations().keys);
     Get.locale = const Locale('vi', 'VN');
     repo = _MockCalibrations();
+    catalogs = _MockCatalogs();
     when(
       () => repo.list(
         equipmentId: any(named: 'equipmentId'),
@@ -51,7 +54,7 @@ void main() {
     );
     c = CalibrationsController(
       repo: repo,
-      catalogs: _MockCatalogs(),
+      catalogs: catalogs,
       attachments: _MockAttachments(),
       userId: 'u1',
     );
@@ -81,6 +84,17 @@ void main() {
       ),
     ).called(greaterThan(1));
     expect(c.dueSoonOnly.value, isTrue);
+  });
+
+  test('loadAgencies chuẩn hoá code — name cho PickerSheet', () async {
+    when(() => catalogs.list('calibration-agencies', q: 'abc')).thenAnswer(
+      (_) async => const [
+        DepartmentRef(id: 'a1', code: 'AG-1', name: 'Trung tâm A'),
+      ],
+    );
+    final options = await c.loadAgencies('abc');
+    expect(options.single.value, 'a1');
+    expect(options.single.label, 'AG-1 — Trung tâm A');
   });
 
   test('complete gửi kết quả + reload', () async {

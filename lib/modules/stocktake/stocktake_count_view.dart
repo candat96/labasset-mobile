@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
+import '../../core/services/attachment_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/error_state.dart';
@@ -162,6 +163,35 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
     final theme = Theme.of(context);
     final diff = _diff(item);
     return ListTile(
+      leading: item.photoFileId == null
+          ? null
+          : FutureBuilder<String?>(
+              future: controller.photoUrl(item.photoFileId!),
+              builder: (_, snapshot) {
+                final url = snapshot.data;
+                if (url == null) {
+                  return const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(Icons.image_outlined),
+                  );
+                }
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  child: Image.network(
+                    url,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Icon(Icons.broken_image_outlined),
+                    ),
+                  ),
+                );
+              },
+            ),
       title: Text('${item.code} — ${item.name}'),
       subtitle: Text(
         [
@@ -294,6 +324,9 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
       text: item.countedLocation ?? item.location ?? '',
     );
     final note = TextEditingController(text: item.note ?? '');
+    final clientId = controller.createClientId();
+    var photoFileId = item.photoFileId;
+    var photoQueued = false;
     await Get.bottomSheet<void>(
       SafeArea(
         child: Padding(
@@ -356,6 +389,35 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                       labelText: 'repairs.logs.note'.tr,
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final upload = await controller.attachPhoto(
+                        item,
+                        clientId: clientId,
+                      );
+                      if (upload == null) return;
+                      setState(() {
+                        final fileId = upload.attachment?.fileId;
+                        if (fileId != null) photoFileId = fileId;
+                        if (upload.status == AttachmentUploadStatus.queued) {
+                          photoQueued = true;
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      photoFileId != null || photoQueued
+                          ? Icons.check_circle_outline
+                          : Icons.camera_alt_outlined,
+                    ),
+                    label: Text(
+                      photoFileId != null
+                          ? 'stocktake.photo.attached'.tr
+                          : photoQueued
+                          ? 'stocktake.photo.queued'.tr
+                          : 'stocktake.photo.add'.tr,
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   FilledButton(
                     onPressed: () async {
@@ -369,6 +431,8 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                         note: note.text.trim().isEmpty
                             ? null
                             : note.text.trim(),
+                        photoFileId: photoFileId,
+                        clientId: clientId,
                       );
                       Get.back();
                     },

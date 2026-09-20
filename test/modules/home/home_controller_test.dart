@@ -221,6 +221,27 @@ void main() {
     expect(c.error.value, isNull);
   });
 
+  test('kiểm kê rỗng vẫn giữ nhóm để người dùng biết không có đợt', () async {
+    stubHappy();
+    when(
+      () => stocktakes.list(status: 'counting', limit: 5),
+    ).thenAnswer((_) async => const StocktakePage(items: [], total: 0));
+    await c.load();
+    expect(c.showStocktakes.value, isTrue);
+    expect(c.stocktakesOpen, isEmpty);
+    expect(c.stocktakesOpenTotal.value, 0);
+  });
+
+  test('kiểm kê 404 được ẩn như API chưa được triển khai', () async {
+    stubHappy();
+    when(
+      () => stocktakes.list(status: 'counting', limit: 5),
+    ).thenThrow(ApiError(404, 'NOT_FOUND', ''));
+    await c.load();
+    expect(c.showStocktakes.value, isFalse);
+    expect(c.repairsAssigned, isNotEmpty);
+  });
+
   test('tất cả nguồn lỗi → dùng cache kèm nhãn thời gian', () async {
     cache.store[HomeController.cacheKey] = CachedValue({
       'repairsAssigned': [

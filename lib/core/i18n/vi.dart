@@ -836,6 +836,9 @@ const Map<String, String> vi = {
   'stocktake.unsent': 'Chưa gửi',
   'stocktake.synced': 'Đã gửi',
   'stocktake.conflict': 'Người khác đã đếm mới hơn',
+  'stocktake.photo.add': 'Chụp/chọn ảnh dòng đếm',
+  'stocktake.photo.attached': 'Đã gắn ảnh dòng đếm',
+  'stocktake.photo.queued': 'Ảnh đang chờ đồng bộ',
   'stocktake.recount': 'Đếm lại?',
   'stocktake.extraFound':
       'Mã @code không có trong đợt — thêm vào phát hiện thêm?',

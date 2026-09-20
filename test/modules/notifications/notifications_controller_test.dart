@@ -10,6 +10,17 @@ void main() {
     expect(NotificationsController.mapPath(''), isNull);
   });
 
+  test('mapPath giữ đúng id kiểm kê và vật tư', () {
+    expect(
+      NotificationsController.mapPath('/stocktakes/st-1'),
+      '/stocktakes/st-1',
+    );
+    expect(
+      NotificationsController.mapPath('/supplies/supply-1'),
+      '/supplies/supply-1',
+    );
+  });
+
   group('mapData theo 00 §2.10', () {
     test('equipmentId ưu tiên mở hồ sơ máy', () {
       expect(

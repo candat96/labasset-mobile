@@ -118,6 +118,7 @@ void main() {
       name: 'a.jpg',
       mime: 'image/jpeg',
       bytes: bytes,
+      outboxPayload: const {'clientId': 'count-client-1'},
     );
     expect(result.status, AttachmentUploadStatus.queued);
     final payload =
@@ -125,6 +126,7 @@ void main() {
             as Map<String, dynamic>;
     expect(payload['path'], '/tmp/a.jpg');
     expect(payload['entityId'], 'e1');
+    expect(payload['clientId'], 'count-client-1');
   });
 
   test('queueOnOffline=false → ném lỗi ra ngoài', () async {

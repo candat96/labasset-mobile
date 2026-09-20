@@ -134,6 +134,7 @@ class AttachmentService {
     required Uint8List bytes,
     String? label,
     bool queueOnOffline = true,
+    Map<String, dynamic>? outboxPayload,
   }) async {
     try {
       final presign = await files.presign(
@@ -174,6 +175,7 @@ class AttachmentService {
         'mime': mime,
         'label': label,
         'path': path,
+        ...?outboxPayload,
       });
       return const AttachmentUploadResult(AttachmentUploadStatus.queued);
     }

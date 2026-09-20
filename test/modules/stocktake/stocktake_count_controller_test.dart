@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/i18n/app_translations.dart';
+import 'package:labasset_mobile/core/services/attachment_service.dart';
 import 'package:labasset_mobile/core/stocktake/stocktake_counts_handler.dart';
 import 'package:labasset_mobile/core/stocktake/stocktake_local_store.dart';
 import 'package:labasset_mobile/core/sync/outbox_service.dart';
 import 'package:labasset_mobile/data/models/stocktake.dart';
 import 'package:labasset_mobile/data/repositories/stocktakes_repository.dart';
+import 'package:labasset_mobile/data/repositories/files_repository.dart';
 import 'package:labasset_mobile/modules/stocktake/stocktake_count_controller.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockRepo extends Mock implements StocktakesRepository {}
 
 class _MockOutbox extends Mock implements OutboxService {}
+
+class _MockAttachments extends Mock implements AttachmentService {}
+
+class _MockFiles extends Mock implements FilesRepository {}
 
 /// Store in-memory cho test (không cần sqflite).
 class _FakeStore implements StocktakeLocalStore {
@@ -137,6 +143,8 @@ void main() {
       repo: repo,
       store: store,
       outbox: outbox,
+      attachments: _MockAttachments(),
+      files: _MockFiles(),
       id: 's1',
     );
   });
@@ -193,13 +201,26 @@ void main() {
     await seed();
     await c.load();
     final item = c.items.first;
-    await c.saveCount(item, qty: '8', note: 'thiếu 2');
+    await c.saveCount(
+      item,
+      qty: '8',
+      note: 'thiếu 2',
+      photoFileId: 'file-photo-1',
+    );
     final saved = c.items.firstWhere((e) => e.itemId == item.itemId);
     expect(saved.countedQty, '8');
     expect(saved.clientId, isNotNull);
     expect(saved.synced, isFalse);
     expect(saved.counted, isTrue);
+    expect(saved.photoFileId, 'file-photo-1');
     expect(await store.pendingCount('s1'), 1);
+  });
+
+  test('saveCount giữ clientId đã dùng để xếp ảnh offline', () async {
+    await seed();
+    await c.load();
+    await c.saveCount(c.items.first, qty: '9', clientId: 'count-client-1');
+    expect(c.items.first.clientId, 'count-client-1');
   });
 
   test('addExtra lưu phát hiện thêm', () async {
@@ -219,7 +240,7 @@ void main() {
     when(() => outbox.enqueue(any(), any())).thenAnswer((_) async => 'o1');
     when(() => outbox.run()).thenAnswer((_) async => true);
     await c.load();
-    await c.saveCount(c.items.first, qty: '8');
+    await c.saveCount(c.items.first, qty: '8', photoFileId: 'file-photo-1');
     await c.addExtra(code: 'LA-01', qty: '1');
 
     expect(await c.send(), isTrue);
@@ -235,6 +256,7 @@ void main() {
     expect(first['itemId'], 'i1');
     expect(first['clientId'], isA<String>());
     expect(first['countedQty'], '8');
+    expect(first['photoFileId'], 'file-photo-1');
     verify(() => outbox.run()).called(1);
   });
 
