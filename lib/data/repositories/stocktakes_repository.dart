@@ -20,10 +20,14 @@ class StocktakesRepository {
   StocktakesRepository(this._dio);
   final Dio _dio;
 
-  Future<StocktakePage> list({String? status, String? type}) async {
+  Future<StocktakePage> list({
+    String? status,
+    String? type,
+    int limit = 50,
+  }) async {
     final res = await _dio.get<dynamic>(
       Ep.stocktakes,
-      queryParameters: {'status': ?status, 'type': ?type, 'limit': 50},
+      queryParameters: {'status': ?status, 'type': ?type, 'limit': limit},
     );
     final data = res.data;
     if (data is List) {

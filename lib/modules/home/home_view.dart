@@ -45,7 +45,8 @@ class HomeView extends GetView<HomeController> {
             controller.repairsAssigned.isEmpty &&
             controller.tasksDue.isEmpty &&
             controller.requestsPending.isEmpty &&
-            controller.requestsApproved.isEmpty;
+            controller.requestsApproved.isEmpty &&
+            controller.stocktakesOpen.isEmpty;
         if (controller.loading.value &&
             empty &&
             controller.cachedAt.value == null) {
@@ -85,6 +86,21 @@ class HomeView extends GetView<HomeController> {
                           ),
                       ],
                     ),
+                    if (controller.showStocktakes.value)
+                      _WorkGroup(
+                        title: 'home.task.stocktakesOpen'.tr,
+                        total: controller.stocktakesOpenTotal.value,
+                        route: Routes.stocktakes,
+                        children: [
+                          for (final s in controller.stocktakesOpen)
+                            _WorkRow(
+                              title: '${s.code} — ${s.name}',
+                              status: 'stocktake.status.${s.status}'.tr,
+                              icon: Icons.fact_check_outlined,
+                              onTap: () => Get.toNamed(Routes.stocktake(s.id)),
+                            ),
+                        ],
+                      ),
                     _WorkGroup(
                       title: 'home.task.maintenanceDue'.tr,
                       total: controller.tasksDueTotal.value,

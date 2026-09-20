@@ -9,11 +9,13 @@ import 'package:labasset_mobile/data/models/repair.dart';
 import 'package:labasset_mobile/data/models/request.dart';
 import 'package:labasset_mobile/data/models/stock.dart';
 import 'package:labasset_mobile/data/models/task.dart';
+import 'package:labasset_mobile/data/models/stocktake.dart';
 import 'package:labasset_mobile/data/repositories/equipment_repository.dart';
 import 'package:labasset_mobile/data/repositories/repairs_repository.dart';
 import 'package:labasset_mobile/data/repositories/requests_repository.dart';
 import 'package:labasset_mobile/data/repositories/settings_repository.dart';
 import 'package:labasset_mobile/data/repositories/stock_repository.dart';
+import 'package:labasset_mobile/data/repositories/stocktakes_repository.dart';
 import 'package:labasset_mobile/data/repositories/tasks_repository.dart';
 import 'package:labasset_mobile/modules/home/home_controller.dart';
 import 'package:mocktail/mocktail.dart';
@@ -32,6 +34,8 @@ class _MockStock extends Mock implements StockRepository {}
 
 class _MockSettings extends Mock implements SettingsRepository {}
 
+class _MockStocktakes extends Mock implements StocktakesRepository {}
+
 void main() {
   late _MockRepairs repairs;
   late _MockTasks tasks;
@@ -39,6 +43,7 @@ void main() {
   late _MockEquipment equipment;
   late _MockStock stock;
   late _MockSettings settings;
+  late _MockStocktakes stocktakes;
   late FakeKvCache cache;
   late HomeController c;
 
@@ -52,6 +57,7 @@ void main() {
     equipment = _MockEquipment();
     stock = _MockStock();
     settings = _MockSettings();
+    stocktakes = _MockStocktakes();
     cache = FakeKvCache();
     when(
       () => settings.hospitalName(),
@@ -64,6 +70,7 @@ void main() {
       requests: requests,
       equipment: equipment,
       stock: stock,
+      stocktakes: stocktakes,
       cache: cache,
     );
   });
@@ -149,6 +156,19 @@ void main() {
     when(
       () => equipment.count(calibrationOverdue: true),
     ).thenAnswer((_) async => 2);
+    when(() => stocktakes.list(status: 'counting', limit: 5)).thenAnswer(
+      (_) async => const StocktakePage(
+        items: [
+          StocktakeSession(
+            id: 'st1',
+            code: 'KK-001',
+            name: 'Kiểm kê tháng 9',
+            status: 'counting',
+          ),
+        ],
+        total: 1,
+      ),
+    );
   }
 
   test('ghép dữ liệu 4 nhóm việc + 3 cảnh báo', () async {
@@ -162,6 +182,8 @@ void main() {
     expect(c.brokenUnassigned.value, 2);
     expect(c.suppliesAlert.value, 5);
     expect(c.calibrationOverdue.value, 2);
+    expect(c.stocktakesOpen.single.code, 'KK-001');
+    expect(c.showStocktakes.value, isTrue);
     expect(c.error.value, isNull);
     expect(c.cachedAt.value, isNull);
     expect(cache.store.containsKey(HomeController.cacheKey), isTrue);
@@ -186,6 +208,18 @@ void main() {
       expect(c.cachedAt.value, isNull);
     },
   );
+
+  test('kiểm kê 403 được ẩn, các nhóm khác vẫn hoạt động', () async {
+    stubHappy();
+    when(
+      () => stocktakes.list(status: 'counting', limit: 5),
+    ).thenThrow(ApiError(403, 'FORBIDDEN', ''));
+    await c.load();
+    expect(c.showStocktakes.value, isFalse);
+    expect(c.stocktakesOpen, isEmpty);
+    expect(c.repairsAssigned, hasLength(1));
+    expect(c.error.value, isNull);
+  });
 
   test('tất cả nguồn lỗi → dùng cache kèm nhãn thời gian', () async {
     cache.store[HomeController.cacheKey] = CachedValue({

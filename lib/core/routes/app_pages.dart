@@ -16,6 +16,7 @@ import '../../data/repositories/repairs_repository.dart';
 import '../../data/repositories/requests_repository.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../data/repositories/stock_repository.dart';
+import '../../data/repositories/stocktakes_repository.dart';
 import '../../data/repositories/tasks_repository.dart';
 import '../cache/kv_cache.dart';
 import '../storage/session_store.dart';
@@ -54,6 +55,7 @@ class AppPages {
             requests: Get.find<RequestsRepository>(),
             equipment: Get.find<EquipmentRepository>(),
             stock: Get.find<StockRepository>(),
+            stocktakes: Get.find<StocktakesRepository>(),
             cache: Get.find<KvCache>(),
           ),
         );

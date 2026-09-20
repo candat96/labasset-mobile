@@ -3,15 +3,18 @@ import 'dart:async';
 import 'package:get/get.dart';
 
 import '../../core/cache/kv_cache.dart';
+import '../../core/errors/api_error.dart';
 import '../../core/storage/session_store.dart';
 import '../../data/models/repair.dart';
 import '../../data/models/request.dart';
 import '../../data/models/task.dart';
+import '../../data/models/stocktake.dart';
 import '../../data/repositories/equipment_repository.dart';
 import '../../data/repositories/repairs_repository.dart';
 import '../../data/repositories/requests_repository.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../data/repositories/stock_repository.dart';
+import '../../data/repositories/stocktakes_repository.dart';
 import '../../data/repositories/tasks_repository.dart';
 
 /// Trang chủ: "Việc của tôi hôm nay" + cảnh báo ghép từ API, cache khi offline.
@@ -24,6 +27,7 @@ class HomeController extends GetxController {
     required this.requests,
     required this.equipment,
     required this.stock,
+    required this.stocktakes,
     this.cache,
   });
 
@@ -34,6 +38,7 @@ class HomeController extends GetxController {
   final RequestsRepository requests;
   final EquipmentRepository equipment;
   final StockRepository stock;
+  final StocktakesRepository stocktakes;
   final KvCache? cache;
 
   static const cacheKey = 'home.snapshot';
@@ -51,13 +56,13 @@ class HomeController extends GetxController {
   final RxInt requestsPendingTotal = 0.obs;
   final RxList<RequestSummary> requestsApproved = <RequestSummary>[].obs;
   final RxInt requestsApprovedTotal = 0.obs;
+  final RxList<StocktakeSession> stocktakesOpen = <StocktakeSession>[].obs;
+  final RxInt stocktakesOpenTotal = 0.obs;
+  final RxBool showStocktakes = true.obs;
 
   final RxInt brokenUnassigned = 0.obs;
   final RxInt suppliesAlert = 0.obs;
   final RxInt calibrationOverdue = 0.obs;
-
-  /// Kiểm kê đang mở — API `/v1/stocktakes` chưa có (C3 đang làm) → ẩn nhóm.
-  bool get hasStocktakeApi => false;
 
   @override
   void onInit() {
@@ -90,6 +95,25 @@ class HomeController extends GetxController {
         );
         repairsAssigned.assignAll(page.items);
         repairsAssignedTotal.value = page.total.toInt();
+      }),
+    );
+    list.add(
+      run(() async {
+        try {
+          final page = await stocktakes.list(status: 'counting', limit: 5);
+          stocktakesOpen.assignAll(page.items);
+          stocktakesOpenTotal.value = page.total.toInt();
+          showStocktakes.value = true;
+        } catch (e) {
+          final apiError = ApiError.from(e);
+          if (apiError.status == 403 || apiError.status == 404) {
+            stocktakesOpen.clear();
+            stocktakesOpenTotal.value = 0;
+            showStocktakes.value = false;
+            return;
+          }
+          rethrow;
+        }
       }),
     );
     list.add(
@@ -164,6 +188,9 @@ class HomeController extends GetxController {
     'requestsPendingTotal': requestsPendingTotal.value,
     'requestsApproved': requestsApproved.map((e) => e.toJson()).toList(),
     'requestsApprovedTotal': requestsApprovedTotal.value,
+    'stocktakesOpen': stocktakesOpen.map((e) => e.toJson()).toList(),
+    'stocktakesOpenTotal': stocktakesOpenTotal.value,
+    'showStocktakes': showStocktakes.value,
     'brokenUnassigned': brokenUnassigned.value,
     'suppliesAlert': suppliesAlert.value,
     'calibrationOverdue': calibrationOverdue.value,
@@ -199,6 +226,12 @@ class HomeController extends GetxController {
       );
       requestsApprovedTotal.value =
           (d['requestsApprovedTotal'] as num?)?.toInt() ?? 0;
+      stocktakesOpen.assignAll(
+        _items(d['stocktakesOpen'], StocktakeSession.fromJson),
+      );
+      stocktakesOpenTotal.value =
+          (d['stocktakesOpenTotal'] as num?)?.toInt() ?? 0;
+      showStocktakes.value = d['showStocktakes'] as bool? ?? true;
       brokenUnassigned.value = (d['brokenUnassigned'] as num?)?.toInt() ?? 0;
       suppliesAlert.value = (d['suppliesAlert'] as num?)?.toInt() ?? 0;
       calibrationOverdue.value =
