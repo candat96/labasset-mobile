@@ -50,6 +50,7 @@ void main() {
         catalogs: _MockCatalogs(),
         attachments: _MockAttachments(),
         popWithId: (_) {},
+        connectivity: () async => true,
       );
     });
 
@@ -106,6 +107,7 @@ void main() {
         catalogs: _MockCatalogs(),
         attachments: _MockAttachments(),
         popWithId: (id) => popped = id,
+        connectivity: () async => true,
       );
       cc.setWarehouse(const DepartmentRef(id: 'w1', code: 'K', name: 'Kho'));
       cc.addLine(
@@ -149,6 +151,35 @@ void main() {
               ).captured.single
               as List<ReceiptItem>;
       expect(items.single.quantity, '2');
+    });
+
+    test('offline không gọi API tạo phiếu nhập', () async {
+      final cc = ReceiptFormController(
+        stock: stock,
+        supplies: _MockSupplies(),
+        departments: _MockDepartments(),
+        catalogs: _MockCatalogs(),
+        attachments: _MockAttachments(),
+        connectivity: () async => false,
+      );
+      cc.setWarehouse(const DepartmentRef(id: 'w1', code: 'K', name: 'Kho'));
+      cc.addLine(ReceiptLine(supplyId: 's1', label: 'A'));
+      expect(await cc.saveDraft(), isFalse);
+      verifyNever(
+        () => stock.createReceipt(
+          type: any(named: 'type'),
+          warehouseId: any(named: 'warehouseId'),
+          supplierId: any(named: 'supplierId'),
+          fromDepartmentId: any(named: 'fromDepartmentId'),
+          invoiceNo: any(named: 'invoiceNo'),
+          invoiceDate: any(named: 'invoiceDate'),
+          receivedAt: any(named: 'receivedAt'),
+          qcStatus: any(named: 'qcStatus'),
+          qcNote: any(named: 'qcNote'),
+          notes: any(named: 'notes'),
+          items: any(named: 'items'),
+        ),
+      );
     });
 
     test('scanManufacturerCode khớp chính xác mã', () async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/network/connectivity.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/department.dart';
 import '../../data/models/stock.dart';
@@ -13,11 +14,14 @@ class TransferFormController extends GetxController {
     required this.stock,
     required this.catalogs,
     void Function()? pop,
-  }) : _pop = pop ?? (Get.back);
+    Future<bool> Function()? connectivity,
+  }) : _pop = pop ?? (Get.back),
+       _hasNetwork = connectivity ?? hasNetwork;
 
   final StockRepository stock;
   final CatalogsRepository catalogs;
   final void Function() _pop;
+  final Future<bool> Function() _hasNetwork;
 
   final Rxn<DepartmentRef> fromWarehouse = Rxn<DepartmentRef>();
   final Rxn<DepartmentRef> toWarehouse = Rxn<DepartmentRef>();
@@ -88,6 +92,10 @@ class TransferFormController extends GetxController {
   Future<bool> submit() async {
     if (!canSubmit) {
       error.value = 'stock.transfer.needLines'.tr;
+      return false;
+    }
+    if (!await _hasNetwork()) {
+      AppSnackbar.info('sync.offline'.tr);
       return false;
     }
     submitting.value = true;

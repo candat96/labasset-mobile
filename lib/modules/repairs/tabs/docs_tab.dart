@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../core/services/attachment_service.dart';
+import '../../../core/services/pdf_file_service.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/attachments_grid.dart';
@@ -64,16 +64,28 @@ class _DocsTabState extends State<DocsTab> {
         ),
         const SizedBox(height: AppSpacing.md),
         Obx(
-          () => FilledButton.icon(
-            onPressed: exporting.value ? null : _exportReport,
-            icon: exporting.value
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.picture_as_pdf_outlined),
-            label: Text('repairs.report.open'.tr),
+          () => Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: exporting.value
+                      ? null
+                      : () => _exportReport(share: false),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  label: Text('common.view'.tr),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: exporting.value
+                      ? null
+                      : () => _exportReport(share: true),
+                  icon: const Icon(Icons.share_outlined),
+                  label: Text('common.share'.tr),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -131,10 +143,10 @@ class _DocsTabState extends State<DocsTab> {
     }
   }
 
-  Future<void> _exportReport() async {
+  Future<void> _exportReport({required bool share}) async {
     exporting.value = true;
     try {
-      await exportRepairPdf(widget.ticketId);
+      await exportRepairPdf(widget.ticketId, share: share);
     } catch (e) {
       AppSnackbar.error(e);
     } finally {
@@ -143,11 +155,15 @@ class _DocsTabState extends State<DocsTab> {
   }
 }
 
-/// Tải PDF biên bản + chia sẻ (dùng chung tab Tài liệu và tab Biên bản).
-Future<void> exportRepairPdf(String ticketId) async {
+/// Tải PDF biên bản rồi mở ngoài app hoặc chia sẻ.
+Future<void> exportRepairPdf(String ticketId, {bool share = false}) async {
   final bytes = await Get.find<RepairsRepository>().reportPdf(ticketId);
   final dir = await getApplicationDocumentsDirectory();
   final file = File('${dir.path}/bien-ban-$ticketId.pdf');
   await file.writeAsBytes(bytes, flush: true);
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+  if (share) {
+    await PdfFileService.share(file);
+  } else {
+    await PdfFileService.open(file);
+  }
 }

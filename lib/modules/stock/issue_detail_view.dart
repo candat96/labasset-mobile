@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../core/format/format.dart';
 import '../../core/services/attachment_service.dart';
+import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/error_state.dart';
@@ -119,13 +119,17 @@ class _IssueDetailViewState extends State<IssueDetailView> {
     }
   }
 
-  Future<void> _pdf() async {
+  Future<void> _pdf({bool share = false}) async {
     try {
       final bytes = await repo.issuePdf(widget.id);
       final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/phieu-xuat-${widget.id}.pdf');
       await file.writeAsBytes(bytes, flush: true);
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+      if (share) {
+        await PdfFileService.share(file);
+      } else {
+        await PdfFileService.open(file);
+      }
     } catch (e) {
       AppSnackbar.error(e);
     }
@@ -157,6 +161,11 @@ class _IssueDetailViewState extends State<IssueDetailView> {
               tooltip: 'repairs.report.open'.tr,
               icon: const Icon(Icons.picture_as_pdf_outlined),
               onPressed: _pdf,
+            ),
+            IconButton(
+              tooltip: 'common.share'.tr,
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => _pdf(share: true),
             ),
           ],
         ),

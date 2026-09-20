@@ -44,6 +44,7 @@ void main() {
         departments: _MockDepartments(),
         catalogs: _MockCatalogs(),
         popWithId: (_) {},
+        connectivity: () async => true,
       );
     });
 
@@ -141,6 +142,38 @@ void main() {
       expect(items.single.lotId, 'l1');
       expect(items.single.quantity, '2');
     });
+
+    test('offline không gọi API tạo phiếu xuất', () async {
+      final cc = IssueFormController(
+        stock: stock,
+        supplies: _MockSupplies(),
+        departments: _MockDepartments(),
+        catalogs: _MockCatalogs(),
+        connectivity: () async => false,
+      );
+      cc.warehouse.value = const DepartmentRef(
+        id: 'w1',
+        code: 'K',
+        name: 'Kho',
+      );
+      cc.lines.add(IssueLine(supplyId: 's1', label: 'A'));
+      expect(await cc.save(), isFalse);
+      verifyNever(
+        () => stock.createIssue(
+          type: any(named: 'type'),
+          warehouseId: any(named: 'warehouseId'),
+          toDepartmentId: any(named: 'toDepartmentId'),
+          equipmentId: any(named: 'equipmentId'),
+          repairTicketId: any(named: 'repairTicketId'),
+          maintenanceTaskId: any(named: 'maintenanceTaskId'),
+          receiverUserId: any(named: 'receiverUserId'),
+          receiverName: any(named: 'receiverName'),
+          reason: any(named: 'reason'),
+          notes: any(named: 'notes'),
+          items: any(named: 'items'),
+        ),
+      );
+    });
   });
 
   group('TransferFormController', () {
@@ -150,6 +183,7 @@ void main() {
         stock: stock,
         catalogs: _MockCatalogs(),
         pop: () {},
+        connectivity: () async => true,
       );
       c.setFrom(const DepartmentRef(id: 'w1', code: 'A', name: 'Kho A'));
       c.setTo(const DepartmentRef(id: 'w1', code: 'A', name: 'Kho A'));
@@ -170,6 +204,29 @@ void main() {
         ),
       ).thenAnswer((_) async {});
       expect(await c.submit(), isTrue);
+    });
+
+    test('offline không gọi API chuyển kho', () async {
+      final stock = _MockStock();
+      final c = TransferFormController(
+        stock: stock,
+        catalogs: _MockCatalogs(),
+        connectivity: () async => false,
+      );
+      c.setFrom(const DepartmentRef(id: 'w1', code: 'A', name: 'Kho A'));
+      c.setTo(const DepartmentRef(id: 'w2', code: 'B', name: 'Kho B'));
+      c.addLine(
+        const StockLotSummary(id: 'l1', supplyId: 's1', lotNo: 'L1'),
+        '1',
+      );
+      expect(await c.submit(), isFalse);
+      verifyNever(
+        () => stock.createTransfer(
+          fromWarehouseId: any(named: 'fromWarehouseId'),
+          toWarehouseId: any(named: 'toWarehouseId'),
+          items: any(named: 'items'),
+        ),
+      );
     });
 
     test('findLot khớp lotNo chính xác', () async {

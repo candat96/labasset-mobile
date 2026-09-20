@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/network/connectivity.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/department.dart';
 import '../../data/models/stock_issue.dart';
@@ -24,7 +25,9 @@ class IssueFormController extends GetxController {
     String? maintenanceTaskId,
     String? lotId,
     String? supplyId,
+    Future<bool> Function()? connectivity,
   }) : _popWithId = popWithId ?? ((id) => Get.back(result: id)),
+       _hasNetwork = connectivity ?? hasNetwork,
        initialEquipmentId = equipmentId,
        initialRepairTicketId = repairTicketId,
        initialMaintenanceTaskId = maintenanceTaskId {
@@ -46,6 +49,7 @@ class IssueFormController extends GetxController {
   final DepartmentsRepository departments;
   final CatalogsRepository catalogs;
   final void Function(String id) _popWithId;
+  final Future<bool> Function() _hasNetwork;
   final String? initialEquipmentId;
   final String? initialRepairTicketId;
   final String? initialMaintenanceTaskId;
@@ -177,6 +181,10 @@ class IssueFormController extends GetxController {
   Future<bool> save() async {
     if (!canSave) {
       error.value = 'stock.issue.needLines'.tr;
+      return false;
+    }
+    if (!await _hasNetwork()) {
+      AppSnackbar.info('sync.offline'.tr);
       return false;
     }
     submitting.value = true;

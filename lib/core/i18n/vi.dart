@@ -27,6 +27,7 @@ const Map<String, String> vi = {
   'common.copy': 'Sao chép',
   'common.copied': 'Đã sao chép',
   'common.view': 'Xem',
+  'common.share': 'Chia sẻ',
   'common.optional': 'Không bắt buộc',
   'common.required': 'Bắt buộc',
   'common.pick': 'Chọn',

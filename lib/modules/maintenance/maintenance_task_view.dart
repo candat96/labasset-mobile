@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_snackbar.dart';
@@ -50,6 +50,11 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
               icon: const Icon(Icons.picture_as_pdf_outlined),
               onPressed: () => _exportPdf(context, controller),
             ),
+            IconButton(
+              tooltip: 'common.share'.tr,
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => _exportPdf(context, controller, share: true),
+            ),
             if (controller.canStart)
               IconButton(
                 tooltip: 'maintenance.skip'.tr,
@@ -80,10 +85,11 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
 
   Future<void> _exportPdf(
     BuildContext context,
-    MaintenanceTaskController c,
-  ) async {
+    MaintenanceTaskController c, {
+    bool share = false,
+  }) async {
     try {
-      await exportMaintenancePdf(c.id);
+      await exportMaintenancePdf(c.id, share: share);
     } catch (e) {
       AppSnackbar.error(e);
     }
@@ -509,11 +515,15 @@ Future<void> _sign(MaintenanceTaskController c) async {
   name.dispose();
 }
 
-/// Tải PDF biên bản bảo dưỡng + chia sẻ.
-Future<void> exportMaintenancePdf(String taskId) async {
+/// Tải PDF biên bản bảo dưỡng rồi mở ngoài app hoặc chia sẻ.
+Future<void> exportMaintenancePdf(String taskId, {bool share = false}) async {
   final bytes = await Get.find<TasksRepository>().reportPdf(taskId);
   final dir = await getApplicationDocumentsDirectory();
   final file = File('${dir.path}/bien-ban-bd-$taskId.pdf');
   await file.writeAsBytes(bytes, flush: true);
-  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+  if (share) {
+    await PdfFileService.share(file);
+  } else {
+    await PdfFileService.open(file);
+  }
 }

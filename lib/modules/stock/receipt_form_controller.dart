@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/decimal_input.dart';
+import '../../core/network/connectivity.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/department.dart';
@@ -53,7 +54,9 @@ class ReceiptFormController extends GetxController {
     required this.catalogs,
     required this.attachments,
     void Function(String id)? popWithId,
-  }) : _popWithId = popWithId ?? ((id) => Get.back(result: id));
+    Future<bool> Function()? connectivity,
+  }) : _popWithId = popWithId ?? ((id) => Get.back(result: id)),
+       _hasNetwork = connectivity ?? hasNetwork;
 
   final StockRepository stock;
   final SuppliesRepository supplies;
@@ -61,6 +64,7 @@ class ReceiptFormController extends GetxController {
   final CatalogsRepository catalogs;
   final AttachmentService attachments;
   final void Function(String id) _popWithId;
+  final Future<bool> Function() _hasNetwork;
 
   static const types = ['purchase', 'return_from_dept', 'adjust_in'];
   static const expiryWarnDays = 30;
@@ -77,7 +81,6 @@ class ReceiptFormController extends GetxController {
   final qcNote = TextEditingController();
   final RxBool submitting = false.obs;
   final RxString error = ''.obs;
-  final RxBool online = true.obs;
 
   Decimal get total => lines.fold(
     Decimal.zero,
@@ -194,6 +197,10 @@ class ReceiptFormController extends GetxController {
   Future<bool> saveDraft() async {
     if (!canNext || lines.isEmpty || warehouse.value == null) {
       error.value = 'stock.receipt.needItems'.tr;
+      return false;
+    }
+    if (!await _hasNetwork()) {
+      AppSnackbar.info('sync.offline'.tr);
       return false;
     }
     submitting.value = true;
