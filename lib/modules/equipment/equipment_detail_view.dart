@@ -302,7 +302,7 @@ class _QuickActions extends StatelessWidget {
   Future<void> _run(BuildContext context, String key) async {
     switch (key) {
       case 'reportFault':
-        await Get.toNamed(Routes.placeholderFor('reportFault'));
+        await Get.toNamed('${Routes.repairNew}?equipmentId=${e.id}');
       case 'adhocMaintenance':
         await _adhoc();
       case 'issueSupplies':
@@ -323,7 +323,7 @@ class _QuickActions extends StatelessWidget {
       case 'transfer':
         await _transfer();
       case 'assistant':
-        await Get.toNamed(Routes.placeholderFor('assistant'));
+        await Get.toNamed(Routes.ai);
       case 'reprint':
         await _reprint();
     }

@@ -74,15 +74,14 @@ class HomeView extends GetView<HomeController> {
                     _WorkGroup(
                       title: 'home.task.repairsAssigned'.tr,
                       total: controller.repairsAssignedTotal.value,
-                      route: Routes.placeholderFor('repairs'),
+                      route: '${Routes.repairs}?segment=mine',
                       children: [
                         for (final r in controller.repairsAssigned)
                           _WorkRow(
                             title: '${r.code} — ${r.equipmentLabel}',
                             status: 'status.repair.${r.status}'.tr,
                             icon: Icons.build_outlined,
-                            onTap: () =>
-                                Get.toNamed(Routes.placeholderFor('repairs')),
+                            onTap: () => Get.toNamed(Routes.repair(r.id)),
                           ),
                       ],
                     ),
@@ -105,30 +104,28 @@ class HomeView extends GetView<HomeController> {
                     _WorkGroup(
                       title: 'home.task.requestsPending'.tr,
                       total: controller.requestsPendingTotal.value,
-                      route: Routes.placeholderFor('requests'),
+                      route: '${Routes.requests}?segment=pending',
                       children: [
                         for (final r in controller.requestsPending)
                           _WorkRow(
                             title: '${r.code} — ${r.reason}',
                             status: 'status.request.${r.status}'.tr,
                             icon: Icons.description_outlined,
-                            onTap: () =>
-                                Get.toNamed(Routes.placeholderFor('requests')),
+                            onTap: () => Get.toNamed(Routes.request(r.id)),
                           ),
                       ],
                     ),
                     _WorkGroup(
                       title: 'home.task.requestsApproved'.tr,
                       total: controller.requestsApprovedTotal.value,
-                      route: Routes.placeholderFor('requests'),
+                      route: '${Routes.requests}?segment=toIssue',
                       children: [
                         for (final r in controller.requestsApproved)
                           _WorkRow(
                             title: '${r.code} — ${r.reason}',
                             status: 'status.request.${r.status}'.tr,
                             icon: Icons.inventory_outlined,
-                            onTap: () =>
-                                Get.toNamed(Routes.placeholderFor('requests')),
+                            onTap: () => Get.toNamed(Routes.request(r.id)),
                           ),
                       ],
                     ),
@@ -159,7 +156,7 @@ class HomeView extends GetView<HomeController> {
                             ? StatusTone.danger
                             : StatusTone.success,
                         onTap: () =>
-                            Get.toNamed(Routes.placeholderFor('repairs')),
+                            Get.toNamed('${Routes.repairs}?segment=unassigned'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -171,8 +168,7 @@ class HomeView extends GetView<HomeController> {
                         tone: controller.suppliesAlert.value > 0
                             ? StatusTone.warning
                             : StatusTone.success,
-                        onTap: () =>
-                            Get.toNamed(Routes.placeholderFor('stock')),
+                        onTap: () => Get.toNamed(Routes.stockAlerts),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -211,7 +207,10 @@ class HomeView extends GetView<HomeController> {
                           'stocktake' => Routes.stocktakes,
                           'reports' => Routes.reports,
                           'assistant' => Routes.ai,
-                          _ => Routes.placeholderFor(s.key),
+                          'reportFault' => Routes.repairNew,
+                          'stockIssue' => Routes.stockIssueNew,
+                          'stockReceipt' => Routes.stockReceiptNew,
+                          _ => Routes.stock,
                         }),
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.sm),

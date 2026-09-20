@@ -129,7 +129,7 @@ class GlobalSearchController extends GetxController {
             id: s.id,
             title: '${s.code} — ${s.name}',
             subtitle: s.isActive ? '' : 'status.inactive'.tr,
-            route: Routes.placeholderFor('stock'),
+            route: Routes.supply(s.id),
           ),
       ],
     );
@@ -145,7 +145,7 @@ class GlobalSearchController extends GetxController {
             id: r.id,
             title: '${r.code} — ${r.equipmentLabel}',
             subtitle: 'status.repair.${r.status}'.tr,
-            route: Routes.placeholderFor('repairs'),
+            route: Routes.repair(r.id),
           ),
       ],
     );
@@ -161,7 +161,7 @@ class GlobalSearchController extends GetxController {
             id: r.id,
             title: '${r.code} — ${r.reason}',
             subtitle: 'status.request.${r.status}'.tr,
-            route: Routes.placeholderFor('requests'),
+            route: Routes.request(r.id),
           ),
       ],
     );

@@ -103,7 +103,7 @@ class CalendarController extends GetxController {
       case 'repair':
         await _navigate(Routes.repair(item.id));
       default:
-        await _navigate(Routes.placeholderFor('maintenance'));
+        await _navigate(Routes.maintenanceTask(item.id));
     }
   }
 }

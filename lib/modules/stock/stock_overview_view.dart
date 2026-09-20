@@ -143,7 +143,7 @@ class StockOverviewView extends GetView<StockOverviewController> {
       case 'transfer':
         await Get.toNamed(Routes.stockTransferNew);
       case 'pending':
-        await Get.toNamed(Routes.placeholderFor('requests'));
+        await Get.toNamed('${Routes.requests}?segment=toIssue');
       case 'alerts':
         await Get.toNamed(Routes.stockAlerts);
     }

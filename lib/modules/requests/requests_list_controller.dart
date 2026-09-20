@@ -7,12 +7,16 @@ enum RequestSegment { pending, toIssue, all }
 
 /// Danh sách phiếu yêu cầu phía Vật tư.
 class RequestsListController extends GetxController {
-  RequestsListController({required this.requests, this.isAdmin = false});
+  RequestsListController({
+    required this.requests,
+    this.isAdmin = false,
+    RequestSegment initialSegment = RequestSegment.pending,
+  }) : segment = initialSegment.obs;
 
   final RequestsRepository requests;
   final bool isAdmin;
 
-  final Rx<RequestSegment> segment = RequestSegment.pending.obs;
+  final Rx<RequestSegment> segment;
   final RxList<RequestSummary> items = <RequestSummary>[].obs;
   final RxInt total = 0.obs;
   final RxBool loading = true.obs;

@@ -4,14 +4,8 @@ import 'package:labasset_mobile/modules/notifications/notifications_controller.d
 void main() {
   test('mapPath maps equipment detail and known modules', () {
     expect(NotificationsController.mapPath('/equipment/abc'), '/equipment/abc');
-    expect(
-      NotificationsController.mapPath('/repairs/12'),
-      '/placeholder/repairs',
-    );
-    expect(
-      NotificationsController.mapPath('/calibrations'),
-      '/placeholder/maintenance',
-    );
+    expect(NotificationsController.mapPath('/repairs/12'), '/repairs/12');
+    expect(NotificationsController.mapPath('/calibrations'), '/calibrations');
     expect(NotificationsController.mapPath('/admin/users'), isNull);
     expect(NotificationsController.mapPath(''), isNull);
   });
@@ -30,34 +24,45 @@ void main() {
     test('repairTicketId/taskId/requestId → module tương ứng', () {
       expect(
         NotificationsController.mapData({'repairTicketId': 'r1'}),
-        '/placeholder/repairs',
+        '/repairs/r1',
       );
       expect(
         NotificationsController.mapData({'taskId': 't1'}),
-        '/placeholder/maintenance',
+        '/maintenance/tasks/t1',
       );
       expect(
         NotificationsController.mapData({'requestId': 'q1'}),
-        '/placeholder/requests',
+        '/requests/q1',
       );
     });
 
     test('issueId/receiptId/alertId → kho, sessionId → kiểm kê', () {
       expect(
         NotificationsController.mapData({'issueId': 'i1'}),
-        '/placeholder/stock',
+        '/stock/issues/i1',
       );
       expect(
         NotificationsController.mapData({'receiptId': 'p1'}),
-        '/placeholder/stock',
+        '/stock/receipts/p1',
       );
       expect(
         NotificationsController.mapData({'alertId': 'a1'}),
-        '/placeholder/stock',
+        '/stock/alerts?alertId=a1',
       );
       expect(
         NotificationsController.mapData({'sessionId': 's1'}),
-        '/placeholder/stocktake',
+        '/stocktakes/s1',
+      );
+    });
+
+    test('supplyId/lotId mở màn vật tư', () {
+      expect(
+        NotificationsController.mapData({'supplyId': 'supply-1'}),
+        '/supplies/supply-1',
+      );
+      expect(
+        NotificationsController.mapData({'lotId': 'lot-1'}),
+        '/stock/lookup?lotId=lot-1',
       );
     });
 

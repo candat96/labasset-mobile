@@ -112,49 +112,66 @@ class NotificationsController extends GetxController
 
   /// Map `data` thông báo → route mobile.
   ///
-  /// TODO(module): `/repairs/:id`, `/maintenance/tasks/:id`, `/stock/issues/:id`…
-  /// chưa dựng ở mobile — hiện mở màn giữ chỗ, thay bằng route thật khi module xong.
   static String? mapData(Map<String, dynamic>? data) {
     if (data == null) return null;
     final equipmentId = data['equipmentId'];
     if (equipmentId is String && equipmentId.isNotEmpty) {
       return Routes.equipment(equipmentId);
     }
-    const keys = {
-      'repairTicketId': 'repairs',
-      'taskId': 'maintenance',
-      'requestId': 'requests',
-      'issueId': 'stock',
-      'receiptId': 'stock',
-      'sessionId': 'stocktake',
-      'alertId': 'stock',
-    };
-    for (final entry in keys.entries) {
-      final v = data[entry.key];
-      if (v is String && v.isNotEmpty) {
-        return Routes.placeholderFor(entry.value);
-      }
+    String? value(String key) {
+      final raw = data[key];
+      return raw is String && raw.isNotEmpty ? raw : null;
     }
+
+    final repairId = value('repairTicketId');
+    if (repairId != null) return Routes.repair(repairId);
+    final taskId = value('taskId');
+    if (taskId != null) return Routes.maintenanceTask(taskId);
+    final requestId = value('requestId');
+    if (requestId != null) return Routes.request(requestId);
+    final issueId = value('issueId');
+    if (issueId != null) return Routes.stockIssue(issueId);
+    final receiptId = value('receiptId');
+    if (receiptId != null) return Routes.stockReceipt(receiptId);
+    final sessionId = value('sessionId');
+    if (sessionId != null) return Routes.stocktake(sessionId);
+    final alertId = value('alertId');
+    if (alertId != null) return '${Routes.stockAlerts}?alertId=$alertId';
+    final supplyId = value('supplyId');
+    if (supplyId != null) return Routes.supply(supplyId);
+    final lotId = value('lotId');
+    if (lotId != null) return '${Routes.stockLookup}?lotId=$lotId';
     return null;
   }
 
   static String? mapPath(String path) {
     if (path.isEmpty) return null;
-    final eq = RegExp(r'^/equipment/([^/]+)$').firstMatch(path);
-    if (eq != null) return Routes.equipment(eq.group(1)!);
+    final detailRoutes = <RegExp, String Function(String)>{
+      RegExp(r'^/equipment/([^/]+)$'): Routes.equipment,
+      RegExp(r'^/repairs/([^/]+)$'): Routes.repair,
+      RegExp(r'^/maintenance/tasks/([^/]+)$'): Routes.maintenanceTask,
+      RegExp(r'^/requests/([^/]+)$'): Routes.request,
+      RegExp(r'^/stock/issues/([^/]+)$'): Routes.stockIssue,
+      RegExp(r'^/stock/receipts/([^/]+)$'): Routes.stockReceipt,
+      RegExp(r'^/stocktakes/([^/]+)$'): Routes.stocktake,
+      RegExp(r'^/supplies/([^/]+)$'): Routes.supply,
+    };
+    for (final entry in detailRoutes.entries) {
+      final match = entry.key.firstMatch(path);
+      if (match != null) return entry.value(match.group(1)!);
+    }
     final first = path.split('/').where((s) => s.isNotEmpty).firstOrNull;
     if (first == null) return null;
     const known = {
-      'repairs': 'repairs',
-      'maintenance': 'maintenance',
-      'calibrations': 'maintenance',
-      'stock': 'stock',
-      'supplies': 'stock',
-      'requests': 'requests',
-      'stocktakes': 'stocktake',
+      'repairs': Routes.repairs,
+      'maintenance': Routes.maintenanceTasks,
+      'calibrations': Routes.calibrations,
+      'stock': Routes.stock,
+      'supplies': Routes.stockLookup,
+      'requests': Routes.requests,
+      'stocktakes': Routes.stocktakes,
     };
-    final key = known[first];
-    return key == null ? null : Routes.placeholderFor(key);
+    return known[first];
   }
 
   @override

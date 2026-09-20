@@ -9,7 +9,11 @@ enum RepairsSegment { mine, unassigned, all }
 
 /// Danh sách sửa chữa: segment Của tôi / Chưa phân công / Tất cả + lọc + phân trang.
 class RepairsController extends GetxController {
-  RepairsController({required this.repairs, this.userId = ''});
+  RepairsController({
+    required this.repairs,
+    this.userId = '',
+    RepairsSegment initialSegment = RepairsSegment.mine,
+  }) : segment = initialSegment.obs;
 
   final RepairsRepository repairs;
   final String userId;
@@ -17,7 +21,7 @@ class RepairsController extends GetxController {
   static const openStatuses =
       'accepted,in_progress,awaiting_parts,awaiting_vendor';
 
-  final Rx<RepairsSegment> segment = RepairsSegment.mine.obs;
+  final Rx<RepairsSegment> segment;
   final RxSet<String> statuses = <String>{}.obs;
   final RxnString severity = RxnString();
   final RxnString departmentId = RxnString();

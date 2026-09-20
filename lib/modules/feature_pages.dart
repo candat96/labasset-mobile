@@ -44,6 +44,8 @@ import 'repairs/repair_detail_controller.dart';
 import 'repairs/repair_detail_view.dart';
 import 'repairs/repair_form_controller.dart';
 import 'repairs/repair_form_view.dart';
+import 'repairs/repairs_controller.dart';
+import 'repairs/repairs_view.dart';
 import 'reports/reports_controller.dart';
 import 'reports/reports_view.dart';
 import 'requests/request_detail_controller.dart';
@@ -65,6 +67,8 @@ import 'stock/issue_form_controller.dart';
 import 'stock/issue_form_view.dart';
 import 'stock/issues_controller.dart';
 import 'stock/stock_alerts_view.dart';
+import 'stock/stock_overview_controller.dart';
+import 'stock/stock_overview_view.dart';
 import 'stock/stock_lookup_controller.dart';
 import 'stock/stock_lookup_view.dart';
 import 'stock/supply_detail_controller.dart';
@@ -89,6 +93,38 @@ import 'sync/sync_view.dart';
 List<GetPage<dynamic>> featurePages() {
   final protected = [AuthMiddleware(), RoleMiddleware(), PasswordMiddleware()];
   return [
+    GetPage(
+      name: Routes.repairs,
+      page: () => const RepairsView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final initial = switch (Get.parameters['segment']) {
+          'unassigned' => RepairsSegment.unassigned,
+          'all' => RepairsSegment.all,
+          _ => RepairsSegment.mine,
+        };
+        Get.lazyPut(
+          () => RepairsController(
+            repairs: Get.find<RepairsRepository>(),
+            userId: Get.find<SessionStore>().user.value?.id ?? '',
+            initialSegment: initial,
+          ),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.stock,
+      page: () => const StockOverviewView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => StockOverviewController(
+            stock: Get.find<StockRepository>(),
+            requests: Get.find<RequestsRepository>(),
+          ),
+        ),
+      ),
+    ),
     GetPage(
       name: Routes.notifications,
       page: () => const NotificationsView(),
@@ -225,7 +261,10 @@ List<GetPage<dynamic>> featurePages() {
             supplies: Get.find<SuppliesRepository>(),
             stock: Get.find<StockRepository>(),
             equipment: Get.find<EquipmentRepository>(),
-            initialQuery: args is Map ? args['q'] as String? : null,
+            initialQuery:
+                (args is Map ? args['q'] as String? : null) ??
+                Get.parameters['lotId'] ??
+                Get.parameters['q'],
           ),
         );
       }),
@@ -305,8 +344,8 @@ List<GetPage<dynamic>> featurePages() {
             equipmentId: map['equipmentId'] as String?,
             repairTicketId: map['repairTicketId'] as String?,
             maintenanceTaskId: map['maintenanceTaskId'] as String?,
-            lotId: map['lotId'] as String?,
-            supplyId: map['supplyId'] as String?,
+            lotId: map['lotId'] as String? ?? Get.parameters['lotId'],
+            supplyId: map['supplyId'] as String? ?? Get.parameters['supplyId'],
           ),
         );
       }),
@@ -338,7 +377,9 @@ List<GetPage<dynamic>> featurePages() {
         Get.lazyPut(
           () => StockAlertsController(
             stock: Get.find<StockRepository>(),
-            initialType: args is Map ? args['type'] as String? : null,
+            initialType:
+                (args is Map ? args['type'] as String? : null) ??
+                Get.parameters['type'],
           ),
         );
       }),
@@ -347,14 +388,20 @@ List<GetPage<dynamic>> featurePages() {
       name: Routes.requests,
       page: () => const RequestsListView(),
       middlewares: protected,
-      binding: BindingsBuilder(
-        () => Get.lazyPut(
+      binding: BindingsBuilder(() {
+        final initial = switch (Get.parameters['segment']) {
+          'toIssue' => RequestSegment.toIssue,
+          'all' => RequestSegment.all,
+          _ => RequestSegment.pending,
+        };
+        Get.lazyPut(
           () => RequestsListController(
             requests: Get.find<RequestsRepository>(),
             isAdmin: Get.find<SessionStore>().hasRole(const ['HOSPITAL_ADMIN']),
+            initialSegment: initial,
           ),
-        ),
-      ),
+        );
+      }),
     ),
     GetPage(
       name: Routes.requestDetail,

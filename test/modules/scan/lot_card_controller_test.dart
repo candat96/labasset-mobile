@@ -83,7 +83,7 @@ void main() {
     expect(c.opening.value, isFalse);
   });
 
-  test('viewSupply/issueThisLot điều hướng placeholder', () async {
+  test('viewSupply/issueThisLot điều hướng route thật', () async {
     final routes = <String>[];
     final c = LotCardController(
       lot: lot,
@@ -94,6 +94,6 @@ void main() {
     );
     await c.viewSupply();
     await c.issueThisLot();
-    expect(routes, ['/placeholder/stock', '/placeholder/stockIssue']);
+    expect(routes, ['/supplies/s1', '/stock/issues/new?lotId=l1&supplyId=s1']);
   });
 }

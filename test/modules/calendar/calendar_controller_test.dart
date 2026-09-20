@@ -102,6 +102,6 @@ void main() {
     await cc.load();
     await cc.open(cc.items.first);
     await cc.open(cc.items.last);
-    expect(routes, ['/repairs/r1', '/placeholder/maintenance']);
+    expect(routes, ['/repairs/r1', '/maintenance/tasks/t1']);
   });
 }

@@ -58,11 +58,13 @@ class LotCardController extends GetxController {
 
   Future<void> viewSupply() async {
     _pop();
-    await _navigate(Routes.placeholderFor('stock'));
+    await _navigate(Routes.supply(lot.supplyId));
   }
 
   Future<void> issueThisLot() async {
     _pop();
-    await _navigate(Routes.placeholderFor('stockIssue'));
+    await _navigate(
+      '${Routes.stockIssueNew}?lotId=${lot.id}&supplyId=${lot.supplyId}',
+    );
   }
 }
