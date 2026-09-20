@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/config/env.dart';
 import 'package:labasset_mobile/data/repositories/auth_repository.dart';
+import 'package:labasset_mobile/data/repositories/settings_repository.dart';
 import 'package:labasset_mobile/modules/auth/login_controller.dart';
 import 'package:labasset_mobile/modules/auth/login_view.dart';
 import 'package:mocktail/mocktail.dart';
@@ -10,6 +11,8 @@ import 'package:mocktail/mocktail.dart';
 import '../../helpers/test_helpers.dart';
 
 class _MockAuth extends Mock implements AuthRepository {}
+
+class _MockSettings extends Mock implements SettingsRepository {}
 
 void main() {
   tearDown(() {
@@ -19,7 +22,13 @@ void main() {
 
   Future<LoginController> pump(WidgetTester tester, String mode) async {
     Env.tenantMode.value = mode;
-    final c = LoginController(auth: _MockAuth(), store: fakeStore());
+    final settings = _MockSettings();
+    when(() => settings.resolveTenantMode()).thenAnswer((_) async => mode);
+    final c = LoginController(
+      auth: _MockAuth(),
+      store: fakeStore(),
+      settings: settings,
+    );
     Get.put(c);
     await tester.pumpWidget(wrap(const LoginView()));
     await tester.pumpAndSettle();

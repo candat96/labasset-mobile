@@ -509,6 +509,7 @@ const Map<String, String> vi = {
   // ai — trợ lý AI
   'ai.title': 'Trợ lý AI',
   'ai.new': 'Hội thoại mới',
+  'ai.askEquipment': 'Hỏi về máy',
   'ai.empty': 'Chưa có tin nhắn',
   'ai.hint': 'Hỏi về máy, lỗi thường gặp, lịch sử sửa chữa…',
   'ai.inputHint': 'Nhập câu hỏi…',

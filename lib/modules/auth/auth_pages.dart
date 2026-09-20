@@ -4,6 +4,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/routes/middlewares.dart';
 import '../../core/storage/session_store.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/settings_repository.dart';
 import 'change_password_view.dart';
 import 'forgot_password_view.dart';
 import 'login_controller.dart';
@@ -23,6 +24,7 @@ List<GetPage<dynamic>> authPages() => [
         () => LoginController(
           auth: Get.find<AuthRepository>(),
           store: Get.find<SessionStore>(),
+          settings: Get.find<SettingsRepository>(),
         ),
       ),
     ),

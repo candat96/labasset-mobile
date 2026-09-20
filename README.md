@@ -10,20 +10,20 @@ Tài liệu: `docs/superpowers/specs/2026-09-19-mobile-base-design.md`, design s
 
 ## Stack
 
-Flutter 3.47 (FVM) · Dart 3.13 · **GetX** (route + middleware, controller, DI, i18n) · dio · flutter_secure_storage ·
+Flutter 3.47.5 (FVM) · Dart 3.13 · **GetX** (route + middleware, controller, DI, i18n) · dio · flutter_secure_storage ·
 json_serializable · mobile_scanner · local_auth · intl.
 Package `labasset_mobile`, id `vn.labasset.mobile`, Android minSdk 24, iOS 15+.
 
 ## Chạy
 
-Project ghim Flutter qua FVM (`.fvmrc`): dùng `fvm flutter ...` (hoặc cài đúng bản trong `.fvmrc`). iOS dùng CocoaPods: `config: enable-swift-package-manager: false` trong pubspec (SPM mặc định của 3.47 không khớp project Runner); sau `pub get` chạy `cd ios && pod install`.
+Project bắt buộc Flutter 3.47.5 qua FVM (`.fvmrc`): dùng `fvm flutter ...` và `fvm dart ...` để dependency native như `sqflite` được resolve đúng. iOS dùng CocoaPods: `config: enable-swift-package-manager: false` trong pubspec (SPM mặc định của 3.47 không khớp project Runner); sau `pub get` chạy `cd ios && pod install`.
 
 ```bash
 fvm flutter pub get
 fvm dart run build_runner build -d      # sinh *.g.dart
 fvm flutter run --dart-define=API_URL=http://localhost:3000        # iOS simulator
-flutter run --dart-define=API_URL=http://10.0.2.2:3000         # Android emulator (mặc định)
-flutter run --dart-define=API_URL=http://192.168.1.10:3000     # thiết bị thật (IP LAN máy chạy API)
+fvm flutter run --dart-define=API_URL=http://10.0.2.2:3000     # Android emulator (mặc định)
+fvm flutter run --dart-define=API_URL=http://192.168.1.10:3000 # thiết bị thật (IP LAN máy chạy API)
 ```
 
 | dart-define | Ý nghĩa |
@@ -85,7 +85,7 @@ mở đối tượng theo `data.path`. **Push (FCM) đã gỡ khỏi base** theo
 
 ## Quy ước thêm module mới
 
-1. **Endpoint:** thêm hằng vào `lib/data/api/endpoints.dart`; chạy `dart run tool/check_openapi.dart`.
+1. **Endpoint:** thêm hằng vào `lib/data/api/endpoints.dart`; chạy `fvm dart run tool/check_openapi.dart`.
 2. **Model:** `lib/data/models/<x>.dart` với `@JsonSerializable()` (field lạ tự bỏ qua) → `build_runner`.
 3. **Repository:** `lib/data/repositories/<x>_repository.dart` nhận `Dio`, đăng ký `Get.put` trong `core/bootstrap.dart`.
 4. **Module:** `lib/modules/<x>/` gồm `<x>_controller.dart` (GetxController: `loading/error/items` Rx, `load()`),
@@ -100,8 +100,8 @@ Màn mẫu chuẩn: `modules/scan` + `modules/equipment`.
 ## Test
 
 ```bash
-flutter analyze && flutter test
-flutter test integration_test -d <device> --dart-define=API_URL=... --dart-define=E2E_PASSWORD=... [--dart-define=E2E_EQUIPMENT_CODE=...]
+fvm flutter analyze && fvm flutter test
+fvm flutter test integration_test -d <device> --dart-define=API_URL=... --dart-define=E2E_PASSWORD=... [--dart-define=E2E_EQUIPMENT_CODE=...]
 ```
 Smoke tự skip khi thiếu `E2E_PASSWORD`. CI: format, analyze, test, build apk debug.
 

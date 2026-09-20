@@ -38,7 +38,8 @@ class AiController extends GetxController {
   AiConversation newConversation({String? title}) {
     final c = AiConversation(
       id: 'local-${DateTime.now().microsecondsSinceEpoch}',
-      title: title ?? (equipmentId == null ? 'Hội thoại mới' : 'Hỏi về máy'),
+      title:
+          title ?? (equipmentId == null ? 'ai.new'.tr : 'ai.askEquipment'.tr),
       equipmentId: equipmentId,
     );
     conversations.insert(0, c);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../theme/tokens.dart';
 
@@ -13,7 +14,7 @@ class LoadingList extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.surfaceContainerHighest;
     return Semantics(
-      label: 'Đang tải',
+      label: 'common.loading'.tr,
       child: ListView.separated(
         padding: const EdgeInsets.all(AppSpacing.lg),
         itemCount: rows,

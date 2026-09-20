@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../core/config/env.dart';
 import '../api/endpoints.dart';
 
 class SettingsRepository {
@@ -7,6 +8,9 @@ class SettingsRepository {
   final Dio _dio;
 
   Map<String, dynamic>? _cache;
+
+  /// Đọc chế độ tenant qua repository để controller không phụ thuộc Dio.
+  Future<String> resolveTenantMode() => Env.resolveTenantMode(_dio);
 
   /// `GET /v1/settings/public` — khoá phẳng kiểu `hospital.name` (C14-C17).
   Future<Map<String, dynamic>> publicSettings({bool refresh = false}) async {

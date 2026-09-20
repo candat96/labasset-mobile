@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,21 +9,21 @@ import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
 import '../../data/models/login_result.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/settings_repository.dart';
 
 class LoginController extends GetxController {
   LoginController({
     required this.auth,
     required this.store,
-    Dio? dio,
+    required this.settings,
     Future<void> Function(String route, Map<String, dynamic> args)? push,
     Future<void> Function(String route)? replaceAll,
-  }) : _dio = dio,
-       _push = push ?? ((r, a) async => Get.toNamed(r, arguments: a)),
+  }) : _push = push ?? ((r, a) async => Get.toNamed(r, arguments: a)),
        _replaceAll = replaceAll ?? ((r) async => Get.offAllNamed(r));
 
   final AuthRepository auth;
   final SessionStore store;
-  final Dio? _dio;
+  final SettingsRepository settings;
   final Future<void> Function(String route, Map<String, dynamic> args) _push;
   final Future<void> Function(String route) _replaceAll;
 
@@ -60,9 +59,7 @@ class LoginController extends GetxController {
       tenantMode.value = Env.tenantMode.value;
       return;
     }
-    final dio = _dio ?? (Get.isRegistered<Dio>() ? Get.find<Dio>() : null);
-    if (dio == null) return;
-    tenantMode.value = await Env.resolveTenantMode(dio);
+    tenantMode.value = await settings.resolveTenantMode();
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:labasset_mobile/core/errors/api_error.dart';
 import 'package:labasset_mobile/core/i18n/app_translations.dart';
 import 'package:labasset_mobile/data/models/login_result.dart';
 import 'package:labasset_mobile/data/repositories/auth_repository.dart';
+import 'package:labasset_mobile/data/repositories/settings_repository.dart';
 import 'package:labasset_mobile/modules/auth/login_controller.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -12,8 +13,11 @@ import '../../helpers/test_helpers.dart';
 
 class _MockAuth extends Mock implements AuthRepository {}
 
+class _MockSettings extends Mock implements SettingsRepository {}
+
 void main() {
   late _MockAuth auth;
+  late _MockSettings settings;
   late LoginController c;
 
   setUp(() {
@@ -21,9 +25,11 @@ void main() {
     Get.addTranslations(AppTranslations().keys);
     Get.locale = const Locale('vi', 'VN');
     auth = _MockAuth();
+    settings = _MockSettings();
     c = LoginController(
       auth: auth,
       store: fakeStore(),
+      settings: settings,
       push: (_, _) async {},
       replaceAll: (_) async {},
     );
