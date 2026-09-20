@@ -232,6 +232,8 @@ List<GetPage<dynamic>> featurePages() {
         () => Get.lazyPut(
           () => CalibrationsController(
             repo: Get.find<CalibrationsRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
+            attachments: Get.find<AttachmentService>(),
             userId: Get.find<SessionStore>().user.value?.id ?? '',
           ),
         ),

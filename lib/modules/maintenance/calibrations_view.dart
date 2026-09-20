@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/date_field.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/money_field.dart';
+import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/maintenance.dart';
 import 'calibrations_controller.dart';
@@ -114,6 +117,11 @@ Future<void> _completeSheet(
   Calibration calibration,
 ) async {
   var result = 'pass';
+  String? agencyId;
+  String? agencyLabel;
+  String? certificateFileId;
+  String? certificateName;
+  final formKey = GlobalKey<FormState>();
   final performedAt = TextEditingController(text: formatDate(DateTime.now()));
   final certificateNo = TextEditingController();
   final findings = TextEditingController();
@@ -131,120 +139,148 @@ Future<void> _completeSheet(
         ),
         child: StatefulBuilder(
           builder: (context, setState) => SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'calibration.complete'.tr,
-                  style: Get.theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(calibration.code),
-                const SizedBox(height: AppSpacing.md),
-                TextField(
-                  controller: performedAt,
-                  readOnly: true,
-                  onTap: () async {
-                    final d = await showDatePicker(
-                      context: Get.context!,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d != null) performedAt.text = formatDate(d);
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'calibration.performedAt'.tr,
-                    suffixIcon: const Icon(Icons.event_outlined),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'calibration.complete'.tr,
+                    style: Get.theme.textTheme.titleMedium,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.xs,
-                  children: [
-                    for (final r in ['pass', 'fail', 'conditional'])
-                      ChoiceChip(
-                        label: Text('calibration.result.$r'.tr),
-                        selected: result == r,
-                        onSelected: (v) {
-                          if (v) setState(() => result = r);
-                        },
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: certificateNo,
-                  decoration: InputDecoration(
-                    labelText: 'calibration.certificateNo'.tr,
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(calibration.code),
+                  const SizedBox(height: AppSpacing.md),
+                  DateField(
+                    controller: performedAt,
+                    label: 'calibration.performedAt'.tr,
+                    required: true,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: findings,
-                  decoration: InputDecoration(
-                    labelText: 'calibration.findings'.tr,
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    children: [
+                      for (final r in ['pass', 'fail', 'conditional'])
+                        ChoiceChip(
+                          label: Text('calibration.result.$r'.tr),
+                          selected: result == r,
+                          onSelected: (v) {
+                            if (v) setState(() => result = r);
+                          },
+                        ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: cost,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: 'calibration.cost'.tr),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: cycle,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'calibration.cycleMonths'.tr,
+                  const SizedBox(height: AppSpacing.sm),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final selected = await PickerSheet.show<String>(
+                        title: 'calibration.agency'.tr,
+                        loader: c.loadAgencies,
+                        showClear: true,
+                      );
+                      if (selected == null) return;
+                      setState(() {
+                        agencyId = selected.cleared
+                            ? null
+                            : selected.option?.value;
+                        agencyLabel = selected.cleared
+                            ? null
+                            : selected.option?.label;
+                      });
+                    },
+                    icon: const Icon(Icons.business_outlined),
+                    label: Text(agencyLabel ?? 'calibration.agency.select'.tr),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: nextDue,
-                  readOnly: true,
-                  onTap: () async {
-                    final d = await showDatePicker(
-                      context: Get.context!,
-                      initialDate: DateTime.now().add(
-                        Duration(days: 30 * (int.tryParse(cycle.text) ?? 12)),
-                      ),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (d != null) nextDue.text = formatDate(d);
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'calibration.nextDue'.tr,
-                    suffixIcon: const Icon(Icons.event_outlined),
+                  if (c.fieldErrors['agencyId'] case final message?)
+                    Text(
+                      message,
+                      style: TextStyle(color: Get.theme.colorScheme.error),
+                    ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: certificateNo,
+                    decoration: InputDecoration(
+                      labelText: 'calibration.certificateNo'.tr,
+                      errorText: c.fieldErrors['certificateNo'],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(
-                  onPressed: () async {
-                    final ok = await c.complete(
-                      calibration,
-                      performedAt: _iso(performedAt.text) ?? performedAt.text,
-                      result: result,
-                      certificateNo: certificateNo.text.trim().isEmpty
-                          ? null
-                          : certificateNo.text.trim(),
-                      findings: findings.text.trim().isEmpty
-                          ? null
-                          : findings.text.trim(),
-                      cost: cost.text.trim().isEmpty ? null : cost.text.trim(),
-                      cycleMonths: num.tryParse(cycle.text.trim()),
-                      nextDueAt: nextDue.text.trim().isEmpty
-                          ? null
-                          : _iso(nextDue.text),
-                    );
-                    if (ok) Get.back();
-                  },
-                  child: Text('common.save'.tr),
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.sm),
+                  OutlinedButton.icon(
+                    onPressed: c.uploadingCertificate.value
+                        ? null
+                        : () async {
+                            final id = await c.uploadCertificate(calibration);
+                            if (id == null) return;
+                            setState(() {
+                              certificateFileId = id;
+                              certificateName =
+                                  'calibration.certificate.attached'.tr;
+                            });
+                          },
+                    icon: const Icon(Icons.attach_file),
+                    label: Text(
+                      certificateName ?? 'calibration.certificate.select'.tr,
+                    ),
+                  ),
+                  if (c.fieldErrors['certificateFileId'] case final message?)
+                    Text(
+                      message,
+                      style: TextStyle(color: Get.theme.colorScheme.error),
+                    ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: findings,
+                    decoration: InputDecoration(
+                      labelText: 'calibration.findings'.tr,
+                      errorText: c.fieldErrors['findings'],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  MoneyField(controller: cost, label: 'calibration.cost'.tr),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: cycle,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'calibration.cycleMonths'.tr,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  DateField(
+                    controller: nextDue,
+                    label: 'calibration.nextDue'.tr,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  FilledButton(
+                    onPressed: () async {
+                      if (!(formKey.currentState?.validate() ?? false)) return;
+                      final ok = await c.complete(
+                        calibration,
+                        performedAt: _iso(performedAt.text) ?? performedAt.text,
+                        result: result,
+                        certificateNo: certificateNo.text.trim().isEmpty
+                            ? null
+                            : certificateNo.text.trim(),
+                        certificateFileId: certificateFileId,
+                        agencyId: agencyId,
+                        findings: findings.text.trim().isEmpty
+                            ? null
+                            : findings.text.trim(),
+                        cost: MoneyField.raw(cost.text).isEmpty
+                            ? null
+                            : MoneyField.raw(cost.text),
+                        cycleMonths: num.tryParse(cycle.text.trim()),
+                        nextDueAt: nextDue.text.trim().isEmpty
+                            ? null
+                            : _iso(nextDue.text),
+                      );
+                      if (ok) Get.back();
+                    },
+                    child: Text('common.save'.tr),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/i18n/app_translations.dart';
+import 'package:labasset_mobile/core/errors/api_error.dart';
+import 'package:labasset_mobile/core/services/attachment_service.dart';
 import 'package:labasset_mobile/data/models/maintenance.dart';
 import 'package:labasset_mobile/data/repositories/calibrations_repository.dart';
+import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
 import 'package:labasset_mobile/modules/maintenance/calibrations_controller.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockCalibrations extends Mock implements CalibrationsRepository {}
+
+class _MockCatalogs extends Mock implements CatalogsRepository {}
+
+class _MockAttachments extends Mock implements AttachmentService {}
 
 void main() {
   late _MockCalibrations repo;
@@ -42,7 +49,12 @@ void main() {
         total: 1,
       ),
     );
-    c = CalibrationsController(repo: repo, userId: 'u1');
+    c = CalibrationsController(
+      repo: repo,
+      catalogs: _MockCatalogs(),
+      attachments: _MockAttachments(),
+      userId: 'u1',
+    );
   });
 
   tearDown(Get.reset);
@@ -93,7 +105,12 @@ void main() {
       performedAt: '2026-09-19',
       result: 'pass',
       certificateNo: 'CN-1',
+      certificateFileId: 'file-1',
+      agencyId: 'agency-1',
+      findings: 'Đủ điều kiện',
+      cost: '1500000',
       cycleMonths: 12,
+      nextDueAt: '2027-09-19',
     );
     expect(ok, isTrue);
     verify(
@@ -102,12 +119,12 @@ void main() {
         performedAt: '2026-09-19',
         result: 'pass',
         certificateNo: 'CN-1',
-        certificateFileId: null,
-        findings: null,
-        cost: null,
+        certificateFileId: 'file-1',
+        findings: 'Đủ điều kiện',
+        cost: '1500000',
         cycleMonths: 12,
-        nextDueAt: null,
-        agencyId: null,
+        nextDueAt: '2027-09-19',
+        agencyId: 'agency-1',
         performerName: null,
       ),
     ).called(1);
@@ -134,5 +151,35 @@ void main() {
       await c.complete(c.items.single, performedAt: 'x', result: 'fail'),
       isFalse,
     );
+  });
+
+  test('VALIDATION_ERROR gắn lỗi theo field', () async {
+    when(
+      () => repo.complete(
+        any(),
+        performedAt: any(named: 'performedAt'),
+        result: any(named: 'result'),
+        certificateNo: any(named: 'certificateNo'),
+        certificateFileId: any(named: 'certificateFileId'),
+        findings: any(named: 'findings'),
+        cost: any(named: 'cost'),
+        cycleMonths: any(named: 'cycleMonths'),
+        nextDueAt: any(named: 'nextDueAt'),
+        agencyId: any(named: 'agencyId'),
+        performerName: any(named: 'performerName'),
+      ),
+    ).thenThrow(
+      ApiError(400, 'VALIDATION_ERROR', '', {
+        'certificateNo': 'Số chứng nhận không hợp lệ',
+      }),
+    );
+    await c.load();
+    final ok = await c.complete(
+      c.items.single,
+      performedAt: '2026-09-19',
+      result: 'pass',
+    );
+    expect(ok, isFalse);
+    expect(c.fieldErrors['certificateNo'], 'Số chứng nhận không hợp lệ');
   });
 }

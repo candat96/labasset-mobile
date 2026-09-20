@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -66,6 +67,22 @@ class AttachmentService {
       }
     }
     return (bytes: bytes, name: name, mime: mime);
+  }
+
+  /// Chọn ảnh/PDF chứng nhận từ máy, chưa upload.
+  Future<({Uint8List bytes, String name, String mime})?>
+  pickCertificateBytes() async {
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: const ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+      );
+      if (file == null) return null;
+      final bytes = await file.readAsBytes();
+      return (bytes: bytes, name: file.name, mime: _mimeOf(file.name));
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Chọn/chụp ảnh rồi tải lên (nén ≤ 1600 px nếu cần).
