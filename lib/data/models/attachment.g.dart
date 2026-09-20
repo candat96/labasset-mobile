@@ -17,6 +17,9 @@ AttachmentView _$AttachmentViewFromJson(Map<String, dynamic> json) =>
       sortOrder: json['sortOrder'] as num? ?? 0,
       createdBy: json['createdBy'] as String? ?? '',
       createdAt: json['createdAt'] as String?,
+      mime: json['mime'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      size: json['size'] as num? ?? 0,
     );
 
 Map<String, dynamic> _$AttachmentViewToJson(AttachmentView instance) =>
@@ -30,6 +33,9 @@ Map<String, dynamic> _$AttachmentViewToJson(AttachmentView instance) =>
       'sortOrder': instance.sortOrder,
       'createdBy': instance.createdBy,
       'createdAt': instance.createdAt,
+      'mime': instance.mime,
+      'name': instance.name,
+      'size': instance.size,
     };
 
 PresignResult _$PresignResultFromJson(Map<String, dynamic> json) =>

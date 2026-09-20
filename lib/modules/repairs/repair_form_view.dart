@@ -101,7 +101,11 @@ class RepairFormView extends GetView<RepairFormController> {
                 children: [
                   for (final s in RepairFormController.severities)
                     ChoiceChip(
-                      label: Text('status.severity.$s'.tr),
+                      label: Text(
+                        controller.sla[s] == null
+                            ? 'status.severity.$s'.tr
+                            : '${'status.severity.$s'.tr} · SLA ${controller.sla[s]}h',
+                      ),
                       selected: controller.severity.value == s,
                       onSelected: (v) {
                         if (v) controller.severity.value = s;

@@ -184,6 +184,9 @@ void main() {
       when(
         () => repo.search('LOT-01', limit: 5),
       ).thenAnswer((_) async => const EquipmentPage(items: [], total: 0));
+      when(
+        () => stock.lots(barcode: 'LOT-01', limit: 5),
+      ).thenAnswer((_) async => const StockLotPage(items: [], total: 0));
       when(() => stock.lots(q: 'LOT-01', limit: 5)).thenAnswer(
         (_) async => const StockLotPage(
           items: [StockLotSummary(id: 'l1', supplyId: 's1', lotNo: 'LOT-01')],
@@ -194,6 +197,25 @@ void main() {
       expect(lotsShown.single.lotNo, 'LOT-01');
       expect(c2.message.value, isNull);
       expect(routes, isEmpty);
+      verify(() => stock.lots(barcode: 'LOT-01', limit: 5)).called(1);
+    });
+
+    test('tra lô ưu tiên barcode (C14-C17)', () async {
+      when(
+        () => repo.byQr('BC-9'),
+      ).thenThrow(ApiError(404, 'QR_TOKEN_NOT_FOUND', ''));
+      when(
+        () => repo.search('BC-9', limit: 5),
+      ).thenAnswer((_) async => const EquipmentPage(items: [], total: 0));
+      when(() => stock.lots(barcode: 'BC-9', limit: 5)).thenAnswer(
+        (_) async => const StockLotPage(
+          items: [StockLotSummary(id: 'l9', supplyId: 's1', lotNo: 'L9')],
+          total: 1,
+        ),
+      );
+      expect(await c2.lookup('BC-9'), isNull);
+      expect(lotsShown.single.id, 'l9');
+      verifyNever(() => stock.lots(q: 'BC-9', limit: 5));
     });
 
     test('không mã máy, không lô → báo không tìm thấy', () async {

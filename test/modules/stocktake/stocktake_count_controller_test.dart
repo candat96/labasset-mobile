@@ -158,6 +158,8 @@ void main() {
           name: 'Găng tay',
           lotId: 'l1',
           lotNo: 'L1',
+          qrToken: 'QR-VT001',
+          manufacturerCode: 'MC-001',
           bookQty: '10',
         ),
         StocktakeLocalItem(
@@ -181,6 +183,8 @@ void main() {
     await c.load();
     expect(c.items, hasLength(2));
     expect(c.resolve('vt001')?.itemId, 'i1');
+    expect(c.resolve('QR-VT001')?.itemId, 'i1'); // qrToken (C14-C17)
+    expect(c.resolve('MC-001')?.itemId, 'i1'); // mã hãng
     expect(c.resolve('L2')?.itemId, 'i2');
     expect(c.resolve('ZZ'), isNull);
   });

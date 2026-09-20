@@ -85,6 +85,8 @@ StocktakePackageItem _$StocktakePackageItemFromJson(
   lotNo: json['lotNo'] as String?,
   bookQty: json['bookQty'] as String? ?? '1',
   qrToken: json['qrToken'] as String?,
+  supplyCode: json['supplyCode'] as String?,
+  manufacturerCode: json['manufacturerCode'] as String?,
 );
 
 Map<String, dynamic> _$StocktakePackageItemToJson(
@@ -100,6 +102,8 @@ Map<String, dynamic> _$StocktakePackageItemToJson(
   'lotNo': instance.lotNo,
   'bookQty': instance.bookQty,
   'qrToken': instance.qrToken,
+  'supplyCode': instance.supplyCode,
+  'manufacturerCode': instance.manufacturerCode,
 };
 
 StocktakeProgress _$StocktakeProgressFromJson(Map<String, dynamic> json) =>

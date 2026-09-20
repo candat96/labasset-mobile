@@ -33,6 +33,7 @@ class StockRepository {
 
   Future<StockLotPage> lots({
     String? q,
+    String? barcode,
     String? supplyId,
     String? warehouseId,
     String? status,
@@ -41,6 +42,7 @@ class StockRepository {
     int limit = 20,
   }) async {
     final query = _nonEmpty(q);
+    final bar = _nonEmpty(barcode);
     final sid = _nonEmpty(supplyId);
     final wid = _nonEmpty(warehouseId);
     final st = _nonEmpty(status);
@@ -48,6 +50,7 @@ class StockRepository {
       Ep.stockLots,
       queryParameters: {
         'q': ?query,
+        'barcode': ?bar,
         'supplyId': ?sid,
         'warehouseId': ?wid,
         'status': ?st,

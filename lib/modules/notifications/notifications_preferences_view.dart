@@ -62,7 +62,10 @@ class NotificationsPreferencesView
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(p.type, style: theme.textTheme.titleSmall),
+                      Text(
+                        controller.labels[p.type] ?? p.type,
+                        style: theme.textTheme.titleSmall,
+                      ),
                       const SizedBox(height: AppSpacing.xs),
                       SwitchListTile(
                         dense: true,

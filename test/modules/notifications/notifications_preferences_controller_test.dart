@@ -81,4 +81,35 @@ void main() {
     await c.save();
     expect(c.saving.value, isFalse);
   });
+
+  test(
+    'ghép loại từ /notifications/types, loại chưa có → mặc định bật',
+    () async {
+      when(() => repo.preferences()).thenAnswer(
+        (_) async => [
+          NotificationPreference(
+            type: 'repair_assigned',
+            push: false,
+            inapp: true,
+          ),
+        ],
+      );
+      when(() => repo.types()).thenAnswer(
+        (_) async => const [
+          NotificationType(
+            type: 'repair_assigned',
+            label: 'Sửa chữa được giao',
+          ),
+          NotificationType(type: 'stock_alert', label: 'Cảnh báo kho'),
+        ],
+      );
+      final c = NotificationsPreferencesController(repo: repo);
+      await c.load();
+      expect(c.items, hasLength(2));
+      expect(c.items.first.push, isFalse); // giữ preference người dùng
+      expect(c.items.last.type, 'stock_alert');
+      expect(c.items.last.push, isTrue); // mặc định bật
+      expect(c.labels['stock_alert'], 'Cảnh báo kho');
+    },
+  );
 }

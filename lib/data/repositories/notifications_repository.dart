@@ -36,6 +36,15 @@ class NotificationsRepository {
         .toList();
   }
 
+  /// Danh mục loại thông báo (`GET /v1/notifications/types`).
+  Future<List<NotificationType>> types() async {
+    final res = await _dio.get<List<dynamic>>(Ep.notificationsTypes);
+    return (res.data ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(NotificationType.fromJson)
+        .toList();
+  }
+
   Future<void> savePreferences(List<NotificationPreference> prefs) =>
       _dio.put<void>(
         Ep.notificationsPreferences,

@@ -106,22 +106,34 @@ class ScanController extends GetxController {
     }
   }
 
-  /// Tra lô vật tư theo mã quét (khớp chính xác `lotNo`, hoặc duy nhất 1 kết quả).
+  /// Tra lô vật tư theo mã quét: ưu tiên `barcode` (API C14-C17), fallback `q`.
+  /// Khớp chính xác `lotNo` (hoặc `supplyCode`), hoặc duy nhất 1 kết quả.
   Future<StockLotSummary?> lookupLot(String raw) async {
     final repo = stock;
     if (repo == null) return null;
     final code = qrToken(raw);
     if (code.isEmpty) return null;
+    final upper = code.toUpperCase();
+    try {
+      final page = await repo.lots(barcode: code, limit: 5);
+      final byBarcode = _pick(page.items, upper);
+      if (byBarcode != null) return byBarcode;
+    } catch (_) {
+      // barcode là best-effort
+    }
     try {
       final page = await repo.lots(q: code, limit: 5);
-      final upper = code.toUpperCase();
-      for (final lot in page.items) {
-        if (lot.lotNo.toUpperCase() == upper) return lot;
-      }
-      return page.items.length == 1 ? page.items.first : null;
+      return _pick(page.items, upper);
     } catch (_) {
-      return null; // tra lô là best-effort
+      return null;
     }
+  }
+
+  static StockLotSummary? _pick(List<StockLotSummary> items, String upper) {
+    for (final lot in items) {
+      if (lot.lotNo.toUpperCase() == upper) return lot;
+    }
+    return items.length == 1 ? items.first : null;
   }
 
   /// Thêm một mã vào danh sách quét liên tục (không gọi API).

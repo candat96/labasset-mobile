@@ -79,6 +79,8 @@ class StocktakesController extends GetxController {
                 supplyId: i.supplyId,
                 location: i.location,
                 lotNo: i.lotNo,
+                qrToken: i.qrToken,
+                manufacturerCode: i.manufacturerCode,
                 bookQty: i.bookQty,
               ),
           ],

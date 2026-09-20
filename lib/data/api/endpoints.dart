@@ -88,6 +88,7 @@ class Ep {
   static const notifications = '/v1/notifications';
   static const notificationsReadAll = '/v1/notifications/read-all';
   static const notificationsPreferences = '/v1/notifications/preferences';
+  static const notificationsTypes = '/v1/notifications/types';
   static String notificationRead(String id) => '/v1/notifications/$id/read';
 
   static const maintenanceTasks = '/v1/maintenance/tasks';

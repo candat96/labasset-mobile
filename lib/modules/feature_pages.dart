@@ -17,6 +17,7 @@ import '../data/repositories/faults_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
+import '../data/repositories/settings_repository.dart';
 import '../data/repositories/stock_repository.dart';
 import '../data/repositories/stocktakes_repository.dart';
 import '../data/repositories/supplies_repository.dart';
@@ -450,6 +451,7 @@ List<GetPage<dynamic>> featurePages() {
             equipment: Get.find<EquipmentRepository>(),
             faults: Get.find<FaultsRepository>(),
             attachments: Get.find<AttachmentService>(),
+            settings: Get.find<SettingsRepository>(),
             equipmentId: Get.parameters['equipmentId'],
           ),
         ),

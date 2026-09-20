@@ -12,6 +12,8 @@ class StocktakeLocalItem {
     this.supplyId,
     this.location,
     this.lotNo,
+    this.qrToken,
+    this.manufacturerCode,
     this.bookQty = '1',
     this.countedQty,
     this.countedStatus,
@@ -34,6 +36,8 @@ class StocktakeLocalItem {
   final String? supplyId;
   final String? location;
   final String? lotNo;
+  final String? qrToken;
+  final String? manufacturerCode;
   final String bookQty;
   String? countedQty;
   String? countedStatus;
@@ -58,6 +62,8 @@ class StocktakeLocalItem {
     'supplyId': supplyId,
     'location': location,
     'lotNo': lotNo,
+    'qrToken': qrToken,
+    'manufacturerCode': manufacturerCode,
     'bookQty': bookQty,
     'countedQty': countedQty,
     'countedStatus': countedStatus,
@@ -82,6 +88,8 @@ class StocktakeLocalItem {
         supplyId: r['supplyId'] as String?,
         location: r['location'] as String?,
         lotNo: r['lotNo'] as String?,
+        qrToken: r['qrToken'] as String?,
+        manufacturerCode: r['manufacturerCode'] as String?,
         bookQty: r['bookQty'] as String? ?? '1',
         countedQty: r['countedQty'] as String?,
         countedStatus: r['countedStatus'] as String?,
@@ -200,7 +208,15 @@ class SqfliteStocktakeLocalStore implements StocktakeLocalStore {
     final path = '${await getDatabasesPath()}/$databaseName';
     _db = await openDatabase(
       path,
-      version: 1,
+      version: 2,
+      onUpgrade: (db, oldVersion, _) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE st_items ADD COLUMN qrToken TEXT');
+          await db.execute(
+            'ALTER TABLE st_items ADD COLUMN manufacturerCode TEXT',
+          );
+        }
+      },
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE st_meta (
@@ -223,6 +239,8 @@ class SqfliteStocktakeLocalStore implements StocktakeLocalStore {
             supplyId TEXT,
             location TEXT,
             lotNo TEXT,
+            qrToken TEXT,
+            manufacturerCode TEXT,
             bookQty TEXT NOT NULL,
             countedQty TEXT,
             countedStatus TEXT,

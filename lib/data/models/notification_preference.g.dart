@@ -21,3 +21,12 @@ Map<String, dynamic> _$NotificationPreferenceToJson(
   'push': instance.push,
   'inapp': instance.inapp,
 };
+
+NotificationType _$NotificationTypeFromJson(Map<String, dynamic> json) =>
+    NotificationType(
+      type: json['type'] as String,
+      label: json['label'] as String? ?? '',
+    );
+
+Map<String, dynamic> _$NotificationTypeToJson(NotificationType instance) =>
+    <String, dynamic>{'type': instance.type, 'label': instance.label};

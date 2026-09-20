@@ -73,7 +73,7 @@ class StocktakePage {
   Map<String, dynamic> toJson() => _$StocktakePageToJson(this);
 }
 
-/// Một dòng trong `GET /:id/package` (rút gọn).
+/// Một dòng trong `GET /:id/package` (rút gọn, C14-C17 có `qrToken`).
 @JsonSerializable()
 class StocktakePackageItem {
   const StocktakePackageItem({
@@ -87,6 +87,8 @@ class StocktakePackageItem {
     this.lotNo,
     this.bookQty = '1',
     this.qrToken,
+    this.supplyCode,
+    this.manufacturerCode,
   });
 
   final String itemId;
@@ -98,9 +100,9 @@ class StocktakePackageItem {
   final String? location;
   final String? lotNo;
   final String bookQty;
-
-  /// API package chưa trả qrToken (TODO(api)) — tạm tra bằng `code`.
   final String? qrToken;
+  final String? supplyCode;
+  final String? manufacturerCode;
 
   bool get isEquipment => equipmentId != null;
 

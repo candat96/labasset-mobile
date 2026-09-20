@@ -95,12 +95,18 @@ class StocktakeCountController extends GetxController {
 
   void onSearchChanged(String _) => items.refresh();
 
-  /// Tìm trong local theo qrToken/code/lotNo (package chưa trả qrToken).
+  /// Tìm trong local theo qrToken (C14-C17) → code → mã hãng → số lô.
   StocktakeLocalItem? resolve(String raw) {
     final code = raw.trim().toUpperCase();
     if (code.isEmpty) return null;
     for (final i in items) {
+      if ((i.qrToken ?? '').toUpperCase() == code) return i;
+    }
+    for (final i in items) {
       if (i.code.toUpperCase() == code) return i;
+    }
+    for (final i in items) {
+      if ((i.manufacturerCode ?? '').toUpperCase() == code) return i;
     }
     for (final i in items) {
       if ((i.lotNo ?? '').toUpperCase() == code) return i;

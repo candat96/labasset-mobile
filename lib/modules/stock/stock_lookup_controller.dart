@@ -56,7 +56,12 @@ class StockLookupController extends GetxController {
       firstError ??= e;
     }
     try {
-      lotResults.assignAll((await stock.lots(q: term, limit: 20)).items);
+      var lots = (await stock.lots(q: term, limit: 20)).items;
+      if (lots.isEmpty) {
+        // API C14-C17: tra theo mã vạch nhà sản xuất.
+        lots = (await stock.lots(barcode: term, limit: 20)).items;
+      }
+      lotResults.assignAll(lots);
       ok++;
     } catch (e) {
       firstError ??= e;

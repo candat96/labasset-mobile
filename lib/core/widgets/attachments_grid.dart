@@ -96,15 +96,6 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
     }
   }
 
-  bool _isImage(AttachmentView a) {
-    final name = a.label.toLowerCase();
-    return a.kind == 'photo' ||
-        name.endsWith('.png') ||
-        name.endsWith('.jpg') ||
-        name.endsWith('.jpeg') ||
-        name.endsWith('.webp');
-  }
-
   Future<void> _add() async {
     var kind = widget.kinds.first;
     if (widget.kinds.length > 1) {
@@ -181,7 +172,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
     try {
       await _service.files.downloadTo(
         url,
-        a.label.isNotEmpty ? a.label : 'attachment-${a.id}',
+        a.displayName.isNotEmpty ? a.displayName : 'attachment-${a.id}',
       );
       AppSnackbar.success('attachment.downloaded'.tr);
     } catch (e) {
@@ -203,7 +194,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
       }
     }
     if (!mounted) return;
-    if (_isImage(a)) {
+    if (a.isImage) {
       await showDialog<void>(
         context: context,
         builder: (_) => Dialog(
@@ -256,7 +247,9 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
           context: context,
           builder: (_) => AlertDialog(
             title: Text(
-              a.label.isNotEmpty ? a.label : attachmentKindLabel(a.kind),
+              a.displayName.isNotEmpty
+                  ? a.displayName
+                  : attachmentKindLabel(a.kind),
             ),
             actions: [
               TextButton(
@@ -355,7 +348,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
               child: SizedBox(
                 width: 96,
                 height: 96,
-                child: _isImage(a) && url != null
+                child: a.isImage && url != null
                     ? Image.network(
                         url,
                         fit: BoxFit.cover,
@@ -370,7 +363,9 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
             ),
             const SizedBox(height: 2),
             Text(
-              a.label.isNotEmpty ? a.label : attachmentKindLabel(a.kind),
+              a.displayName.isNotEmpty
+                  ? a.displayName
+                  : attachmentKindLabel(a.kind),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelSmall,

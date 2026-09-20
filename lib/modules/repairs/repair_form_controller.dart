@@ -11,6 +11,7 @@ import '../../data/models/repair_detail.dart';
 import '../../data/repositories/equipment_repository.dart';
 import '../../data/repositories/faults_repository.dart';
 import '../../data/repositories/repairs_repository.dart';
+import '../../data/repositories/settings_repository.dart';
 
 /// Báo hỏng `/repairs/new`: máy + mô tả + mức khẩn + gợi ý thư viện lỗi + ảnh.
 class RepairFormController extends GetxController {
@@ -19,6 +20,7 @@ class RepairFormController extends GetxController {
     required this.equipment,
     required this.faults,
     required this.attachments,
+    this.settings,
     Future<void> Function(String id)? popWithId,
     String? equipmentId,
   }) : _popWithId = popWithId ?? ((id) => Get.back(result: id)),
@@ -28,6 +30,7 @@ class RepairFormController extends GetxController {
   final EquipmentRepository equipment;
   final FaultsRepository faults;
   final AttachmentService attachments;
+  final SettingsRepository? settings;
   final void Function(String id) _popWithId;
   final String? initialEquipmentId;
 
@@ -45,6 +48,9 @@ class RepairFormController extends GetxController {
   final RxBool submitting = false.obs;
   final RxString error = ''.obs;
 
+  /// SLA theo mức khẩn (giờ) từ `settings/public` (C14-C17).
+  final RxMap<String, int> sla = <String, int>{}.obs;
+
   Timer? _debounce;
 
   @override
@@ -54,8 +60,18 @@ class RepairFormController extends GetxController {
     if (id != null && id.isNotEmpty) {
       unawaited(_loadEquipment(id));
     }
+    unawaited(_loadSla());
     errorCode.addListener(_onInputChanged);
     description.addListener(_onInputChanged);
+  }
+
+  Future<void> _loadSla() async {
+    try {
+      final values = await settings?.repairSla();
+      if (values != null) sla.assignAll(values);
+    } catch (_) {
+      // SLA best-effort
+    }
   }
 
   Future<void> _loadEquipment(String id) async {
