@@ -245,6 +245,7 @@ class MaintenanceTaskController extends GetxController {
       missingKeys.clear();
       await _clearDraft();
       await load();
+      AppSnackbar.success('maintenance.resultSaved'.tr);
       return true;
     } catch (e) {
       final err = ApiError.from(e);

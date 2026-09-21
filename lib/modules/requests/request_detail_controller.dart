@@ -120,13 +120,16 @@ class RequestDetailController extends GetxController {
     }
   }
 
-  Future<void> addComment(String body) async {
-    if (body.trim().isEmpty) return;
+  Future<bool> addComment(String body) async {
+    if (body.trim().isEmpty) return false;
     try {
       await requests.addComment(id, body.trim());
       await load();
+      AppSnackbar.success('requests.commentSaved'.tr);
+      return true;
     } catch (e) {
       AppSnackbar.error(e);
+      return false;
     }
   }
 }

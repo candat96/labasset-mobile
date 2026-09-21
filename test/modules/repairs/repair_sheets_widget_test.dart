@@ -43,6 +43,7 @@ Future<MockRepairs> openDetail(WidgetTester tester) async {
       code: 'SC-1',
       equipmentId: 'e1',
       status: 'in_progress',
+      assigneeId: 'u1',
       diagnosis: 'Chẩn đoán cũ',
     ),
   );
@@ -138,6 +139,91 @@ void main() {
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     expect(find.text('Lưu'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sheet Chẩn đoán: lưu thành công → reload, snackbar và đóng', (
+    tester,
+  ) async {
+    final repairs = await openDetail(tester);
+    when(
+      () => repairs.diagnose(
+        'r1',
+        diagnosis: any(named: 'diagnosis'),
+        faultId: any(named: 'faultId'),
+        faultGroupId: any(named: 'faultGroupId'),
+        resolutionType: any(named: 'resolutionType'),
+      ),
+    ).thenAnswer((_) async {});
+
+    await tester.tap(find.text('Thao tác'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ActionGridBody),
+        matching: find.text('Chẩn đoán'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Chẩn đoán cũ'),
+      'Đã chẩn đoán',
+    );
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => repairs.diagnose(
+        'r1',
+        diagnosis: 'Đã chẩn đoán',
+        faultId: null,
+        faultGroupId: null,
+        resolutionType: null,
+      ),
+    ).called(1);
+    expect(find.text('Lưu'), findsNothing);
+    expect(find.text('Đã lưu chẩn đoán'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sheet Hoàn thành: lưu thành công → reload, snackbar và đóng', (
+    tester,
+  ) async {
+    final repairs = await openDetail(tester);
+    when(
+      () => repairs.complete(
+        'r1',
+        resolutionSummary: any(named: 'resolutionSummary'),
+        postRepairWarrantyUntil: any(named: 'postRepairWarrantyUntil'),
+        calibrationRequired: any(named: 'calibrationRequired'),
+        proposeFault: any(named: 'proposeFault'),
+      ),
+    ).thenAnswer((_) async {});
+
+    await tester.tap(find.text('Thao tác'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ActionGridBody),
+        matching: find.text('Hoàn thành'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Đã xử lý xong');
+    await tester.tap(find.text('Xác nhận'));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => repairs.complete(
+        'r1',
+        resolutionSummary: 'Đã xử lý xong',
+        postRepairWarrantyUntil: null,
+        calibrationRequired: false,
+        proposeFault: null,
+      ),
+    ).called(1);
+    expect(find.text('Xác nhận'), findsNothing);
+    expect(find.text('Đã hoàn thành phiếu'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

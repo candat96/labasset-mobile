@@ -40,6 +40,9 @@ const Map<String, String> vi = {
   'common.loadMore': 'Tải thêm',
   'common.next': 'Tiếp',
   'common.prev': 'Trước',
+  'stock.warehouse.unknown': 'Kho chưa xác định',
+  'equipment.supply.unknown': 'Vật tư chưa xác định',
+  'equipment.unknown': 'Thiết bị chưa xác định',
 
   // form chung
   'field.qtyRequired': 'Nhập số lượng',
@@ -863,6 +866,9 @@ const Map<String, String> vi = {
   'requests.comments': 'Bình luận',
   'requests.addComment': 'Thêm bình luận',
   'requests.comment': 'Nội dung',
+  'requests.commentSaved': 'Đã thêm bình luận',
+  'requests.departmentUnknown': 'Khoa chưa xác định',
+  'requests.requesterUnknown': 'Người yêu cầu',
 
   // stocktake — kiểm kê offline
   'stocktake.title': 'Kiểm kê',
@@ -952,6 +958,8 @@ const Map<String, String> vi = {
   'calibration.preset.done': 'Đã xong',
   'calibration.complete': 'Ghi kết quả',
   'calibration.saved': 'Đã lưu kết quả kiểm định',
+  'calibration.preset.pending': 'Đang chờ kiểm định',
+  'maintenance.resultSaved': 'Đã lưu kết quả bảo dưỡng',
   'calibration.type.inspection': 'Kiểm tra',
   'calibration.type.calibration': 'Hiệu chuẩn',
   'calibration.performedAt': 'Ngày thực hiện',

@@ -64,7 +64,7 @@ class RequestDetailView extends GetView<RequestDetailController> {
             DetailHeaderCard(
               margin: EdgeInsets.zero,
               icon: LucideIcons.fileCheck,
-              title: d.departmentName ?? d.departmentId,
+              title: d.departmentName ?? 'requests.departmentUnknown'.tr,
               code: d.code,
               badges: [
                 StatusBadge(
@@ -81,7 +81,7 @@ class RequestDetailView extends GetView<RequestDetailController> {
               stats: [
                 DetailStat(
                   'requests.requester'.tr,
-                  d.requesterName ?? d.requesterId,
+                  d.requesterName ?? 'requests.requesterUnknown'.tr,
                   icon: LucideIcons.userRound,
                 ),
                 if (d.neededBy != null)
@@ -269,12 +269,41 @@ Future<void> _issue(RequestDetailController c) async {
 }
 
 Future<void> _comment(BuildContext context, RequestDetailController c) async {
-  final body = await AppDialog.prompt(
+  await AppSheet.show<void>(
     context,
-    title: 'requests.addComment'.tr,
-    label: 'requests.comment'.tr,
-    maxLines: 3,
+    builder: (_) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'requests.addComment'.tr),
+          TextField(
+            controller: form.field('body'),
+            autofocus: true,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'requests.comment'.tr,
+              errorText: form.error('body'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('body').isEmpty) {
+                      form.setError('body', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.addComment(form.text('body'));
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.save'.tr),
+          ),
+        ],
+      ),
+    ),
   );
-  if (body == null || body.isEmpty) return;
-  await c.addComment(body);
 }
