@@ -88,8 +88,7 @@ class ListItemCard extends StatelessWidget {
                   children: [
                     Icon(m.icon, size: 14, color: m.color ?? text.label.color),
                     const SizedBox(width: 4),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 300),
+                    Flexible(
                       child: Text(
                         m.text,
                         maxLines: 1,
