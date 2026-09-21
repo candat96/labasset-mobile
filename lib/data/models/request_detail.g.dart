@@ -84,8 +84,8 @@ RequestItem _$RequestItemFromJson(Map<String, dynamic> json) => RequestItem(
   quotaExceeded: json['quotaExceeded'] as bool? ?? false,
   note: json['note'] as String?,
   approverNote: json['approverNote'] as String?,
-  supplyName: json['supplyName'] as String?,
-  supplyCode: json['supplyCode'] as String?,
+  supplyName: _readSupplyName(json, 'supplyName') as String?,
+  supplyCode: _readSupplyCode(json, 'supplyCode') as String?,
 );
 
 Map<String, dynamic> _$RequestItemToJson(RequestItem instance) =>
@@ -109,7 +109,7 @@ RequestComment _$RequestCommentFromJson(Map<String, dynamic> json) =>
       userId: json['userId'] as String?,
       body: json['body'] as String? ?? '',
       createdAt: json['createdAt'] as String?,
-      userName: json['userName'] as String?,
+      userName: _readUserName(json, 'userName') as String?,
     );
 
 Map<String, dynamic> _$RequestCommentToJson(RequestComment instance) =>

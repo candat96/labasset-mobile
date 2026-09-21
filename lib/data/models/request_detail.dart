@@ -91,11 +91,16 @@ class RequestItem {
   final bool quotaExceeded;
   final String? note;
   final String? approverNote;
+
+  /// API trả lồng `supply {code,name}`; giữ field phẳng để tương thích.
+  @JsonKey(readValue: _readSupplyName)
   final String? supplyName;
+  @JsonKey(readValue: _readSupplyCode)
   final String? supplyCode;
 
-  String get label =>
-      supplyCode == null ? supplyId : '$supplyCode — $supplyName';
+  String get label => supplyCode == null && supplyName == null
+      ? supplyId
+      : [supplyCode, supplyName].whereType<String>().join(' — ');
 
   factory RequestItem.fromJson(Map<String, dynamic> json) =>
       _$RequestItemFromJson(json);
@@ -116,9 +121,21 @@ class RequestComment {
   final String? userId;
   final String body;
   final String? createdAt;
+
+  /// API trả lồng `user {fullName}`; giữ field phẳng để tương thích.
+  @JsonKey(readValue: _readUserName)
   final String? userName;
 
   factory RequestComment.fromJson(Map<String, dynamic> json) =>
       _$RequestCommentFromJson(json);
   Map<String, dynamic> toJson() => _$RequestCommentToJson(this);
 }
+
+Object? _readSupplyName(Map<dynamic, dynamic> json, String key) =>
+    json[key] ?? (json['supply'] as Map<dynamic, dynamic>?)?['name'];
+
+Object? _readSupplyCode(Map<dynamic, dynamic> json, String key) =>
+    json[key] ?? (json['supply'] as Map<dynamic, dynamic>?)?['code'];
+
+Object? _readUserName(Map<dynamic, dynamic> json, String key) =>
+    json[key] ?? (json['user'] as Map<dynamic, dynamic>?)?['fullName'];

@@ -118,7 +118,11 @@ class RequestDetailView extends GetView<RequestDetailController> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(c.body, style: context.appText.body),
                       subtitle: Text(
-                        '${c.userName ?? c.userId ?? ''} · ${formatRelative(c.createdAt)}',
+                        [c.userName, formatRelative(c.createdAt)]
+                            .whereType<String>()
+                            .where((s) => s.isNotEmpty)
+                            .join(' · '),
+                        style: context.appText.caption,
                       ),
                     ),
                   TextButton.icon(
