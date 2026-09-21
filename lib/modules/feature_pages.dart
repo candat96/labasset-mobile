@@ -346,6 +346,7 @@ List<GetPage<dynamic>> featurePages() {
             supplies: Get.find<SuppliesRepository>(),
             departments: Get.find<DepartmentsRepository>(),
             catalogs: Get.find<CatalogsRepository>(),
+            equipmentRepository: Get.find<EquipmentRepository>(),
             initialType: map['type'] as String?,
             equipmentId: map['equipmentId'] as String?,
             repairTicketId: map['repairTicketId'] as String?,

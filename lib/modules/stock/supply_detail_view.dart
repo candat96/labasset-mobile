@@ -73,7 +73,9 @@ class SupplyDetailView extends GetView<SupplyDetailController> {
                       ListTile(
                         dense: true,
                         contentPadding: EdgeInsets.zero,
-                        title: Text(b.warehouseName ?? b.warehouseId),
+                        title: Text(
+                          b.warehouseName ?? 'stock.warehouse.unknown'.tr,
+                        ),
                         subtitle: Text(
                           '${'stock.supply.onHand'.tr}: ${formatVnd(b.qtyOnHand, symbol: false)}'
                           ' · ${'stock.supply.reserved'.tr}: ${formatVnd(b.qtyReserved, symbol: false)}',

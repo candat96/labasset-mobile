@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/format/display_text.dart';
 import '../../../core/format/format.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_snackbar.dart';
@@ -29,6 +30,7 @@ class VendorsTabController extends GetxController {
   final RxList<RepairVendor> items = <RepairVendor>[].obs;
   final RxBool loading = true.obs;
   final Rxn<Object> error = Rxn<Object>();
+  final RxMap<String, String> supplierNames = <String, String>{}.obs;
 
   @override
   void onInit() {
@@ -41,6 +43,12 @@ class VendorsTabController extends GetxController {
     error.value = null;
     try {
       items.assignAll(await repairs.vendors(ticketId));
+      try {
+        final suppliers = await catalogs.list('suppliers', limit: 100);
+        supplierNames.assignAll({for (final s in suppliers) s.id: s.name});
+      } catch (_) {
+        supplierNames.clear();
+      }
     } catch (e) {
       error.value = e;
     } finally {
@@ -108,12 +116,19 @@ class VendorsTab extends GetView<VendorsTabController> {
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (_, i) {
               final v = controller.items[i];
+              final supplierName = v.supplierId == null
+                  ? null
+                  : controller.supplierNames[v.supplierId!];
               return Card(
                 child: ListTile(
-                  title: Text(v.engineerName ?? v.supplierId ?? '—'),
+                  title: Text(
+                    displayNameOr(supplierName, 'repairs.vendors.supplier'.tr),
+                  ),
                   subtitle: Text(
                     [
+                      if (v.engineerName != null) v.engineerName!,
                       if (v.engineerPhone != null) v.engineerPhone!,
+                      if (v.contractNo != null) v.contractNo!,
                       if (v.quotationAmount != null)
                         formatVnd(v.quotationAmount),
                       if (v.visitAt != null) formatDate(v.visitAt),

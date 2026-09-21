@@ -14,6 +14,7 @@ import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock_extra.dart';
 import '../../data/repositories/stock_repository.dart';
+import '../../data/repositories/supplies_repository.dart';
 import 'receipts_controller.dart';
 
 /// Danh sách phiếu nhập kho.
@@ -129,8 +130,10 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
   final Rxn<StockReceipt> receipt = Rxn<StockReceipt>();
   final RxBool loading = true.obs;
   final Rxn<Object> error = Rxn<Object>();
+  final RxMap<String, String> supplyLabels = <String, String>{}.obs;
 
   StockRepository get repo => Get.find<StockRepository>();
+  SuppliesRepository get supplies => Get.find<SuppliesRepository>();
 
   @override
   void initState() {
@@ -142,7 +145,16 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
     loading.value = true;
     error.value = null;
     try {
-      receipt.value = await repo.receipt(widget.id);
+      final loaded = await repo.receipt(widget.id);
+      for (final item in loaded.items) {
+        try {
+          final supply = await supplies.byId(item.supplyId);
+          supplyLabels[item.supplyId] = '${supply.code} — ${supply.name}';
+        } catch (_) {
+          supplyLabels[item.supplyId] = 'equipment.supply.unknown'.tr;
+        }
+      }
+      receipt.value = loaded;
     } catch (e) {
       error.value = e;
     } finally {
@@ -271,7 +283,10 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
             for (final item in r.items)
               Card(
                 child: ListTile(
-                  title: Text(item.supplyId),
+                  title: Text(
+                    supplyLabels[item.supplyId] ??
+                        'equipment.supply.unknown'.tr,
+                  ),
                   subtitle: Text(
                     '${'repairs.parts.quantity'.tr}: ${item.quantity}'
                     '${item.lotNo == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${item.lotNo}'}'

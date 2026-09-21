@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/i18n/app_translations.dart';
 import 'package:labasset_mobile/data/models/repair_detail.dart';
+import 'package:labasset_mobile/data/models/department.dart';
 import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
 import 'package:labasset_mobile/data/repositories/equipment_repository.dart';
 import 'package:labasset_mobile/data/repositories/repairs_repository.dart';
@@ -78,13 +79,20 @@ void main() {
   });
 
   test('VendorsTab: thêm thuê ngoài gửi supplier + báo giá', () async {
+    final catalogs = _MockCatalogs();
+    when(() => catalogs.list('suppliers', limit: 100)).thenAnswer(
+      (_) async => const [
+        DepartmentRef(id: 'sp1', code: 'NCC-01', name: 'Thiết bị Việt'),
+      ],
+    );
     when(() => repairs.addVendor(any(), any())).thenAnswer((_) async {});
     final c = VendorsTabController(
       repairs: repairs,
-      catalogs: _MockCatalogs(),
+      catalogs: catalogs,
       ticketId: 'r1',
     );
     await c.load();
+    expect(c.supplierNames['sp1'], 'Thiết bị Việt');
     await c.add(
       supplierId: 'sp1',
       quotationAmount: '500000',

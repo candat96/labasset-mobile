@@ -16,6 +16,7 @@ import '../../core/widgets/signature_pad.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock_issue.dart';
 import '../../data/repositories/stock_repository.dart';
+import '../../data/repositories/supplies_repository.dart';
 
 /// Chi tiết phiếu xuất: ký người nhận, ghi sổ, huỷ, PDF.
 class IssueDetailView extends StatefulWidget {
@@ -31,8 +32,11 @@ class _IssueDetailViewState extends State<IssueDetailView> {
   final Rxn<StockIssue> issue = Rxn<StockIssue>();
   final RxBool loading = true.obs;
   final Rxn<Object> error = Rxn<Object>();
+  final RxMap<String, String> supplyLabels = <String, String>{}.obs;
+  final RxMap<String, String> lotLabels = <String, String>{}.obs;
 
   StockRepository get repo => Get.find<StockRepository>();
+  SuppliesRepository get supplies => Get.find<SuppliesRepository>();
 
   @override
   void initState() {
@@ -44,11 +48,33 @@ class _IssueDetailViewState extends State<IssueDetailView> {
     loading.value = true;
     error.value = null;
     try {
-      issue.value = await repo.issue(widget.id);
+      final loaded = await repo.issue(widget.id);
+      await _loadLabels(loaded);
+      issue.value = loaded;
     } catch (e) {
       error.value = e;
     } finally {
       loading.value = false;
+    }
+  }
+
+  Future<void> _loadLabels(StockIssue loaded) async {
+    for (final item in loaded.items) {
+      try {
+        final supply = await supplies.byId(item.supplyId);
+        supplyLabels[item.supplyId] = '${supply.code} — ${supply.name}';
+      } catch (_) {
+        supplyLabels[item.supplyId] = 'equipment.supply.unknown'.tr;
+      }
+      final lotId = item.lotId;
+      if (lotId == null) continue;
+      try {
+        final page = await repo.lots(supplyId: item.supplyId, limit: 100);
+        final lot = page.items.where((l) => l.id == lotId).firstOrNull;
+        if (lot != null && lot.lotNo.isNotEmpty) lotLabels[lotId] = lot.lotNo;
+      } catch (_) {
+        // Không hiện UUID nếu API lô tạm thời lỗi.
+      }
     }
   }
 
@@ -205,10 +231,13 @@ class _IssueDetailViewState extends State<IssueDetailView> {
             for (final item in x.items)
               Card(
                 child: ListTile(
-                  title: Text(item.supplyId),
+                  title: Text(
+                    supplyLabels[item.supplyId] ??
+                        'equipment.supply.unknown'.tr,
+                  ),
                   subtitle: Text(
                     '${'repairs.parts.quantity'.tr}: ${item.quantity}'
-                    '${item.lotId == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${item.lotId}'}',
+                    '${item.lotId == null || lotLabels[item.lotId!] == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${lotLabels[item.lotId!]}'}',
                   ),
                 ),
               ),

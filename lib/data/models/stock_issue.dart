@@ -121,7 +121,7 @@ class IssueLine {
   });
 
   final String supplyId;
-  final String label;
+  String label;
   String? lotId;
   String? lotNo;
   String quantity;

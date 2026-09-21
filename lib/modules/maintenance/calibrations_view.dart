@@ -77,7 +77,7 @@ class CalibrationsView extends GetView<CalibrationsController> {
                     final c = controller.items[i];
                     return Card(
                       child: ListTile(
-                        title: Text('${c.code} — ${c.equipmentId}'),
+                        title: Text(c.code),
                         subtitle: Text(
                           '${c.type == 'inspection' ? 'calibration.type.inspection'.tr : 'calibration.type.calibration'.tr}'
                           '${c.scheduledAt == null ? '' : ' · ${formatDate(c.scheduledAt)}'}'

@@ -62,7 +62,7 @@ class SuppliesTabController extends GetxController {
         final s = await supplies.byId(l.supplyId);
         supplyLabels[l.supplyId] = '${s.code} — ${s.name}';
       } catch (_) {
-        supplyLabels[l.supplyId] = l.supplyId;
+        supplyLabels[l.supplyId] = 'equipment.supply.unknown'.tr;
       }
     }
   }
@@ -143,7 +143,10 @@ class SuppliesTab extends GetView<SuppliesTabController> {
             final runway = controller.runwayOf(l.supplyId);
             return Card(
               child: ListTile(
-                title: Text(controller.supplyLabels[l.supplyId] ?? l.supplyId),
+                title: Text(
+                  controller.supplyLabels[l.supplyId] ??
+                      'equipment.supply.unknown'.tr,
+                ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

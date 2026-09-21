@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,6 +12,7 @@ import '../../data/models/stock_issue.dart';
 import '../../data/models/supply.dart';
 import '../../data/repositories/catalogs_repository.dart';
 import '../../data/repositories/departments_repository.dart';
+import '../../data/repositories/equipment_repository.dart';
 import '../../data/repositories/stock_repository.dart';
 import '../../data/repositories/supplies_repository.dart';
 
@@ -20,6 +23,7 @@ class IssueFormController extends GetxController {
     required this.supplies,
     required this.departments,
     required this.catalogs,
+    this.equipmentRepository,
     void Function(String id)? popWithId,
     String? initialType,
     String? equipmentId,
@@ -38,7 +42,7 @@ class IssueFormController extends GetxController {
       lines.add(
         IssueLine(
           supplyId: supplyId ?? '',
-          label: supplyId ?? '',
+          label: 'equipment.supply.unknown'.tr,
           lotId: lotId,
           quantity: '1',
         ),
@@ -50,6 +54,7 @@ class IssueFormController extends GetxController {
   final SuppliesRepository supplies;
   final DepartmentsRepository departments;
   final CatalogsRepository catalogs;
+  final EquipmentRepository? equipmentRepository;
   final void Function(String id) _popWithId;
   final Future<bool> Function() _hasNetwork;
   final String? initialEquipmentId;
@@ -89,8 +94,35 @@ class IssueFormController extends GetxController {
       equipment.value = DepartmentRef(
         id: initialEquipmentId!,
         code: '',
-        name: initialEquipmentId!,
+        name: 'equipment.unknown'.tr,
       );
+    }
+    unawaited(_resolveInitialLabels());
+  }
+
+  Future<void> _resolveInitialLabels() async {
+    final equipmentId = initialEquipmentId;
+    if (equipmentId != null && equipmentRepository != null) {
+      try {
+        final item = await equipmentRepository!.detail(equipmentId);
+        equipment.value = DepartmentRef(
+          id: item.id,
+          code: item.code,
+          name: item.name,
+        );
+      } catch (_) {
+        // Giữ nhãn an toàn, không rơi về UUID.
+      }
+    }
+    for (final line in lines) {
+      if (line.supplyId.isEmpty) continue;
+      try {
+        final supply = await supplies.byId(line.supplyId);
+        line.label = '${supply.code} — ${supply.name}';
+        lines.refresh();
+      } catch (_) {
+        // Giữ nhãn "Vật tư chưa xác định".
+      }
     }
   }
 

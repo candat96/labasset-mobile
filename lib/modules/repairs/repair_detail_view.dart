@@ -195,7 +195,9 @@ class _Overview extends StatelessWidget {
                 color: context.status.warning,
               ),
               title: Text('repairs.overview.calibration'.tr),
-              subtitle: Text(d.calibrationTicketId ?? ''),
+              subtitle: d.calibrationTicketId == null
+                  ? null
+                  : Text('calibration.preset.pending'.tr),
             ),
           ),
         ],
