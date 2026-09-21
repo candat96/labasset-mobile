@@ -17,6 +17,9 @@ MyTasksResponse _$MyTasksResponseFromJson(Map<String, dynamic> json) =>
         json['stocktakes'] as Map<String, dynamic>,
       ),
       alerts: TaskAlerts.fromJson(json['alerts'] as Map<String, dynamic>),
+      demand: json['demand'] == null
+          ? const DemandTasks()
+          : DemandTasks.fromJson(json['demand'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MyTasksResponseToJson(MyTasksResponse instance) =>
@@ -26,6 +29,7 @@ Map<String, dynamic> _$MyTasksResponseToJson(MyTasksResponse instance) =>
       'requests': instance.requests.toJson(),
       'stocktakes': instance.stocktakes.toJson(),
       'alerts': instance.alerts.toJson(),
+      'demand': instance.demand.toJson(),
     };
 
 RepairTasks _$RepairTasksFromJson(Map<String, dynamic> json) => RepairTasks(

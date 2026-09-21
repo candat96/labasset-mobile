@@ -90,6 +90,25 @@ class Ep {
   static String requestComments(String id) => '/v1/requests/$id/comments';
   static const requestsApproveBulk = '/v1/requests/approve-bulk';
 
+  // Dự trù (E1a) — /v1/demand.
+  static const demandMy = '/v1/demand/my';
+  static const demandPeriods = '/v1/demand/periods';
+  static String demandPeriod(String id) => '/v1/demand/periods/$id';
+  static String demandPeriodRequests(String id) =>
+      '/v1/demand/periods/$id/requests';
+  static String demandPeriodConsolidation(String id) =>
+      '/v1/demand/periods/$id/consolidation';
+  static String demandPeriodSummary(String id) =>
+      '/v1/demand/periods/$id/summary';
+  static String demandRequest(String id) => '/v1/demand/requests/$id';
+  static String demandRequestDeptApprove(String id) =>
+      '/v1/demand/requests/$id/dept-approve';
+  static String demandRequestReturn(String id) =>
+      '/v1/demand/requests/$id/return';
+  static String demandRequestAccept(String id) =>
+      '/v1/demand/requests/$id/accept';
+  static const demandLinesSuggest = '/v1/demand/lines/suggest';
+
   static const notifications = '/v1/notifications';
   static const notificationsReadAll = '/v1/notifications/read-all';
   static const notificationsPreferences = '/v1/notifications/preferences';

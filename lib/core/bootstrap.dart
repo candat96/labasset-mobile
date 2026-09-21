@@ -9,6 +9,7 @@ import '../data/repositories/auth_repository.dart';
 import '../data/repositories/calendar_repository.dart';
 import '../data/repositories/calibrations_repository.dart';
 import '../data/repositories/catalogs_repository.dart';
+import '../data/repositories/demand_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/device_repository.dart';
 import '../data/repositories/equipment_repository.dart';
@@ -61,6 +62,7 @@ Future<void> bootstrap() async {
   Get.put(SuppliesRepository(dio), permanent: true);
   Get.put(RepairsRepository(dio), permanent: true);
   Get.put(RequestsRepository(dio), permanent: true);
+  Get.put(DemandRepository(dio), permanent: true);
   Get.put(NotificationsRepository(dio), permanent: true);
   Get.put(DeviceRepository(dio), permanent: true);
   Get.put(SettingsRepository(dio), permanent: true);

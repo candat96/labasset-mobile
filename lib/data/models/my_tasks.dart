@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'demand.dart';
+
 part 'my_tasks.g.dart';
 
 @JsonSerializable(explicitToJson: true)
@@ -10,6 +12,7 @@ class MyTasksResponse {
     required this.requests,
     required this.stocktakes,
     required this.alerts,
+    this.demand = const DemandTasks(),
   });
 
   final RepairTasks repairs;
@@ -17,6 +20,7 @@ class MyTasksResponse {
   final RequestTasks requests;
   final StocktakeTasks stocktakes;
   final TaskAlerts alerts;
+  final DemandTasks demand;
 
   factory MyTasksResponse.fromJson(Map<String, dynamic> json) =>
       _$MyTasksResponseFromJson(json);
