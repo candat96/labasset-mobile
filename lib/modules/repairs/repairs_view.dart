@@ -113,16 +113,6 @@ class RepairsView extends GetView<RepairsController> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'repairNew',
-        tooltip: 'repairs.new'.tr,
-        onPressed: () async {
-          final id = await Get.toNamed<String>(Routes.repairNew);
-          if (id != null) await Get.toNamed(Routes.repair(id));
-          await controller.load();
-        },
-        child: const Icon(Icons.add_alert_outlined),
-      ),
     );
   }
 }
