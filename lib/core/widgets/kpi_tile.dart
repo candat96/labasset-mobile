@@ -26,7 +26,7 @@ class KpiTile extends StatelessWidget {
     final effectiveTone = value.trim() == '0' ? StatusTone.muted : tone;
     final palette = paletteForTone(context, effectiveTone);
     return SizedBox(
-      height: 96,
+      height: 120,
       child: Material(
         color: palette.background,
         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -40,39 +40,32 @@ class KpiTile extends StatelessWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    if (icon != null) ...[
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: palette.color.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(icon, size: 18, color: palette.color),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                    ],
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: context.appText.label.copyWith(
-                          color: palette.foreground,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                if (icon != null)
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: palette.color.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
                     ),
-                  ],
+                    child: Icon(icon, size: 18, color: palette.color),
+                  ),
+                Text(
+                  label,
+                  style: context.appText.caption.copyWith(
+                    color: palette.foreground,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppSpacing.xs),
                 Text(
                   value,
                   style: context.appText.kpi.copyWith(
                     color: palette.foreground,
+                    fontSize: 24,
                   ),
                 ),
               ],

@@ -262,6 +262,9 @@ const Map<String, String> vi = {
   'home.alert.brokenUnassigned': 'Máy hỏng chưa tiếp nhận',
   'home.alert.suppliesLow': 'Hoá chất sắp hết / hết hạn',
   'home.alert.calibrationOverdue': 'Kiểm định quá hạn',
+  'home.alert.brokenShort': 'Máy hỏng',
+  'home.alert.suppliesLowShort': 'Hoá chất sắp hết',
+  'home.alert.calibrationOverdueShort': 'Kiểm định quá hạn',
   'home.mockNote': 'Số liệu minh hoạ — chờ API tổng hợp phía backend.',
 
   // shortcuts / placeholders

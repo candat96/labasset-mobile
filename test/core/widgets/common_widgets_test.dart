@@ -46,6 +46,19 @@ void main() {
       ),
     );
     expect(find.text('3'), findsOneWidget);
+    final tileSize = tester.getSize(find.byType(KpiTile));
+    expect(tileSize.height, 120);
+    final label = tester.widget<Text>(find.text('Máy hỏng'));
+    expect(label.maxLines, 2);
+    expect(label.overflow, TextOverflow.ellipsis);
+    expect(
+      tester.getTopLeft(find.byIcon(Icons.warning_amber_outlined)).dy,
+      lessThan(tester.getTopLeft(find.text('Máy hỏng')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Máy hỏng')).dy,
+      lessThan(tester.getTopLeft(find.text('3')).dy),
+    );
     await tester.tap(find.text('3'));
     expect(tapped, isTrue);
   });

@@ -151,7 +151,7 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     Expanded(
                       child: KpiTile(
-                        label: 'home.alert.brokenUnassigned'.tr,
+                        label: 'home.alert.brokenShort'.tr,
                         value: '${controller.brokenUnassigned}',
                         icon: LucideIcons.triangleAlert,
                         tone: controller.brokenUnassigned > 0
@@ -164,7 +164,7 @@ class HomeView extends GetView<HomeController> {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: KpiTile(
-                        label: 'home.alert.suppliesLow'.tr,
+                        label: 'home.alert.suppliesLowShort'.tr,
                         value: '${controller.suppliesAlert}',
                         icon: LucideIcons.packageSearch,
                         tone: controller.suppliesAlert > 0
@@ -176,7 +176,7 @@ class HomeView extends GetView<HomeController> {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: KpiTile(
-                        label: 'home.alert.calibrationOverdue'.tr,
+                        label: 'home.alert.calibrationOverdueShort'.tr,
                         value: '${controller.calibrationOverdue}',
                         icon: LucideIcons.badgeCheck,
                         tone: controller.calibrationOverdue > 0

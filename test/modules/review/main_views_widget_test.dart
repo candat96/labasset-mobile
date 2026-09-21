@@ -192,15 +192,15 @@ void main() {
       ),
       stocktakes: StocktakeTasks(counting: 0),
       alerts: TaskAlerts(
-        repairsNew: 0,
+        repairsNew: 1,
         stock: StockAlertCounts(
-          lowStock: 0,
+          lowStock: 5,
           expiring: 0,
           expired: 0,
           openVialExpiring: 0,
           stale: 0,
         ),
-        calibrationOverdue: 0,
+        calibrationOverdue: 3,
       ),
     );
     Get.put(
@@ -209,6 +209,10 @@ void main() {
     await tester.pumpWidget(wrap(const HomeView()));
     expect(find.text('Sửa chữa được giao'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
+    expect(find.text('Máy hỏng'), findsOneWidget);
+    expect(find.text('Hoá chất sắp hết'), findsOneWidget);
+    expect(find.text('Kiểm định quá hạn'), findsOneWidget);
+    expect(find.text('Máy hỏng chưa tiếp nhận'), findsNothing);
   });
 
   testWidgets('repairs_list_view render empty', (tester) async {
