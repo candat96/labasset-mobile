@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/cache/kv_cache.dart';
+import 'package:labasset_mobile/core/widgets/detail_widgets.dart';
 import 'package:labasset_mobile/core/sync/outbox_service.dart';
 import 'package:labasset_mobile/data/models/repair_detail.dart';
 import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
@@ -133,4 +134,32 @@ void main() {
     expect(find.text('Lưu'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'chi tiết phiếu cuộn toàn màn: header card ra khỏi màn, thanh tab còn ghim',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await openDetail(tester);
+      final header = find.byType(DetailHeaderCard);
+      expect(header, findsOneWidget);
+      expect(find.text('Tổng quan'), findsWidgets);
+
+      await tester.drag(find.byType(NestedScrollView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+      // Header cuộn lên khỏi vùng nhìn (sliver ngoài viewport bị gỡ).
+      expect(header, findsNothing);
+      // Thanh tab vẫn hiện ngay dưới AppBar.
+      final tabBar = find.byType(TabBar);
+      expect(tabBar, findsOneWidget);
+      expect(
+        tester.getTopLeft(tabBar).dy,
+        closeTo(tester.getBottomLeft(find.byType(AppBar)).dy + 9, 2),
+      );
+      // Thanh hành động dính đáy vẫn còn.
+      expect(find.byType(StickyActionBar), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

@@ -82,70 +82,62 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
         );
       }
       final e = controller.item.value!;
-      return DefaultTabController(
-        length: 11,
-        child: Scaffold(
-          appBar: AppBar(title: Text(e.code)),
-          body: Column(
+      return DetailScaffold(
+        title: e.code,
+        onRefresh: controller.load,
+        header: Column(
+          children: [
+            _SummaryCard(e: e),
+            _QuickActions(controller: controller, e: e),
+          ],
+        ),
+        tabs: [
+          'equipment.tab.specs'.tr,
+          'equipment.tab.repairs'.tr,
+          'equipment.tab.maintenance'.tr,
+          'equipment.tab.network'.tr,
+          'equipment.tab.accessories'.tr,
+          'equipment.tab.software'.tr,
+          'equipment.tab.components'.tr,
+          'equipment.tab.supplies'.tr,
+          'equipment.tab.documents'.tr,
+          'equipment.tab.timeline'.tr,
+          'equipment.tab.faults'.tr,
+        ],
+        tabViews: [
+          SpecsTab(e: e),
+          const RepairsTab(),
+          const MaintenanceTab(),
+          const NetworkTab(),
+          const AccessoriesTab(),
+          const SoftwareTab(),
+          const ComponentsTab(),
+          const SuppliesTab(),
+          ListView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              _SummaryCard(e: e),
-              _QuickActions(controller: controller, e: e),
-              PillTabBar(
-                tabs: [
-                  'equipment.tab.specs'.tr,
-                  'equipment.tab.repairs'.tr,
-                  'equipment.tab.maintenance'.tr,
-                  'equipment.tab.network'.tr,
-                  'equipment.tab.accessories'.tr,
-                  'equipment.tab.software'.tr,
-                  'equipment.tab.components'.tr,
-                  'equipment.tab.supplies'.tr,
-                  'equipment.tab.documents'.tr,
-                  'equipment.tab.timeline'.tr,
-                  'equipment.tab.faults'.tr,
+              AttachmentsGrid(
+                entityType: 'equipment',
+                entityId: e.id,
+                kinds: const [
+                  'photo',
+                  'manual',
+                  'catalogue',
+                  'co_cq',
+                  'license',
+                  'calibration_cert',
+                  'handover',
+                  'maintenance_contract',
+                  'diagram',
+                  'other',
                 ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    SpecsTab(e: e),
-                    const RepairsTab(),
-                    const MaintenanceTab(),
-                    const NetworkTab(),
-                    const AccessoriesTab(),
-                    const SoftwareTab(),
-                    const ComponentsTab(),
-                    const SuppliesTab(),
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: SingleChildScrollView(
-                        child: AttachmentsGrid(
-                          entityType: 'equipment',
-                          entityId: e.id,
-                          kinds: const [
-                            'photo',
-                            'manual',
-                            'catalogue',
-                            'co_cq',
-                            'license',
-                            'calibration_cert',
-                            'handover',
-                            'maintenance_contract',
-                            'diagram',
-                            'other',
-                          ],
-                          downloadable: true,
-                        ),
-                      ),
-                    ),
-                    const TimelineTab(),
-                    FaultsTab(model: e.model),
-                  ],
-                ),
+                downloadable: true,
               ),
             ],
           ),
-        ),
+          const TimelineTab(),
+          FaultsTab(model: e.model),
+        ],
       );
     });
   }

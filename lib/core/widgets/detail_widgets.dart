@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -147,11 +148,15 @@ class _StatChip extends StatelessWidget {
               '${stat.label}: ',
               style: text.caption.copyWith(color: color ?? text.label.color),
             ),
-          Text(
-            stat.value,
-            style: text.caption.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color ?? scheme.onSurface,
+          Flexible(
+            child: Text(
+              stat.value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: text.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color ?? scheme.onSurface,
+              ),
             ),
           ),
         ],
@@ -331,6 +336,192 @@ class StickySecondaryButton extends StatelessWidget {
           Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
         ],
       ),
+    );
+  }
+}
+
+/// Khung màn chi tiết cuộn toàn màn: AppBar cố định, header card cuộn theo
+/// nội dung, thanh tab pill **ghim** (52) dưới AppBar khi cuộn, nội dung tab
+/// cuộn chung (NestedScrollView); nút hành động dính đáy giữ nguyên.
+///
+/// Thanh tab được bọc `SliverOverlapAbsorber`, phần thân được đệm đúng phần
+/// ghim nên tab con chỉ cần là `ListView`/`SingleChildScrollView` thường
+/// (không controller) — không cần `SliverOverlapInjector` trong từng tab.
+class DetailScaffold extends StatelessWidget {
+  const DetailScaffold({
+    super.key,
+    required this.title,
+    required this.header,
+    required this.tabs,
+    required this.tabViews,
+    this.actions = const [],
+    this.bottomBar,
+    this.floatingActionButton,
+    this.onRefresh,
+    this.initialIndex = 0,
+  }) : assert(tabs.length == tabViews.length);
+
+  final String title;
+  final Widget header;
+  final List<String> tabs;
+  final List<Widget> tabViews;
+  final List<Widget> actions;
+
+  /// Thanh hành động dính đáy (`bottomNavigationBar`).
+  final Widget? bottomBar;
+  final Widget? floatingActionButton;
+
+  /// Kéo xuống để tải lại (áp cho toàn màn — tab con không tự bắt được).
+  final Future<void> Function()? onRefresh;
+  final int initialIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget body = NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) => [
+        SliverToBoxAdapter(child: header),
+        SliverOverlapAbsorber(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          sliver: SliverPersistentHeader(
+            pinned: true,
+            delegate: _PinnedTabsDelegate(
+              tabs: tabs,
+              background: Theme.of(context).scaffoldBackgroundColor,
+            ),
+          ),
+        ),
+      ],
+      body: Builder(
+        builder: (context) => _OverlapPadding(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          child: TabBarView(children: tabViews),
+        ),
+      ),
+    );
+    if (onRefresh != null) {
+      body = RefreshIndicator(onRefresh: onRefresh!, child: body);
+    }
+    return DefaultTabController(
+      length: tabs.length,
+      initialIndex: initialIndex,
+      child: Scaffold(
+        appBar: AppBar(title: Text(title), actions: actions),
+        body: body,
+        bottomNavigationBar: bottomBar,
+        floatingActionButton: floatingActionButton,
+      ),
+    );
+  }
+}
+
+/// Thanh tab pill ghim, cao [DetailScaffold] 52: nền màn để nội dung cuộn
+/// dưới không lộ.
+class _PinnedTabsDelegate extends SliverPersistentHeaderDelegate {
+  const _PinnedTabsDelegate({required this.tabs, required this.background});
+
+  static const double height = 52;
+
+  final List<String> tabs;
+  final Color background;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return ColoredBox(
+      color: background,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 6, AppSpacing.lg, 6),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: context.isDark ? AppColors.segmentDark : AppColors.segment,
+            borderRadius: BorderRadius.circular(AppRadius.chip),
+          ),
+          child: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            padding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
+            tabs: [for (final t in tabs) Tab(text: t, height: 34)],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_PinnedTabsDelegate oldDelegate) =>
+      oldDelegate.tabs != tabs || oldDelegate.background != background;
+}
+
+/// Đệm trên phần thân bằng đúng phần thanh tab ghim (như `SliverOverlapInjector`
+/// nhưng cho box) — lắng nghe handle ở tầng layout nên không rebuild khi cuộn.
+class _OverlapPadding extends SingleChildRenderObjectWidget {
+  const _OverlapPadding({required this.handle, required super.child});
+
+  final SliverOverlapAbsorberHandle handle;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderOverlapPadding(handle);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderOverlapPadding renderObject,
+  ) => renderObject.handle = handle;
+}
+
+class _RenderOverlapPadding extends RenderShiftedBox {
+  _RenderOverlapPadding(this._handle) : super(null);
+
+  SliverOverlapAbsorberHandle _handle;
+  SliverOverlapAbsorberHandle get handle => _handle;
+  set handle(SliverOverlapAbsorberHandle value) {
+    if (identical(value, _handle)) return;
+    if (attached) _handle.removeListener(markNeedsLayout);
+    _handle = value;
+    if (attached) _handle.addListener(markNeedsLayout);
+    markNeedsLayout();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _handle.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _handle.removeListener(markNeedsLayout);
+    super.detach();
+  }
+
+  @override
+  void performLayout() {
+    final top = _handle.layoutExtent ?? 0;
+    final child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    child.layout(
+      constraints.deflate(EdgeInsets.only(top: top)),
+      parentUsesSize: true,
+    );
+    (child.parentData! as BoxParentData).offset = Offset(0, top);
+    size = constraints.constrain(
+      Size(child.size.width, child.size.height + top),
     );
   }
 }

@@ -50,41 +50,29 @@ class RepairDetailView extends GetView<RepairDetailController> {
         );
       }
       final d = controller.item.value!;
-      return DefaultTabController(
-        length: 7,
-        child: Scaffold(
-          appBar: AppBar(title: Text(d.code)),
-          body: Column(
-            children: [
-              _Header(d: d),
-              PillTabBar(
-                tabs: [
-                  'repairs.tab.overview'.tr,
-                  'repairs.tab.logs'.tr,
-                  'repairs.tab.parts'.tr,
-                  'repairs.tab.vendors'.tr,
-                  'repairs.tab.costs'.tr,
-                  'repairs.tab.docs'.tr,
-                  'repairs.tab.report'.tr,
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    _Overview(d: d, controller: controller),
-                    _Logs(controller: controller),
-                    PartsTab(equipmentId: d.equipmentId),
-                    const VendorsTab(),
-                    const CostsTab(),
-                    DocsTab(ticketId: d.id),
-                    _ReportTab(ticketId: d.id),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: _ActionBar(controller: controller, d: d),
-        ),
+      return DetailScaffold(
+        title: d.code,
+        header: _Header(d: d),
+        onRefresh: controller.load,
+        tabs: [
+          'repairs.tab.overview'.tr,
+          'repairs.tab.logs'.tr,
+          'repairs.tab.parts'.tr,
+          'repairs.tab.vendors'.tr,
+          'repairs.tab.costs'.tr,
+          'repairs.tab.docs'.tr,
+          'repairs.tab.report'.tr,
+        ],
+        tabViews: [
+          _Overview(d: d, controller: controller),
+          _Logs(controller: controller),
+          PartsTab(equipmentId: d.equipmentId),
+          const VendorsTab(),
+          const CostsTab(),
+          DocsTab(ticketId: d.id),
+          _ReportTab(ticketId: d.id),
+        ],
+        bottomBar: _ActionBar(controller: controller, d: d),
       );
     });
   }

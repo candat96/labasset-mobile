@@ -68,24 +68,29 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
               ),
           ],
         ),
-        body: Column(
-          children: [
-            _Header(t: t, controller: controller),
-            Expanded(
-              child: ListView(
+        // Header cuộn cùng checklist (không ghim) — mục 7.
+        body: RefreshIndicator(
+          onRefresh: controller.load,
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+            children: [
+              _Header(t: t, controller: controller),
+              Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg,
                   AppSpacing.xs,
                   AppSpacing.lg,
-                  AppSpacing.xl,
+                  0,
                 ),
-                children: [
-                  for (final item in t.templateItems)
-                    _ChecklistCard(item: item, controller: controller),
-                ],
+                child: Column(
+                  children: [
+                    for (final item in t.templateItems)
+                      _ChecklistCard(item: item, controller: controller),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         bottomNavigationBar: _BottomBar(t: t, controller: controller),
       );
