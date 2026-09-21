@@ -23,47 +23,60 @@ class KpiTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final s = context.status;
-    final color = switch (tone) {
-      StatusTone.success => s.success,
-      StatusTone.warning => s.warning,
-      StatusTone.danger => s.danger,
-      StatusTone.info => s.info,
-      StatusTone.muted => s.muted,
-    };
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18, color: color),
-                    const SizedBox(width: AppSpacing.xs),
-                  ],
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: theme.textTheme.bodySmall,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+    final effectiveTone = value.trim() == '0' ? StatusTone.muted : tone;
+    final palette = paletteForTone(context, effectiveTone);
+    return SizedBox(
+      height: 96,
+      child: Material(
+        color: palette.background,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    if (icon != null) ...[
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: palette.color.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, size: 18, color: palette.color),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: context.appText.label.copyWith(
+                          color: palette.foreground,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  value,
+                  style: context.appText.kpi.copyWith(
+                    color: palette.foreground,
                   ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                value,
-                style: theme.textTheme.titleLarge?.copyWith(color: color),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

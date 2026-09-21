@@ -4,6 +4,40 @@ import '../theme/app_theme.dart';
 
 enum StatusTone { success, warning, danger, info, muted }
 
+({Color color, Color background, Color foreground}) paletteForTone(
+  BuildContext context,
+  StatusTone tone,
+) {
+  final s = context.status;
+  return switch (tone) {
+    StatusTone.success => (
+      color: s.success,
+      background: s.successBackground,
+      foreground: s.successForeground,
+    ),
+    StatusTone.warning => (
+      color: s.warning,
+      background: s.warningBackground,
+      foreground: s.warningForeground,
+    ),
+    StatusTone.danger => (
+      color: s.danger,
+      background: s.dangerBackground,
+      foreground: s.dangerForeground,
+    ),
+    StatusTone.info => (
+      color: s.info,
+      background: s.infoBackground,
+      foreground: s.infoForeground,
+    ),
+    StatusTone.muted => (
+      color: s.muted,
+      background: s.mutedBackground,
+      foreground: s.mutedForeground,
+    ),
+  };
+}
+
 /// Map tình trạng máy (EquipmentStatusDto.status) → tone.
 StatusTone toneForEquipmentStatus(String status) => switch (status) {
   'active' => StatusTone.success,
@@ -49,7 +83,7 @@ StatusTone toneForRequestStatus(String status) => switch (status) {
   _ => StatusTone.muted,
 };
 
-/// Badge trạng thái: màu + icon (không chỉ dựa vào màu).
+/// Badge trạng thái cao 24px, dùng dot để không chỉ dựa vào màu chữ.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.tone, required this.label});
 
@@ -58,30 +92,32 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = context.status;
-    final (color, icon) = switch (tone) {
-      StatusTone.success => (s.success, Icons.check_circle_outline),
-      StatusTone.warning => (s.warning, Icons.warning_amber_outlined),
-      StatusTone.danger => (s.danger, Icons.cancel_outlined),
-      StatusTone.info => (s.info, Icons.info_outline),
-      StatusTone.muted => (s.muted, Icons.circle_outlined),
-    };
+    final palette = paletteForTone(context, tone);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: palette.background,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: palette.color,
+              shape: BoxShape.circle,
+            ),
+          ),
           const SizedBox(width: 4),
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: color),
+            style: context.appText.caption.copyWith(
+              color: palette.foreground,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

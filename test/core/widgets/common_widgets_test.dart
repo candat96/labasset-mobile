@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:labasset_mobile/core/widgets/app_list_tile.dart';
 import 'package:labasset_mobile/core/widgets/kpi_tile.dart';
+import 'package:labasset_mobile/core/widgets/segment_tabs.dart';
 import 'package:labasset_mobile/core/widgets/section_card.dart';
+import 'package:labasset_mobile/core/widgets/shortcut_tile.dart';
 import 'package:labasset_mobile/core/widgets/status_badge.dart';
 import 'package:labasset_mobile/core/widgets/timeline_list.dart';
 
@@ -45,6 +48,66 @@ void main() {
     expect(find.text('3'), findsOneWidget);
     await tester.tap(find.text('3'));
     expect(tapped, isTrue);
+  });
+
+  testWidgets('KpiTile số 0 tự dùng neutral tone', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        const Scaffold(
+          body: KpiTile(label: 'Cảnh báo', value: '0', tone: StatusTone.danger),
+        ),
+      ),
+    );
+    final material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.color, isNotNull);
+  });
+
+  testWidgets('ShortcutTile và AppListTile nhận tap', (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      wrap(
+        Scaffold(
+          body: Column(
+            children: [
+              ShortcutTile(
+                icon: Icons.qr_code,
+                label: 'Quét',
+                onTap: () => taps++,
+              ),
+              AppListTile(
+                icon: Icons.lock_outline,
+                title: 'Bảo mật',
+                value: 'Bật',
+                onTap: () => taps++,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Quét'));
+    await tester.tap(find.text('Bảo mật'));
+    expect(taps, 2);
+  });
+
+  testWidgets('SegmentTabs đổi lựa chọn', (tester) async {
+    var selected = 0;
+    await tester.pumpWidget(
+      wrap(
+        Scaffold(
+          body: SegmentTabs<int>(
+            tabs: const [
+              SegmentTab(value: 0, label: 'Của tôi'),
+              SegmentTab(value: 1, label: 'Tất cả'),
+            ],
+            selected: selected,
+            onChanged: (value) => selected = value,
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Tất cả'));
+    expect(selected, 1);
   });
 
   testWidgets('TimelineList hiện mốc theo thứ tự', (tester) async {

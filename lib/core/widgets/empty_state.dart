@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
-    this.icon = Icons.inbox_outlined,
+    this.icon = LucideIcons.inbox,
     required this.title,
     this.description,
     this.action,
@@ -19,32 +21,55 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            if (description != null) ...[
-              const SizedBox(height: AppSpacing.xs),
+    return Align(
+      alignment: const Alignment(0, -0.34),
+      child: FractionallySizedBox(
+        heightFactor: 0.6,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
               Text(
-                description!,
-                style: theme.textTheme.bodySmall,
+                title,
+                style: context.appText.bodyStrong,
                 textAlign: TextAlign.center,
               ),
+              if (description != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  description!,
+                  style: context.appText.label,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (action != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                OutlinedButtonTheme(
+                  data: OutlinedButtonThemeData(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 40),
+                    ),
+                  ),
+                  child: action!,
+                ),
+              ],
             ],
-            if (action != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              action!,
-            ],
-          ],
+          ),
         ),
       ),
     );
