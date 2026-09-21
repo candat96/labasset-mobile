@@ -72,3 +72,112 @@ class AppRadius {
   static const md = 6.0;
   static const lg = 8.0;
 }
+
+/// Thang chữ duy nhất của ứng dụng; màu được áp theo light/dark theme.
+@immutable
+class AppText extends ThemeExtension<AppText> {
+  const AppText({
+    required this.display,
+    required this.title,
+    required this.section,
+    required this.body,
+    required this.bodyStrong,
+    required this.label,
+    required this.caption,
+    required this.kpi,
+  });
+
+  final TextStyle display;
+  final TextStyle title;
+  final TextStyle section;
+  final TextStyle body;
+  final TextStyle bodyStrong;
+  final TextStyle label;
+  final TextStyle caption;
+  final TextStyle kpi;
+
+  factory AppText.forColors({
+    required Color foreground,
+    required Color mutedForeground,
+    required Color subtle,
+  }) => AppText(
+    display: TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w700,
+      color: foreground,
+    ),
+    title: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: foreground,
+    ),
+    section: TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.2,
+      color: foreground,
+    ),
+    body: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: foreground,
+    ),
+    bodyStrong: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: foreground,
+    ),
+    label: TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w500,
+      color: mutedForeground,
+    ),
+    caption: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: subtle,
+    ),
+    kpi: TextStyle(
+      fontSize: 26,
+      fontWeight: FontWeight.w700,
+      color: foreground,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
+
+  @override
+  AppText copyWith({
+    TextStyle? display,
+    TextStyle? title,
+    TextStyle? section,
+    TextStyle? body,
+    TextStyle? bodyStrong,
+    TextStyle? label,
+    TextStyle? caption,
+    TextStyle? kpi,
+  }) => AppText(
+    display: display ?? this.display,
+    title: title ?? this.title,
+    section: section ?? this.section,
+    body: body ?? this.body,
+    bodyStrong: bodyStrong ?? this.bodyStrong,
+    label: label ?? this.label,
+    caption: caption ?? this.caption,
+    kpi: kpi ?? this.kpi,
+  );
+
+  @override
+  AppText lerp(AppText? other, double t) {
+    if (other == null) return this;
+    return AppText(
+      display: TextStyle.lerp(display, other.display, t)!,
+      title: TextStyle.lerp(title, other.title, t)!,
+      section: TextStyle.lerp(section, other.section, t)!,
+      body: TextStyle.lerp(body, other.body, t)!,
+      bodyStrong: TextStyle.lerp(bodyStrong, other.bodyStrong, t)!,
+      label: TextStyle.lerp(label, other.label, t)!,
+      caption: TextStyle.lerp(caption, other.caption, t)!,
+      kpi: TextStyle.lerp(kpi, other.kpi, t)!,
+    );
+  }
+}

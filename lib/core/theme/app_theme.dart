@@ -159,6 +159,7 @@ class AppStatusColors extends ThemeExtension<AppStatusColors> {
 
 extension AppThemeX on BuildContext {
   AppStatusColors get status => Theme.of(this).extension<AppStatusColors>()!;
+  AppText get appText => Theme.of(this).extension<AppText>()!;
 }
 
 class AppTheme {
@@ -166,46 +167,18 @@ class AppTheme {
 
   static const _fontFamily = 'Inter';
 
-  static TextTheme _textTheme(Color fg, Color muted) => TextTheme(
-    headlineSmall: TextStyle(
-      fontSize: 24,
-      height: 32 / 24,
-      fontWeight: FontWeight.w600,
-      color: fg,
-    ),
-    titleLarge: TextStyle(
-      fontSize: 20,
-      height: 28 / 20,
-      fontWeight: FontWeight.w600,
-      color: fg,
-    ),
-    titleMedium: TextStyle(
-      fontSize: 18,
-      height: 28 / 18,
-      fontWeight: FontWeight.w600,
-      color: fg,
-    ),
-    titleSmall: TextStyle(
-      fontSize: 16,
-      height: 24 / 16,
-      fontWeight: FontWeight.w500,
-      color: fg,
-    ),
-    bodyLarge: TextStyle(fontSize: 16, height: 24 / 16, color: fg),
-    bodyMedium: TextStyle(fontSize: 14, height: 20 / 14, color: fg),
-    bodySmall: TextStyle(fontSize: 12, height: 16 / 12, color: muted),
-    labelLarge: TextStyle(
-      fontSize: 14,
-      height: 20 / 14,
-      fontWeight: FontWeight.w500,
-      color: fg,
-    ),
-    labelMedium: TextStyle(
-      fontSize: 12,
-      height: 16 / 12,
-      fontWeight: FontWeight.w500,
-      color: fg,
-    ),
+  static TextTheme _textTheme(AppText appText) => TextTheme(
+    displaySmall: appText.display,
+    headlineSmall: appText.title,
+    titleLarge: appText.title,
+    titleMedium: appText.section,
+    titleSmall: appText.bodyStrong,
+    bodyLarge: appText.body,
+    bodyMedium: appText.body,
+    bodySmall: appText.caption,
+    labelLarge: appText.bodyStrong,
+    labelMedium: appText.label,
+    labelSmall: appText.caption,
   ).apply(fontFamily: _fontFamily);
 
   static ThemeData _build({
@@ -216,9 +189,15 @@ class AppTheme {
     required Color border,
     required Color muted,
     required Color mutedFg,
+    required Color subtle,
     required AppStatusColors status,
   }) {
-    final text = _textTheme(scheme.onSurface, mutedFg);
+    final appText = AppText.forColors(
+      foreground: scheme.onSurface,
+      mutedForeground: mutedFg,
+      subtle: subtle,
+    );
+    final text = _textTheme(appText);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.md),
     );
@@ -311,7 +290,7 @@ class AppTheme {
         titleTextStyle: text.bodyMedium,
         subtitleTextStyle: text.bodySmall,
       ),
-      extensions: [status],
+      extensions: [status, appText],
     );
   }
 
@@ -335,6 +314,7 @@ class AppTheme {
     border: AppColors.border,
     muted: AppColors.muted,
     mutedFg: AppColors.mutedForeground,
+    subtle: AppColors.subtle,
     status: AppStatusColors.light,
   );
 
@@ -358,6 +338,7 @@ class AppTheme {
     border: AppColors.borderDark,
     muted: AppColors.mutedDark,
     mutedFg: AppColors.mutedForegroundDark,
+    subtle: AppColors.subtleDark,
     status: AppStatusColors.dark,
   );
 }
