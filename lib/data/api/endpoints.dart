@@ -129,6 +129,8 @@ class Ep {
   static const catalogComponentTypes = '/v1/catalogs/component-types';
   static const catalogCalibrationAgencies = '/v1/catalogs/calibration-agencies';
   static const catalogFaultGroups = '/v1/catalogs/fault-groups';
+  static const catalogRooms = '/v1/catalogs/rooms';
+  static String departmentRooms(String id) => '/v1/departments/$id/rooms';
 
   static String? catalog(String slug) => switch (slug) {
     'suppliers' => catalogSuppliers,
@@ -142,6 +144,7 @@ class Ep {
     'component-types' => catalogComponentTypes,
     'calibration-agencies' => catalogCalibrationAgencies,
     'fault-groups' => catalogFaultGroups,
+    'rooms' => catalogRooms,
     _ => null,
   };
 

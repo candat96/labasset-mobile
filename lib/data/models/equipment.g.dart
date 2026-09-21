@@ -12,6 +12,11 @@ QrEquipment _$QrEquipmentFromJson(Map<String, dynamic> json) => QrEquipment(
   name: json['name'] as String,
   departmentId: json['departmentId'] as String?,
   status: json['status'] as String,
+  roomId: json['roomId'] as String?,
+  room: json['room'] == null
+      ? null
+      : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
+  location: json['location'] as String?,
 );
 
 Map<String, dynamic> _$QrEquipmentToJson(QrEquipment instance) =>
@@ -21,6 +26,9 @@ Map<String, dynamic> _$QrEquipmentToJson(QrEquipment instance) =>
       'name': instance.name,
       'departmentId': instance.departmentId,
       'status': instance.status,
+      'roomId': instance.roomId,
+      'room': instance.room,
+      'location': instance.location,
     };
 
 EquipmentRef _$EquipmentRefFromJson(Map<String, dynamic> json) => EquipmentRef(
@@ -82,6 +90,10 @@ EquipmentSummary _$EquipmentSummaryFromJson(Map<String, dynamic> json) =>
       nextCalibrationAt: json['nextCalibrationAt'] as String?,
       calibrationOverdue: json['calibrationOverdue'] as bool? ?? false,
       imageUrl: json['imageUrl'] as String?,
+      roomId: json['roomId'] as String?,
+      room: json['room'] == null
+          ? null
+          : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$EquipmentSummaryToJson(EquipmentSummary instance) =>
@@ -106,6 +118,8 @@ Map<String, dynamic> _$EquipmentSummaryToJson(EquipmentSummary instance) =>
       'nextCalibrationAt': instance.nextCalibrationAt,
       'calibrationOverdue': instance.calibrationOverdue,
       'imageUrl': instance.imageUrl,
+      'roomId': instance.roomId,
+      'room': instance.room,
     };
 
 EquipmentPage _$EquipmentPageFromJson(Map<String, dynamic> json) =>

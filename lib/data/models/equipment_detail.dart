@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'equipment.dart';
+import 'room.dart';
 
 part 'equipment_detail.g.dart';
 
@@ -109,6 +110,8 @@ class EquipmentDetail {
     this.deptContact,
     this.counts,
     this.photoFileId,
+    this.roomId,
+    this.room,
   });
 
   final String id;
@@ -152,6 +155,14 @@ class EquipmentDetail {
   final EquipmentUserRef? deptContact;
   final EquipmentCounts? counts;
   final String? photoFileId;
+  final String? roomId;
+  final RoomRef? room;
+
+  /// `Phòng · Vị trí` — dòng meta vị trí.
+  String get placeText => [
+    room?.name,
+    location,
+  ].where((e) => e != null && e.trim().isNotEmpty).join(' · ');
 
   factory EquipmentDetail.fromJson(Map<String, dynamic> json) =>
       _$EquipmentDetailFromJson(json);

@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'room.dart';
+
 part 'equipment.g.dart';
 
 /// `GET /v1/equipment/by-qr/{token}` → QrEquipmentDto.
@@ -11,6 +13,9 @@ class QrEquipment {
     required this.name,
     this.departmentId,
     required this.status,
+    this.roomId,
+    this.room,
+    this.location,
   });
 
   final String id;
@@ -18,6 +23,15 @@ class QrEquipment {
   final String name;
   final String? departmentId;
   final String status;
+  final String? roomId;
+  final RoomRef? room;
+  final String? location;
+
+  /// `Phòng · Vị trí` (bỏ phần rỗng).
+  String get placeText => [
+    room?.name,
+    location,
+  ].where((e) => e != null && e.trim().isNotEmpty).join(' · ');
 
   factory QrEquipment.fromJson(Map<String, dynamic> json) =>
       _$QrEquipmentFromJson(json);
@@ -79,6 +93,8 @@ class EquipmentSummary {
     this.nextCalibrationAt,
     this.calibrationOverdue = false,
     this.imageUrl,
+    this.roomId,
+    this.room,
   });
 
   final String id;
@@ -102,10 +118,18 @@ class EquipmentSummary {
   @JsonKey(defaultValue: false)
   final bool calibrationOverdue;
   final String? imageUrl;
+  final String? roomId;
+  final RoomRef? room;
 
   String? get departmentLabel => department?.name ?? departmentName;
   String? get groupLabel => group?.name ?? groupName;
   String? get manufacturerLabel => manufacturer?.name ?? manufacturerName;
+
+  /// `Phòng · Vị trí` — dòng vị trí gọn cho card/meta.
+  String get placeText => [
+    room?.name,
+    location,
+  ].where((e) => e != null && e.trim().isNotEmpty).join(' · ');
 
   factory EquipmentSummary.fromJson(Map<String, dynamic> json) =>
       _$EquipmentSummaryFromJson(json);

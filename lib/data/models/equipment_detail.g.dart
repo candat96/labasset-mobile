@@ -127,6 +127,10 @@ EquipmentDetail _$EquipmentDetailFromJson(
       ? null
       : EquipmentCounts.fromJson(json['counts'] as Map<String, dynamic>),
   photoFileId: json['photoFileId'] as String?,
+  roomId: json['roomId'] as String?,
+  room: json['room'] == null
+      ? null
+      : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$EquipmentDetailToJson(EquipmentDetail instance) =>
@@ -171,6 +175,8 @@ Map<String, dynamic> _$EquipmentDetailToJson(EquipmentDetail instance) =>
       'deptContact': instance.deptContact,
       'counts': instance.counts,
       'photoFileId': instance.photoFileId,
+      'roomId': instance.roomId,
+      'room': instance.room,
     };
 
 EquipmentNetwork _$EquipmentNetworkFromJson(Map<String, dynamic> json) =>

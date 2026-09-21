@@ -33,6 +33,29 @@ class EquipmentRepository {
     return EquipmentPage.fromJson(res.data!);
   }
 
+  /// Danh sách máy có phân trang + lọc khoa/phòng/trạng thái (`GET /v1/equipment`).
+  Future<EquipmentPage> list({
+    String? q,
+    String? status,
+    String? departmentId,
+    String? roomId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      Ep.equipmentList,
+      queryParameters: {
+        if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+        'status': ?status,
+        'departmentId': ?departmentId,
+        'roomId': ?roomId,
+        'page': page,
+        'limit': limit,
+      },
+    );
+    return EquipmentPage.fromJson(res.data!);
+  }
+
   /// Tổng số máy theo bộ lọc (limit 1 chỉ lấy `total`).
   Future<num> count({bool? calibrationOverdue, String? status}) async {
     final res = await _dio.get<Map<String, dynamic>>(
@@ -242,12 +265,14 @@ class EquipmentRepository {
   Future<void> createTransfer(
     String id, {
     required String toDepartmentId,
+    String? toRoomId,
     String? toLocation,
     required String reason,
   }) => _dio.post<void>(
     Ep.equipmentTransfers(id),
     data: {
       'toDepartmentId': toDepartmentId,
+      'toRoomId': ?toRoomId,
       'toLocation': ?toLocation,
       'reason': reason,
     },
