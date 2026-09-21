@@ -19,6 +19,7 @@ class AppListTile extends StatelessWidget {
     this.onSwitchChanged,
     this.showDivider = false,
     this.accent = false,
+    this.iconAccent,
     this.height,
   });
 
@@ -31,6 +32,9 @@ class AppListTile extends StatelessWidget {
   final ValueChanged<bool>? onSwitchChanged;
   final bool showDivider;
   final bool accent;
+
+  /// Màu chip icon riêng (đỏ/cam/xanh…); null = primary-soft khi [accent].
+  final AppAccent? iconAccent;
   final double? height;
 
   @override
@@ -51,12 +55,14 @@ class AppListTile extends StatelessWidget {
                   size: chipSize,
                   iconSize: accent ? 20 : 18,
                   radius: accent ? 12 : 10,
-                  background: accent
-                      ? null
-                      : theme.colorScheme.surfaceContainerHighest,
-                  foreground: accent
-                      ? null
-                      : theme.colorScheme.onSurfaceVariant,
+                  background:
+                      iconAccent?.backgroundFor(context) ??
+                      (accent
+                          ? null
+                          : theme.colorScheme.surfaceContainerHighest),
+                  foreground:
+                      iconAccent?.foregroundFor(context) ??
+                      (accent ? null : theme.colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(

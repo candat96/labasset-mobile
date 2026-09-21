@@ -113,38 +113,47 @@ class HomeView extends GetView<HomeController> {
   List<Widget> _content(BuildContext context) => [
     if (controller.cachedAt.value != null)
       _OfflineBanner(cachedAt: controller.cachedAt.value!),
-    SizedBox(
-      height: 96,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        padding: EdgeInsets.zero,
-        children: [
-          KpiTile(
+    Row(
+      children: [
+        Expanded(
+          child: KpiTile(
+            width: double.infinity,
+            height: 104,
             label: 'home.alert.brokenShort'.tr,
             value: '${controller.brokenUnassigned}',
             icon: LucideIcons.triangleAlert,
             tone: StatusTone.danger,
+            accent: AppAccent.red,
             onTap: () => Get.toNamed('${Routes.repairs}?segment=unassigned'),
           ),
-          const SizedBox(width: AppSpacing.md),
-          KpiTile(
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: KpiTile(
+            width: double.infinity,
+            height: 104,
             label: 'home.alert.suppliesLowShort'.tr,
             value: '${controller.suppliesAlert}',
             icon: LucideIcons.packageSearch,
             tone: StatusTone.warning,
+            accent: AppAccent.orange,
             onTap: () => Get.toNamed(Routes.stockAlerts),
           ),
-          const SizedBox(width: AppSpacing.md),
-          KpiTile(
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: KpiTile(
+            width: double.infinity,
+            height: 104,
             label: 'home.alert.calibrationOverdueShort'.tr,
             value: '${controller.calibrationOverdue}',
             icon: LucideIcons.badgeCheck,
             tone: StatusTone.danger,
+            accent: AppAccent.purple,
             onTap: () => Get.toNamed(Routes.calibrations),
           ),
-        ],
-      ),
+        ),
+      ],
     ),
     const SizedBox(height: AppSpacing.xl),
     SectionCard(
@@ -397,54 +406,63 @@ class _WorkGroups extends StatelessWidget {
     final groups = [
       (
         icon: LucideIcons.wrench,
+        accent: AppAccent.brand,
         title: 'home.task.repairsAssigned'.tr,
         total: controller.repairsAssignedTotal,
         route: '${Routes.repairs}?segment=mine',
       ),
       (
         icon: LucideIcons.messageCircleWarning,
+        accent: AppAccent.yellow,
         title: 'home.task.repairsPendingResponse'.tr,
         total: controller.repairsPendingResponse,
         route: '${Routes.repairs}?segment=mine',
       ),
       (
         icon: LucideIcons.clockAlert,
+        accent: AppAccent.red,
         title: 'home.task.repairsOverdue'.tr,
         total: controller.repairsOverdue,
         route: '${Routes.repairs}?segment=mine',
       ),
       (
         icon: LucideIcons.clipboardCheck,
+        accent: AppAccent.purple,
         title: 'home.task.stocktakesOpen'.tr,
         total: controller.stocktakesOpenTotal,
         route: Routes.stocktakes,
       ),
       (
         icon: LucideIcons.calendarClock,
+        accent: AppAccent.teal,
         title: 'home.task.maintenanceDue'.tr,
         total: controller.tasksDueTotal,
         route: Routes.maintenanceTasks,
       ),
       (
         icon: LucideIcons.clockAlert,
+        accent: AppAccent.orange,
         title: 'home.task.maintenanceOverdue'.tr,
         total: controller.tasksOverdue,
         route: Routes.maintenanceTasks,
       ),
       (
         icon: LucideIcons.fileCheck,
+        accent: AppAccent.indigo,
         title: 'home.task.requestsPending'.tr,
         total: controller.requestsPendingTotal,
         route: '${Routes.requests}?segment=pending',
       ),
       (
         icon: LucideIcons.packageCheck,
+        accent: AppAccent.green,
         title: 'home.task.requestsApproved'.tr,
         total: controller.requestsApprovedTotal,
         route: '${Routes.requests}?segment=toIssue',
       ),
       (
         icon: LucideIcons.inbox,
+        accent: AppAccent.pink,
         title: 'home.task.requestsPendingReceive'.tr,
         total: controller.requestsPendingReceive,
         route: '${Routes.requests}?segment=mine',
@@ -472,6 +490,7 @@ class _WorkGroups extends StatelessWidget {
         for (var i = 0; i < groups.length; i++)
           AppListTile(
             accent: true,
+            iconAccent: groups[i].accent,
             icon: groups[i].icon,
             title: groups[i].title,
             trailing: _CountPill(count: groups[i].total),

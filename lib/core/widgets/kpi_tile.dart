@@ -16,6 +16,8 @@ class KpiTile extends StatelessWidget {
     this.tone = StatusTone.info,
     this.onTap,
     this.width = 140,
+    this.accent,
+    this.height = 96,
   });
 
   final String label;
@@ -25,6 +27,10 @@ class KpiTile extends StatelessWidget {
   final VoidCallback? onTap;
   final double width;
 
+  /// Màu riêng cho chip icon (luôn hiển thị, kể cả khi 0) — trang chủ.
+  final AppAccent? accent;
+  final double height;
+
   @override
   Widget build(BuildContext context) {
     final zero = value.trim() == '0';
@@ -32,9 +38,13 @@ class KpiTile extends StatelessWidget {
     final palette = paletteForTone(context, effectiveTone);
     final scheme = Theme.of(context).colorScheme;
     final borderRadius = BorderRadius.circular(AppRadius.card);
+    final chipBg =
+        accent?.backgroundFor(context) ??
+        (zero ? null : palette.color.withValues(alpha: 0.14));
+    final chipFg = accent?.foregroundFor(context);
     return SizedBox(
       width: width,
-      height: 96,
+      height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: zero ? scheme.surface : palette.background,
@@ -67,9 +77,8 @@ class KpiTile extends StatelessWidget {
                           iconSize: 18,
                           radius: 10,
                           tone: effectiveTone,
-                          background: zero
-                              ? null
-                              : palette.color.withValues(alpha: 0.14),
+                          background: chipBg,
+                          foreground: chipFg,
                         ),
                       const Spacer(),
                       Text(

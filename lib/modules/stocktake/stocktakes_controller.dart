@@ -36,11 +36,14 @@ class StocktakesController extends GetxController {
     loading.value = true;
     error.value = null;
     try {
-      final page = await repo.list(status: 'open,counting');
+      // API chỉ nhận một `status` mỗi lần → gọi song song rồi gộp.
+      final pages = await Future.wait([
+        repo.list(status: 'open'),
+        repo.list(status: 'counting'),
+      ]);
+      final all = pages.expand((p) => p.items).toList();
       items.assignAll(
-        isAdmin
-            ? page.items
-            : page.items.where((s) => s.assignedTo(userId)).toList(),
+        isAdmin ? all : all.where((s) => s.assignedTo(userId)).toList(),
       );
       final metas = await store.downloadedSessions();
       this.metas.assignAll({for (final m in metas) m.sessionId: m});
