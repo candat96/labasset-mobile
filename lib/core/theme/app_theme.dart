@@ -7,47 +7,107 @@ import 'tokens.dart';
 class AppStatusColors extends ThemeExtension<AppStatusColors> {
   const AppStatusColors({
     required this.success,
+    required this.successBackground,
+    required this.successForeground,
     required this.warning,
+    required this.warningBackground,
+    required this.warningForeground,
     required this.danger,
+    required this.dangerBackground,
+    required this.dangerForeground,
     required this.info,
+    required this.infoBackground,
+    required this.infoForeground,
     required this.muted,
+    required this.mutedBackground,
+    required this.mutedForeground,
   });
 
   final Color success;
+  final Color successBackground;
+  final Color successForeground;
   final Color warning;
+  final Color warningBackground;
+  final Color warningForeground;
   final Color danger;
+  final Color dangerBackground;
+  final Color dangerForeground;
   final Color info;
+  final Color infoBackground;
+  final Color infoForeground;
   final Color muted;
+  final Color mutedBackground;
+  final Color mutedForeground;
 
   static const light = AppStatusColors(
     success: AppColors.success,
+    successBackground: AppColors.successBackground,
+    successForeground: AppColors.successForeground,
     warning: AppColors.warning,
+    warningBackground: AppColors.warningBackground,
+    warningForeground: AppColors.warningForeground,
     danger: AppColors.danger,
+    dangerBackground: AppColors.dangerBackground,
+    dangerForeground: AppColors.dangerForeground,
     info: AppColors.info,
+    infoBackground: AppColors.infoBackground,
+    infoForeground: AppColors.infoForeground,
     muted: AppColors.mutedForeground,
+    mutedBackground: AppColors.neutralBackground,
+    mutedForeground: AppColors.neutralForeground,
   );
 
   static const dark = AppStatusColors(
     success: AppColors.successDark,
+    successBackground: AppColors.successBackgroundDark,
+    successForeground: AppColors.successDark,
     warning: AppColors.warningDark,
+    warningBackground: AppColors.warningBackgroundDark,
+    warningForeground: AppColors.warningDark,
     danger: AppColors.dangerDark,
+    dangerBackground: AppColors.dangerBackgroundDark,
+    dangerForeground: AppColors.dangerDark,
     info: AppColors.infoDark,
+    infoBackground: AppColors.infoBackgroundDark,
+    infoForeground: AppColors.infoDark,
     muted: AppColors.mutedForegroundDark,
+    mutedBackground: AppColors.neutralBackgroundDark,
+    mutedForeground: AppColors.neutralForegroundDark,
   );
 
   @override
   AppStatusColors copyWith({
     Color? success,
+    Color? successBackground,
+    Color? successForeground,
     Color? warning,
+    Color? warningBackground,
+    Color? warningForeground,
     Color? danger,
+    Color? dangerBackground,
+    Color? dangerForeground,
     Color? info,
+    Color? infoBackground,
+    Color? infoForeground,
     Color? muted,
+    Color? mutedBackground,
+    Color? mutedForeground,
   }) => AppStatusColors(
     success: success ?? this.success,
+    successBackground: successBackground ?? this.successBackground,
+    successForeground: successForeground ?? this.successForeground,
     warning: warning ?? this.warning,
+    warningBackground: warningBackground ?? this.warningBackground,
+    warningForeground: warningForeground ?? this.warningForeground,
     danger: danger ?? this.danger,
+    dangerBackground: dangerBackground ?? this.dangerBackground,
+    dangerForeground: dangerForeground ?? this.dangerForeground,
     info: info ?? this.info,
+    infoBackground: infoBackground ?? this.infoBackground,
+    infoForeground: infoForeground ?? this.infoForeground,
     muted: muted ?? this.muted,
+    mutedBackground: mutedBackground ?? this.mutedBackground,
+    mutedForeground: mutedForeground ?? this.mutedForeground,
   );
 
   @override
@@ -55,10 +115,44 @@ class AppStatusColors extends ThemeExtension<AppStatusColors> {
     if (other == null) return this;
     return AppStatusColors(
       success: Color.lerp(success, other.success, t)!,
+      successBackground: Color.lerp(
+        successBackground,
+        other.successBackground,
+        t,
+      )!,
+      successForeground: Color.lerp(
+        successForeground,
+        other.successForeground,
+        t,
+      )!,
       warning: Color.lerp(warning, other.warning, t)!,
+      warningBackground: Color.lerp(
+        warningBackground,
+        other.warningBackground,
+        t,
+      )!,
+      warningForeground: Color.lerp(
+        warningForeground,
+        other.warningForeground,
+        t,
+      )!,
       danger: Color.lerp(danger, other.danger, t)!,
+      dangerBackground: Color.lerp(
+        dangerBackground,
+        other.dangerBackground,
+        t,
+      )!,
+      dangerForeground: Color.lerp(
+        dangerForeground,
+        other.dangerForeground,
+        t,
+      )!,
       info: Color.lerp(info, other.info, t)!,
+      infoBackground: Color.lerp(infoBackground, other.infoBackground, t)!,
+      infoForeground: Color.lerp(infoForeground, other.infoForeground, t)!,
       muted: Color.lerp(muted, other.muted, t)!,
+      mutedBackground: Color.lerp(mutedBackground, other.mutedBackground, t)!,
+      mutedForeground: Color.lerp(mutedForeground, other.mutedForeground, t)!,
     );
   }
 }
@@ -226,8 +320,8 @@ class AppTheme {
     scheme: const ColorScheme.light(
       primary: AppColors.primary,
       onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      onSecondary: AppColors.onPrimaryDark,
+      secondary: AppColors.primaryContainer,
+      onSecondary: AppColors.onPrimaryContainer,
       surface: AppColors.card,
       onSurface: AppColors.foreground,
       onSurfaceVariant: AppColors.mutedForeground,
@@ -248,9 +342,9 @@ class AppTheme {
     brightness: Brightness.dark,
     scheme: const ColorScheme.dark(
       primary: AppColors.primaryDark,
-      onPrimary: AppColors.onPrimaryDark,
-      secondary: AppColors.onPrimaryDark,
-      onSecondary: AppColors.secondary,
+      onPrimary: AppColors.backgroundDark,
+      secondary: AppColors.primaryContainerDark,
+      onSecondary: AppColors.onPrimaryContainerDark,
       surface: AppColors.cardDark,
       onSurface: AppColors.foregroundDark,
       onSurfaceVariant: AppColors.mutedForegroundDark,
