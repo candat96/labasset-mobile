@@ -189,7 +189,7 @@ class _AccountCard extends StatelessWidget {
                     initial,
                     style: context.appText.display.copyWith(
                       fontSize: 26,
-                      color: scheme.onPrimary,
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),

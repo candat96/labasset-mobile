@@ -153,17 +153,20 @@ class GradientButton extends StatelessWidget {
                   fontFamily: 'Inter',
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: scheme.onPrimary,
+                  color: AppColors.onPrimary,
                 ),
                 child: IconTheme(
-                  data: IconThemeData(color: scheme.onPrimary, size: 20),
+                  data: const IconThemeData(
+                    color: AppColors.onPrimary,
+                    size: 20,
+                  ),
                   child: Center(
                     child: loading
                         ? SizedBox.square(
                             dimension: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: scheme.onPrimary,
+                              color: AppColors.onPrimary,
                             ),
                           )
                         : _ButtonContent(
@@ -198,7 +201,6 @@ class GradientFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(AppRadius.card);
     final child = DecoratedBox(
       decoration: BoxDecoration(
@@ -218,7 +220,7 @@ class GradientFab extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 22, color: scheme.onPrimary),
+                Icon(icon, size: 22, color: AppColors.onPrimary),
                 const SizedBox(width: 10),
                 Text(
                   label,
@@ -226,7 +228,7 @@ class GradientFab extends StatelessWidget {
                     fontFamily: 'Inter',
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: scheme.onPrimary,
+                    color: AppColors.onPrimary,
                   ),
                 ),
               ],

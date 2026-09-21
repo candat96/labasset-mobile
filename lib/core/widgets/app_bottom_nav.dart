@@ -180,7 +180,7 @@ class _CenterButton extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: AppShadows.brand,
                 ),
-                child: Icon(icon, size: 26, color: scheme.onPrimary),
+                child: Icon(icon, size: 26, color: AppColors.onPrimary),
               ),
             ),
             Positioned(

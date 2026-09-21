@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import 'scan_controller.dart';
 
 class ScanView extends StatefulWidget {
@@ -40,7 +43,7 @@ class _ScanViewState extends State<ScanView> {
             () => IconButton(
               tooltip: 'scan.torch'.tr,
               icon: Icon(
-                controller.torch.value ? Icons.flash_on : Icons.flash_off,
+                controller.torch.value ? LucideIcons.zap : LucideIcons.zapOff,
               ),
               onPressed: () async {
                 await scanner.toggleTorch();
@@ -56,6 +59,8 @@ class _ScanViewState extends State<ScanView> {
             child: Stack(
               fit: StackFit.expand,
               children: [
+                // Nền tối cho vùng camera (simulator/không quyền vẫn tối).
+                const ColoredBox(color: AppColors.foreground),
                 MobileScanner(
                   controller: scanner,
                   onDetect: (capture) {
@@ -63,22 +68,49 @@ class _ScanViewState extends State<ScanView> {
                     controller.onDetected(raw);
                   },
                   errorBuilder: (context, error) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.xl),
-                      child: Text(
-                        'scan.cameraDenied'.tr,
-                        textAlign: TextAlign.center,
+                    child: SizedBox(
+                      width: 200,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: AppColors.onPrimary.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              LucideIcons.cameraOff,
+                              size: 26,
+                              color: AppColors.onPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Text(
+                            'scan.cameraDenied'.tr,
+                            textAlign: TextAlign.center,
+                            style: context.appText.body.copyWith(
+                              color: AppColors.onPrimary.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-                Center(
-                  child: Container(
-                    width: 240,
-                    height: 240,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.onPrimary, width: 2),
-                      borderRadius: BorderRadius.circular(AppRadius.lg * 2),
+                IgnorePointer(
+                  child: Center(
+                    child: Container(
+                      width: 240,
+                      height: 240,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.primaryDark,
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(AppRadius.hero),
+                      ),
                     ),
                   ),
                 ),
@@ -156,17 +188,15 @@ class _ScanViewState extends State<ScanView> {
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Obx(
-                        () => FilledButton(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(96, 44),
-                          ),
-                          onPressed: controller.busy.value
-                              ? null
-                              : controller.submitManual,
-                          child: Text(
-                            controller.continuous
+                        () => SizedBox(
+                          width: 116,
+                          child: GradientButton(
+                            label: controller.continuous
                                 ? 'common.add'.tr
                                 : 'scan.lookup'.tr,
+                            onPressed: controller.busy.value
+                                ? null
+                                : controller.submitManual,
                           ),
                         ),
                       ),

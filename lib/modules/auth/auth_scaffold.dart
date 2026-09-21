@@ -27,9 +27,8 @@ class AuthScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final top = MediaQuery.paddingOf(context).top;
-    final white = scheme.onPrimary;
+    const white = AppColors.onPrimary;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(

@@ -177,8 +177,8 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
-    final scheme = Theme.of(context).colorScheme;
-    final white = scheme.onPrimary;
+    // Chữ trên gradient luôn trắng (cả dark).
+    const white = AppColors.onPrimary;
     final store = Get.find<SessionStore>();
     final now = DateTime.now();
     final dateLabel =
