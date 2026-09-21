@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 
 final _date = DateFormat('dd/MM/yyyy');
@@ -75,6 +76,28 @@ String formatVnd(String? amount, {bool symbol = true}) {
   );
   final body = dec == null ? grouped : '$grouped,$dec';
   return '$sign$body${symbol ? ' ₫' : ''}';
+}
+
+/// Rút gọn tiền cho thẻ KPI (không đủ chỗ): "62,9 tỷ", "12,3 tr", "450 ng".
+/// Vẫn tính bằng [Decimal], không dùng `double`.
+String formatMoneyCompact(String? amount) {
+  if (amount == null || amount.isEmpty) return '';
+  final d = Decimal.tryParse(amount.trim());
+  if (d == null) return amount;
+  final abs = d.abs();
+  ({Decimal value, String suffix}) unit;
+  if (abs >= Decimal.fromInt(1000000000)) {
+    unit = (value: Decimal.fromInt(1000000000), suffix: 'tỷ');
+  } else if (abs >= Decimal.fromInt(1000000)) {
+    unit = (value: Decimal.fromInt(1000000), suffix: 'tr');
+  } else if (abs >= Decimal.fromInt(1000)) {
+    unit = (value: Decimal.fromInt(1000), suffix: 'ng');
+  } else {
+    return formatVnd(amount, symbol: false);
+  }
+  final scaled = (d / unit.value).toDecimal(scaleOnInfinitePrecision: 1);
+  final text = scaled.toStringAsFixed(1).replaceAll('.', ',');
+  return '$text ${unit.suffix}';
 }
 
 String formatNumber(num? n, {int digits = 0}) {

@@ -61,6 +61,7 @@ class HomeView extends GetView<HomeController> {
       accent: AppAccent.indigo,
     ),
     (key: 'reports', icon: LucideIcons.chartPie, accent: AppAccent.yellow),
+    (key: 'demand', icon: LucideIcons.clipboardList, accent: AppAccent.indigo),
     (key: 'assistant', icon: LucideIcons.sparkles, accent: AppAccent.pink),
   ];
 
@@ -198,6 +199,7 @@ class HomeView extends GetView<HomeController> {
         'calendar' => Routes.calendar,
         'stocktake' => Routes.stocktakes,
         'reports' => Routes.reports,
+        'demand' => Routes.demand,
         'assistant' => Routes.aiConversations,
         'reportFault' => Routes.repairNew,
         'stockIssue' => Routes.stockIssueNew,
@@ -466,6 +468,27 @@ class _WorkGroups extends StatelessWidget {
         title: 'home.task.requestsPendingReceive'.tr,
         total: controller.requestsPendingReceive,
         route: '${Routes.requests}?segment=mine',
+      ),
+      (
+        icon: LucideIcons.clipboardList,
+        accent: AppAccent.indigo,
+        title: 'home.task.demandToApprove'.tr,
+        total: controller.demandToApprove,
+        route: Routes.demand,
+      ),
+      (
+        icon: LucideIcons.packageCheck,
+        accent: AppAccent.green,
+        title: 'home.task.demandToAccept'.tr,
+        total: controller.demandToAccept,
+        route: Routes.demand,
+      ),
+      (
+        icon: LucideIcons.filePlus2,
+        accent: AppAccent.brand,
+        title: 'home.task.demandToSubmit'.tr,
+        total: controller.demandToSubmit,
+        route: Routes.demand,
       ),
     ].where((g) => g.total > 0).toList();
     if (groups.isEmpty) {

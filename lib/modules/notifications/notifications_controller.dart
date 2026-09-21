@@ -120,14 +120,16 @@ class NotificationsController extends GetxController
   /// Mở đối tượng liên quan: map `data` (00 §2.10) rồi tới `path`.
   Future<void> open(NotificationItem n) async {
     await markRead(n);
-    final route = mapData(n.data) ?? mapPath(n.data?['path'] ?? '');
+    final route =
+        mapData(n.data, type: n.type) ?? mapPath(n.data?['path'] ?? '');
     if (route != null) await Get.toNamed(route);
   }
 
-  /// Map `data` thông báo → route mobile.
-  ///
-  static String? mapData(Map<String, dynamic>? data) {
+  /// Map `data` thông báo → route mobile. [type] để phân biệt `demand.*`
+  /// (dùng chung khoá `requestId` với phiếu yêu cầu C2).
+  static String? mapData(Map<String, dynamic>? data, {String? type}) {
     if (data == null) return null;
+    if (type != null && type.startsWith('demand.')) return _mapDemand(data);
     final equipmentId = data['equipmentId'];
     if (equipmentId is String && equipmentId.isNotEmpty) {
       return Routes.equipment(equipmentId);
@@ -156,6 +158,20 @@ class NotificationsController extends GetxController
     final lotId = value('lotId');
     if (lotId != null) return '${Routes.stockLookup}?lotId=$lotId';
     return null;
+  }
+
+  /// `demand.request_*` → phiếu dự trù; `demand.period_*`/`deadline_soon` → kỳ.
+  static String? _mapDemand(Map<String, dynamic> data) {
+    String? str(String key) {
+      final raw = data[key];
+      return raw is String && raw.isNotEmpty ? raw : null;
+    }
+
+    final requestId = str('requestId');
+    if (requestId != null) return Routes.demandRequest(requestId);
+    final periodId = str('periodId');
+    if (periodId != null) return Routes.demandPeriod(periodId);
+    return Routes.demand;
   }
 
   static String? mapPath(String path) {

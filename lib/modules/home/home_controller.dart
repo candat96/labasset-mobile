@@ -36,6 +36,9 @@ class HomeController extends GetxController {
   int get requestsPendingReceive =>
       data.value?.requests.pendingReceive.toInt() ?? 0;
   int get stocktakesOpenTotal => data.value?.stocktakes.counting.toInt() ?? 0;
+  int get demandToSubmit => data.value?.demand.toSubmit.toInt() ?? 0;
+  int get demandToApprove => data.value?.demand.toApprove.toInt() ?? 0;
+  int get demandToAccept => data.value?.demand.toAccept.toInt() ?? 0;
   int get brokenUnassigned => data.value?.alerts.repairsNew.toInt() ?? 0;
   int get suppliesAlert => data.value?.alerts.stock.total ?? 0;
   int get calibrationOverdue =>
@@ -50,7 +53,10 @@ class HomeController extends GetxController {
           requestsPendingTotal +
           requestsApprovedTotal +
           requestsPendingReceive +
-          stocktakesOpenTotal >
+          stocktakesOpenTotal +
+          demandToSubmit +
+          demandToApprove +
+          demandToAccept >
       0;
 
   @override

@@ -11,6 +11,7 @@ import '../data/repositories/calendar_repository.dart';
 import '../data/repositories/calibrations_repository.dart';
 import '../data/repositories/catalogs_repository.dart';
 import '../data/repositories/ai_repository.dart';
+import '../data/repositories/demand_repository.dart';
 import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/files_repository.dart';
@@ -32,6 +33,12 @@ import 'ai/ai_conversations_view.dart';
 import 'ai/ai_view.dart';
 import 'calendar/calendar_controller.dart';
 import 'calendar/calendar_view.dart';
+import 'demand/demand_controller.dart';
+import 'demand/demand_period_controller.dart';
+import 'demand/demand_period_view.dart';
+import 'demand/demand_request_controller.dart';
+import 'demand/demand_request_view.dart';
+import 'demand/demand_view.dart';
 import 'equipment/equipment_detail_controller.dart';
 import 'equipment/equipment_list_controller.dart';
 import 'equipment/equipment_list_view.dart';
@@ -423,6 +430,61 @@ List<GetPage<dynamic>> featurePages() {
         Get.lazyPut(
           () => RequestDetailController(
             requests: Get.find<RequestsRepository>(),
+            id: id,
+          ),
+          tag: id,
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.demand,
+      page: () => const DemandView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final initial = switch (Get.parameters['segment']) {
+          'periods' => DemandSegment.periods,
+          _ => DemandSegment.mine,
+        };
+        Get.lazyPut(
+          () => DemandController(
+            demand: Get.find<DemandRepository>(),
+            canSeePeriods: Get.find<SessionStore>().hasRole(const [
+              'HOSPITAL_ADMIN',
+              'EQUIPMENT_STAFF',
+            ]),
+            initialSegment: initial,
+          ),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.demandRequestDetail,
+      page: () => const DemandRequestView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        final store = Get.find<SessionStore>();
+        Get.lazyPut(
+          () => DemandRequestController(
+            demand: Get.find<DemandRepository>(),
+            id: id,
+            isDeptHead: store.hasRole(const ['DEPT_HEAD']),
+            isStaff: store.hasRole(const ['EQUIPMENT_STAFF']),
+            isAdmin: store.hasRole(const ['HOSPITAL_ADMIN']),
+          ),
+          tag: id,
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.demandPeriodDetail,
+      page: () => const DemandPeriodView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final id = Get.parameters['id'] ?? '';
+        Get.lazyPut(
+          () => DemandPeriodController(
+            demand: Get.find<DemandRepository>(),
             id: id,
           ),
           tag: id,

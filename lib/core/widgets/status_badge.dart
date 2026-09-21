@@ -83,6 +83,35 @@ StatusTone toneForRequestStatus(String status) => switch (status) {
   _ => StatusTone.muted,
 };
 
+/// Map trạng thái kỳ dự trù → tone.
+StatusTone toneForDemandPeriodStatus(String status) => switch (status) {
+  'draft' => StatusTone.muted,
+  'collecting' => StatusTone.info,
+  'consolidating' => StatusTone.warning,
+  'approved' => StatusTone.success,
+  'closed' => StatusTone.success,
+  'cancelled' => StatusTone.danger,
+  _ => StatusTone.muted,
+};
+
+/// Map trạng thái phiếu dự trù khoa → tone.
+StatusTone toneForDemandRequestStatus(String status) => switch (status) {
+  'draft' => StatusTone.muted,
+  'submitted' => StatusTone.warning,
+  'dept_approved' => StatusTone.info,
+  'returned' => StatusTone.danger,
+  'accepted' => StatusTone.success,
+  _ => StatusTone.muted,
+};
+
+/// Map quyết định dòng tổng hợp → tone.
+StatusTone toneForDemandDecision(String decision) => switch (decision) {
+  'buy' => StatusTone.info,
+  'from_stock' => StatusTone.success,
+  'reject' => StatusTone.danger,
+  _ => StatusTone.muted,
+};
+
 /// Badge trạng thái cao 24px, dùng dot để không chỉ dựa vào màu chữ.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.tone, required this.label});

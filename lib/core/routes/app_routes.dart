@@ -29,6 +29,11 @@ class Routes {
   static const requests = '/requests';
   static const requestDetail = '/requests/:id';
   static String request(String id) => '/requests/$id';
+  static const demand = '/demand';
+  static const demandRequestDetail = '/demand/requests/:id';
+  static String demandRequest(String id) => '/demand/requests/$id';
+  static const demandPeriodDetail = '/demand/periods/:id';
+  static String demandPeriod(String id) => '/demand/periods/$id';
   static const stocktakes = '/stocktakes';
   static const stocktakeDetail = '/stocktakes/:id';
   static String stocktake(String id) => '/stocktakes/$id';
