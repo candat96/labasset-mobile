@@ -35,23 +35,25 @@ class AppCard extends StatelessWidget {
     final borderRadius = BorderRadius.circular(radius);
     Widget body = Padding(padding: padding, child: child);
     if (accentColor != null) {
-      body = Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Container(
-              width: 4,
-              decoration: BoxDecoration(
-                color: accentColor,
-                borderRadius: const BorderRadius.horizontal(
-                  right: Radius.circular(4),
+      body = IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  borderRadius: const BorderRadius.horizontal(
+                    right: Radius.circular(4),
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(child: body),
-        ],
+            Expanded(child: body),
+          ],
+        ),
       );
     }
     return DecoratedBox(

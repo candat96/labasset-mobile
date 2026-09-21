@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
@@ -9,6 +10,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/large_title_scaffold.dart';
+import '../../core/widgets/list_item_card.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/segment_tabs.dart';
@@ -23,97 +26,83 @@ class RepairsView extends GetView<RepairsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('repairs.title'.tr),
-        actions: [
-          IconButton(
+    return LargeTitleScaffold(
+      title: 'repairs.title'.tr,
+      actions: [
+        Obx(
+          () => CircleIconButton(
+            icon: LucideIcons.slidersHorizontal,
             tooltip: 'repairs.filter'.tr,
-            icon: Obx(
-              () => Badge(
-                isLabelVisible: controller.filterActive.value,
-                child: const Icon(Icons.filter_list),
+            badge: controller.filterActive.value,
+            onTap: () => _filters(context, controller),
+          ),
+        ),
+      ],
+      header: Obx(
+        () => SegmentTabs<RepairsSegment>(
+          tabs: [
+            SegmentTab(
+              value: RepairsSegment.mine,
+              label: 'repairs.segment.mine'.tr,
+            ),
+            SegmentTab(
+              value: RepairsSegment.unassigned,
+              label: 'repairs.segment.unassigned'.tr,
+            ),
+            SegmentTab(
+              value: RepairsSegment.all,
+              label: 'repairs.segment.all'.tr,
+            ),
+          ],
+          selected: controller.segment.value,
+          onChanged: controller.setSegment,
+        ),
+      ),
+      body: Obx(() {
+        if (controller.loading.value && controller.items.isEmpty) {
+          return const LoadingList();
+        }
+        if (controller.error.value != null && controller.items.isEmpty) {
+          return ErrorState(
+            error: controller.error.value!,
+            onRetry: controller.load,
+          );
+        }
+        if (controller.items.isEmpty) {
+          return EmptyState(
+            icon: LucideIcons.wrench,
+            title: 'repairs.empty'.tr,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: controller.load,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (n) {
+              if (n.metrics.extentAfter < 300) {
+                unawaited(controller.loadMore());
+              }
+              return false;
+            },
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.xxl * 3,
+              ),
+              itemCount: controller.items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (_, i) => _RepairCard(
+                r: controller.items[i],
+                onTap: () async {
+                  await Get.toNamed(Routes.repair(controller.items[i].id));
+                  await controller.load();
+                },
               ),
             ),
-            onPressed: () => _filters(context, controller),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Obx(
-            () => Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.sm,
-              ),
-              child: SegmentTabs<RepairsSegment>(
-                tabs: [
-                  SegmentTab(
-                    value: RepairsSegment.mine,
-                    label: 'repairs.segment.mine'.tr,
-                  ),
-                  SegmentTab(
-                    value: RepairsSegment.unassigned,
-                    label: 'repairs.segment.unassigned'.tr,
-                  ),
-                  SegmentTab(
-                    value: RepairsSegment.all,
-                    label: 'repairs.segment.all'.tr,
-                  ),
-                ],
-                selected: controller.segment.value,
-                onChanged: controller.setSegment,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Obx(() {
-              if (controller.loading.value && controller.items.isEmpty) {
-                return const LoadingList();
-              }
-              if (controller.error.value != null && controller.items.isEmpty) {
-                return ErrorState(
-                  error: controller.error.value!,
-                  onRetry: controller.load,
-                );
-              }
-              if (controller.items.isEmpty) {
-                return EmptyState(
-                  icon: Icons.build_outlined,
-                  title: 'repairs.empty'.tr,
-                );
-              }
-              return RefreshIndicator(
-                onRefresh: controller.load,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (n) {
-                    if (n.metrics.extentAfter < 300) {
-                      unawaited(controller.loadMore());
-                    }
-                    return false;
-                  },
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    itemCount: controller.items.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (_, i) => _RepairCard(
-                      r: controller.items[i],
-                      onTap: () async {
-                        await Get.toNamed(
-                          Routes.repair(controller.items[i].id),
-                        );
-                        await controller.load();
-                      },
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
+        );
+      }),
     );
   }
 }
@@ -131,50 +120,24 @@ class _RepairCard extends StatelessWidget {
         (r.dueAt != null &&
             (DateTime.tryParse(r.dueAt!)?.isBefore(DateTime.now()) ?? false));
     final severity = paletteForTone(context, toneForRepairSeverity(r.severity));
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: onTap,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 3, color: severity.color),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(r.code, style: context.appText.label),
-                        ),
-                        StatusBadge(
-                          tone: toneForRepairStatus(r.status),
-                          label: 'status.repair.${r.status}'.tr,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(r.equipmentLabel, style: context.appText.bodyStrong),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${r.description}${r.dueAt == null ? '' : ' · ${formatSla(r.dueAt)}'}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.appText.caption.copyWith(
-                        color: overdue ? context.status.danger : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+    return ListItemCard(
+      code: r.code,
+      badge: StatusBadge(
+        tone: toneForRepairStatus(r.status),
+        label: 'status.repair.${r.status}'.tr,
       ),
+      title: r.equipmentLabel,
+      accentColor: severity.color,
+      metas: [
+        ListMeta(LucideIcons.fileText, r.description),
+        if (r.dueAt != null)
+          ListMeta(
+            overdue ? LucideIcons.clockAlert : LucideIcons.clock3,
+            formatSla(r.dueAt),
+            color: overdue ? context.status.danger : null,
+          ),
+      ],
+      onTap: onTap,
     );
   }
 }

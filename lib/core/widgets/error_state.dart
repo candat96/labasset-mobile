@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../errors/api_error.dart';
 import 'empty_state.dart';
@@ -13,7 +14,7 @@ class ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyState(
-      icon: Icons.error_outline,
+      icon: LucideIcons.circleAlert,
       title: 'common.error'.tr,
       description: ApiError.messageFor(error),
       action: onRetry == null
