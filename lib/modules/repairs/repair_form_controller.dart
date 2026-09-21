@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../core/errors/api_error.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/equipment.dart';
@@ -161,7 +162,7 @@ class RepairFormController extends GetxController {
       _popWithId(created.id);
       return true;
     } catch (err) {
-      error.value = err.toString();
+      error.value = ApiError.messageFor(err);
       AppSnackbar.error(err);
       return false;
     } finally {
