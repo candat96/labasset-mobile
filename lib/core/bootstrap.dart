@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:get/get.dart';
 
@@ -72,16 +73,22 @@ Future<void> bootstrap() async {
   Get.put(AiRepository(dio), permanent: true);
 
   // Kho cục bộ kiểm kê offline.
-  final stocktakeStore = Get.put(SqfliteStocktakeLocalStore(), permanent: true);
+  final stocktakeStore = SqfliteStocktakeLocalStore();
   await stocktakeStore.init();
 
   // Cache khoá–giá trị (trang chủ offline, lịch sử quét…).
-  final cache = Get.put(SqfliteKvCache(), permanent: true);
+  final cache = SqfliteKvCache();
   await cache.init();
 
   // Hàng đợi offline: sqflite + lắng nghe mạng, handler tệp đính kèm.
+  final outboxStore = SqfliteOutboxStore();
+  registerLocalStores(
+    stocktakeStore: stocktakeStore,
+    cache: cache,
+    outboxStore: outboxStore,
+  );
   final outbox = Get.put(
-    OutboxService(store: SqfliteOutboxStore(), online: hasNetwork),
+    OutboxService(store: outboxStore, online: hasNetwork),
     permanent: true,
   );
   await outbox.init();
@@ -113,4 +120,16 @@ Future<void> bootstrap() async {
     permanent: true,
   );
   Get.put(LockController(store: store), permanent: true);
+}
+
+/// Đăng ký theo interface vì các route/controller tra cứu bằng abstraction.
+@visibleForTesting
+void registerLocalStores({
+  required StocktakeLocalStore stocktakeStore,
+  required KvCache cache,
+  required OutboxStore outboxStore,
+}) {
+  Get.put<StocktakeLocalStore>(stocktakeStore, permanent: true);
+  Get.put<KvCache>(cache, permanent: true);
+  Get.put<OutboxStore>(outboxStore, permanent: true);
 }

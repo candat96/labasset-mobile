@@ -28,7 +28,12 @@ Dio createDio({
   );
   if (kDebugMode) {
     dio.interceptors.add(
-      LogInterceptor(requestBody: false, responseBody: false),
+      LogInterceptor(
+        requestHeader: false,
+        responseHeader: false,
+        requestBody: false,
+        responseBody: false,
+      ),
     );
   }
   return dio;
