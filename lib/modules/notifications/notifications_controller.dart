@@ -94,6 +94,20 @@ class NotificationsController extends GetxController
     }
   }
 
+  /// Vuốt trái: bỏ dòng ngay để Dismissible hoàn tất animation, sau đó đồng bộ
+  /// trạng thái đọc. Ở tab Tất cả dòng sẽ trở lại dạng đã đọc sau lần tải mới.
+  Future<void> dismissRead(NotificationItem n) async {
+    if (n.isRead) return;
+    items.removeWhere((item) => item.id == n.id);
+    try {
+      await repo.markRead(n.id);
+      await reload(silent: true);
+    } catch (e) {
+      AppSnackbar.error(e);
+      await reload(silent: true);
+    }
+  }
+
   Future<void> markAllRead() async {
     try {
       await repo.markAllRead();

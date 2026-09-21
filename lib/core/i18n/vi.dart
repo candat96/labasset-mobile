@@ -49,7 +49,7 @@ const Map<String, String> vi = {
   'field.dateRequired': 'Chọn ngày',
   'field.dateInvalid': 'Ngày không hợp lệ',
   'picker.searchHint': 'Tìm theo mã hoặc tên',
-  'picker.empty': 'Không có kết quả',
+  'picker.empty': 'Không tìm thấy',
   'picker.scan': 'Quét mã',
   'signature.title': 'Ký tên',
   'signature.clear': 'Xoá nét ký',
@@ -112,6 +112,7 @@ const Map<String, String> vi = {
   'notifications.preferences.saved': 'Đã lưu tuỳ chọn',
   'notifications.preferences.empty': 'Chưa có tuỳ chọn cho tài khoản này',
   'notifications.open': 'Mở đối tượng liên quan',
+  'notifications.all': 'Tất cả',
 
   // scan bổ sung
   'scan.continuous': 'Quét liên tục',
