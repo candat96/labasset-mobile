@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'equipment.dart';
+import 'room.dart';
 
 part 'maintenance.g.dart';
 
@@ -29,6 +30,7 @@ class MaintenanceTask {
     this.techSignatureFileId,
     this.deptSignatureFileId,
     this.equipment,
+    this.room,
   });
 
   final String id;
@@ -52,6 +54,7 @@ class MaintenanceTask {
   final String? techSignatureFileId;
   final String? deptSignatureFileId;
   final EquipmentRef? equipment;
+  final RoomRef? room;
 
   String get equipmentLabel => equipment == null
       ? equipmentId
@@ -181,6 +184,7 @@ class Calibration {
     this.status = 'scheduled',
     this.createdAt,
     this.updatedAt,
+    this.room,
   });
 
   final String id;
@@ -203,6 +207,7 @@ class Calibration {
   final String status;
   final String? createdAt;
   final String? updatedAt;
+  final RoomRef? room;
 
   factory Calibration.fromJson(Map<String, dynamic> json) =>
       _$CalibrationFromJson(json);

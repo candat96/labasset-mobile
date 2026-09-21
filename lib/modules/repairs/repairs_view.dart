@@ -130,6 +130,7 @@ class _RepairCard extends StatelessWidget {
       title: r.equipmentLabel,
       accentColor: severity.color,
       metas: [
+        if (r.room != null) ListMeta(LucideIcons.mapPin, r.room!.name),
         ListMeta(LucideIcons.fileText, r.description),
         if (r.dueAt != null)
           ListMeta(

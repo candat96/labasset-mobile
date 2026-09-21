@@ -43,6 +43,9 @@ GlobalSearchHit _$GlobalSearchHitFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       subtitle: json['subtitle'] as String,
       link: json['link'] as String,
+      room: json['room'] == null
+          ? null
+          : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GlobalSearchHitToJson(GlobalSearchHit instance) =>
@@ -52,4 +55,5 @@ Map<String, dynamic> _$GlobalSearchHitToJson(GlobalSearchHit instance) =>
       'title': instance.title,
       'subtitle': instance.subtitle,
       'link': instance.link,
+      'room': instance.room,
     };

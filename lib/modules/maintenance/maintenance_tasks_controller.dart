@@ -69,5 +69,6 @@ class MaintenanceTasksController extends GetxController {
     dueAt: t.dueAt,
     assigneeId: t.assigneeId,
     status: t.status,
+    room: t.room,
   );
 }

@@ -113,6 +113,8 @@ class MaintenanceTasksView extends GetView<MaintenanceTasksController> {
                 title: t.equipmentLabel,
                 accentColor: paletteForTone(context, tone).color,
                 metas: [
+                  if (t.room != null)
+                    ListMeta(LucideIcons.mapPin, t.room!.name),
                   ListMeta(LucideIcons.calendarDays, formatDate(t.scheduledAt)),
                   if (t.dueAt != null)
                     ListMeta(

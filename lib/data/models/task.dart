@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'room.dart';
+
 part 'task.g.dart';
 
 /// Tập con của TaskResponseDto (`GET /v1/maintenance/tasks`).
@@ -16,6 +18,7 @@ class TaskSummary {
     this.status = 'scheduled',
     this.assigneeId,
     this.notes,
+    this.room,
   });
 
   final String id;
@@ -28,6 +31,7 @@ class TaskSummary {
   final String status;
   final String? assigneeId;
   final String? notes;
+  final RoomRef? room;
 
   factory TaskSummary.fromJson(Map<String, dynamic> json) =>
       _$TaskSummaryFromJson(json);

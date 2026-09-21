@@ -13,11 +13,13 @@ class SearchHit {
     required this.title,
     required this.subtitle,
     required this.route,
+    this.roomName,
   });
   final String id;
   final String title;
   final String subtitle;
   final String route;
+  final String? roomName;
 }
 
 class SearchGroup {
@@ -93,6 +95,7 @@ class GlobalSearchController extends GetxController {
           id: hit.id,
           title: hit.code.isEmpty ? hit.title : '${hit.code} — ${hit.title}',
           subtitle: hit.subtitle,
+          roomName: hit.room?.name,
           route: key == 'faults' ? Routes.placeholderFor('faults') : hit.link,
         ),
     ],

@@ -7,7 +7,15 @@ import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
 import 'search_controller.dart';
 
-/// Tìm kiếm toàn cục: thiết bị, vật tư, sửa chữa, phiếu yêu cầu.
+/// Dòng phụ: subtitle + tên phòng (khi API trả `room`).
+Widget? _subtitle(SearchHit hit) {
+  final text = [
+    hit.subtitle,
+    hit.roomName,
+  ].where((e) => e != null && e.trim().isNotEmpty).join(' · ');
+  return text.isEmpty ? null : Text(text);
+}
+
 class SearchView extends GetView<GlobalSearchController> {
   const SearchView({super.key});
 
@@ -85,7 +93,7 @@ class SearchView extends GetView<GlobalSearchController> {
                 ListTile(
                   leading: Icon(_icons[g.key] ?? Icons.search),
                   title: Text(hit.title),
-                  subtitle: hit.subtitle.isEmpty ? null : Text(hit.subtitle),
+                  subtitle: _subtitle(hit),
                   onTap: () => controller.open(hit),
                 ),
             ],

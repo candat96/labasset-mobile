@@ -22,6 +22,9 @@ RepairSummary _$RepairSummaryFromJson(Map<String, dynamic> json) =>
       equipment: json['equipment'] == null
           ? null
           : EquipmentRef.fromJson(json['equipment'] as Map<String, dynamic>),
+      room: json['room'] == null
+          ? null
+          : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$RepairSummaryToJson(RepairSummary instance) =>
@@ -38,6 +41,7 @@ Map<String, dynamic> _$RepairSummaryToJson(RepairSummary instance) =>
       'isOverdue': instance.isOverdue,
       'equipmentDown': instance.equipmentDown,
       'equipment': instance.equipment,
+      'room': instance.room,
     };
 
 RepairPage _$RepairPageFromJson(Map<String, dynamic> json) => RepairPage(

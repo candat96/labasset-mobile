@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'equipment.dart';
+import 'room.dart';
 
 part 'repair.g.dart';
 
@@ -20,6 +21,7 @@ class RepairSummary {
     this.isOverdue = false,
     this.equipmentDown = false,
     this.equipment,
+    this.room,
   });
 
   final String id;
@@ -36,6 +38,7 @@ class RepairSummary {
   @JsonKey(defaultValue: false)
   final bool equipmentDown;
   final EquipmentRef? equipment;
+  final RoomRef? room;
 
   String get equipmentLabel => equipment?.name ?? equipmentId;
 

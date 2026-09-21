@@ -80,6 +80,7 @@ class CalibrationsView extends GetView<CalibrationsController> {
                         title: Text(c.code),
                         subtitle: Text(
                           '${c.type == 'inspection' ? 'calibration.type.inspection'.tr : 'calibration.type.calibration'.tr}'
+                          '${c.room == null ? '' : ' · ${c.room!.name}'}'
                           '${c.scheduledAt == null ? '' : ' · ${formatDate(c.scheduledAt)}'}'
                           '${c.nextDueAt == null ? '' : ' · ${'calibration.nextDue'.tr}: ${formatDate(c.nextDueAt)}'}',
                           style: theme.textTheme.bodySmall,

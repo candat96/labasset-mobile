@@ -149,6 +149,7 @@ class EquipmentDetailController extends GetxController {
 
   Future<bool> createTransfer({
     required String toDepartmentId,
+    String? toRoomId,
     String? toLocation,
     required String reason,
   }) async {
@@ -156,6 +157,7 @@ class EquipmentDetailController extends GetxController {
       await equipment.createTransfer(
         id,
         toDepartmentId: toDepartmentId,
+        toRoomId: toRoomId,
         toLocation: toLocation,
         reason: reason,
       );

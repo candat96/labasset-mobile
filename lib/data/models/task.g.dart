@@ -17,6 +17,9 @@ TaskSummary _$TaskSummaryFromJson(Map<String, dynamic> json) => TaskSummary(
   status: json['status'] as String? ?? 'scheduled',
   assigneeId: json['assigneeId'] as String?,
   notes: json['notes'] as String?,
+  room: json['room'] == null
+      ? null
+      : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$TaskSummaryToJson(TaskSummary instance) =>
@@ -31,6 +34,7 @@ Map<String, dynamic> _$TaskSummaryToJson(TaskSummary instance) =>
       'status': instance.status,
       'assigneeId': instance.assigneeId,
       'notes': instance.notes,
+      'room': instance.room,
     };
 
 TaskPage _$TaskPageFromJson(Map<String, dynamic> json) => TaskPage(

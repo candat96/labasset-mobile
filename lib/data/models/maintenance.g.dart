@@ -43,6 +43,9 @@ MaintenanceTask _$MaintenanceTaskFromJson(Map<String, dynamic> json) =>
       equipment: json['equipment'] == null
           ? null
           : EquipmentRef.fromJson(json['equipment'] as Map<String, dynamic>),
+      room: json['room'] == null
+          ? null
+          : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MaintenanceTaskToJson(MaintenanceTask instance) =>
@@ -68,6 +71,7 @@ Map<String, dynamic> _$MaintenanceTaskToJson(MaintenanceTask instance) =>
       'techSignatureFileId': instance.techSignatureFileId,
       'deptSignatureFileId': instance.deptSignatureFileId,
       'equipment': instance.equipment,
+      'room': instance.room,
     };
 
 ChecklistItem _$ChecklistItemFromJson(Map<String, dynamic> json) =>
@@ -161,6 +165,9 @@ Calibration _$CalibrationFromJson(Map<String, dynamic> json) => Calibration(
   status: json['status'] as String? ?? 'scheduled',
   createdAt: json['createdAt'] as String?,
   updatedAt: json['updatedAt'] as String?,
+  room: json['room'] == null
+      ? null
+      : RoomRef.fromJson(json['room'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$CalibrationToJson(Calibration instance) =>
@@ -185,6 +192,7 @@ Map<String, dynamic> _$CalibrationToJson(Calibration instance) =>
       'status': instance.status,
       'createdAt': instance.createdAt,
       'updatedAt': instance.updatedAt,
+      'room': instance.room,
     };
 
 CalibrationPage _$CalibrationPageFromJson(Map<String, dynamic> json) =>

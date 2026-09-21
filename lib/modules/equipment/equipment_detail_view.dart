@@ -24,6 +24,8 @@ import '../../core/widgets/qty_field.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/department.dart';
 import '../../data/models/equipment_detail.dart';
+import '../../data/models/room.dart';
+import '../../data/repositories/catalogs_repository.dart';
 import '../../data/repositories/departments_repository.dart';
 import 'equipment_detail_controller.dart';
 import 'tabs/accessories_tab.dart';
@@ -212,6 +214,7 @@ class _SummaryCard extends StatelessWidget {
                 e.serial == null ? null : 'SN ${e.serial}',
                 [
                   e.department?.name,
+                  e.room?.name,
                   e.location,
                 ].whereType<String>().join(' · '),
               ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
@@ -660,6 +663,7 @@ class _QuickActions extends StatelessWidget {
     );
     final dept = selection?.option;
     if (dept == null || !context.mounted) return;
+    RoomRef? toRoom;
     await AppSheet.show<void>(
       context,
       builder: (ctx) => SheetForm(
@@ -669,7 +673,52 @@ class _QuickActions extends StatelessWidget {
           children: [
             SheetHeader(title: 'equipment.transfer.title'.tr),
             Text(dept.label),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
+            // Phòng đích (tuỳ chọn, lọc theo khoa đích).
+            InkWell(
+              onTap: () async {
+                final catalogs = Get.find<CatalogsRepository>();
+                final rooms = await catalogs.rooms(departmentId: dept.value);
+                if (!context.mounted) return;
+                final sel = await PickerSheet.show<RoomRef>(
+                  context,
+                  title: 'equipment.room.name'.tr,
+                  kind: PickerKind.equipment,
+                  showClear: true,
+                  selected: toRoom,
+                  loader: (query) async {
+                    final needle = query.trim().toLowerCase();
+                    return [
+                      for (final r in rooms)
+                        if (needle.isEmpty ||
+                            r.code.toLowerCase().contains(needle) ||
+                            r.name.toLowerCase().contains(needle))
+                          PickerOption(
+                            value: r,
+                            code: r.code,
+                            name: r.name,
+                            subtitle:
+                                r.placeText ??
+                                (r.departmentId == null
+                                    ? 'equipment.room.shared'.tr
+                                    : null),
+                          ),
+                    ];
+                  },
+                );
+                if (sel == null) return;
+                toRoom = sel.cleared ? null : sel.option?.value;
+                form.refresh(() {});
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'equipment.room.name'.tr,
+                  suffixIcon: const Icon(Icons.chevron_right),
+                ),
+                child: Text(toRoom?.name ?? 'equipment.room.name'.tr),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: form.field('location'),
               decoration: InputDecoration(
@@ -696,6 +745,7 @@ class _QuickActions extends StatelessWidget {
                       form.setBusy(true);
                       final ok = await controller.createTransfer(
                         toDepartmentId: dept.value,
+                        toRoomId: toRoom?.id,
                         toLocation: form.textOrNull('location'),
                         reason: form.text('reason'),
                       );

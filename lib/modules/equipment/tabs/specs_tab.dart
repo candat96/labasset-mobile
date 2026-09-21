@@ -31,6 +31,7 @@ class SpecsTab extends StatelessWidget {
               _row(context, 'equipment.group'.tr, e.group?.name),
               _row(context, 'equipment.manufacturer'.tr, e.manufacturer?.name),
               _row(context, 'equipment.department'.tr, e.department?.name),
+              _row(context, 'equipment.room.name'.tr, e.room?.name),
               _row(context, 'equipment.location.label'.tr, e.location),
               _row(context, 'equipment.staff'.tr, e.staffInCharge?.fullName),
               _row(

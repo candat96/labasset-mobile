@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'room.dart';
+
 part 'global_search.g.dart';
 
 @JsonSerializable(explicitToJson: true)
@@ -30,12 +32,14 @@ class GlobalSearchHit {
     required this.title,
     required this.subtitle,
     required this.link,
+    this.room,
   });
   final String id;
   final String code;
   final String title;
   final String subtitle;
   final String link;
+  final RoomRef? room;
   factory GlobalSearchHit.fromJson(Map<String, dynamic> json) =>
       _$GlobalSearchHitFromJson(json);
   Map<String, dynamic> toJson() => _$GlobalSearchHitToJson(this);
