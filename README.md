@@ -107,9 +107,8 @@ Smoke tự skip khi thiếu `E2E_PASSWORD`. CI: format, analyze, test, build apk
 
 ## API còn thiếu cho mobile
 
-1. Chưa có API "Việc của tôi hôm nay" & cảnh báo tổng hợp — trang chủ dùng mock có nhãn.
-2. `GET /v1/equipment/by-qr/{token}` chỉ nhận token QR; barcode mã máy phải fallback `GET /v1/equipment?q=`.
-3. Chưa có tra lô vật tư theo mã quét (`/v1/stock/lots?barcode=`).
-4. Khi bổ sung push: cần cách biết server đã bật FCM để app quyết định xin quyền.
-5. Thiếu response schema (như web): `/v1/settings/public`, `/v1/users`, `/v1/departments`; `page/limit` khai `Object`.
-6. Quên mật khẩu chỉ gửi link web; mobile không có màn reset (theo thiết kế).
+1. D2 `/v1/ai/*` chưa có — màn Trợ lý AI tiếp tục dùng mock SSE.
+2. Gap 26: `StocktakeSessionResponseDto` thiếu `scopeName`, `progressPercent`; quyền đọc items cho `DEPT_USER` còn thiếu.
+3. Gap 28: DTO sửa chữa còn thiếu tên khoa/người/NCC và một số quyền workload/log.
+
+D18 `/v1/me/tasks`, D19 `/v1/search` và D1 `/v1/dashboard`, `/v1/reports`, `/v1/reports/{key}` đã được nối API thật.
