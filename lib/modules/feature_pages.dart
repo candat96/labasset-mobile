@@ -584,7 +584,12 @@ List<GetPage<dynamic>> featurePages() {
           () => NewEquipmentController(
             equipment: Get.find<EquipmentRepository>(),
             departments: Get.find<DepartmentsRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
             attachments: Get.find<AttachmentService>(),
+            canCreateRoom: Get.find<SessionStore>().hasRole(const [
+              'HOSPITAL_ADMIN',
+              'EQUIPMENT_STAFF',
+            ]),
           ),
         ),
       ),

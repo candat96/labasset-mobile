@@ -62,6 +62,7 @@ class PickerSheet {
     String? searchHint,
     PickerKind kind = PickerKind.generic,
     T? selected,
+    Widget Function(BuildContext context)? footer,
   }) {
     return AppSheet.show<PickerSelection<T>>(
       context,
@@ -75,6 +76,7 @@ class PickerSheet {
         searchHint: searchHint,
         kind: kind,
         selected: selected,
+        footer: footer,
       ),
     );
   }
@@ -89,6 +91,7 @@ class _PickerContent<T> extends StatefulWidget {
     required this.searchHint,
     required this.kind,
     required this.selected,
+    required this.footer,
   });
 
   final String title;
@@ -98,6 +101,7 @@ class _PickerContent<T> extends StatefulWidget {
   final String? searchHint;
   final PickerKind kind;
   final T? selected;
+  final Widget Function(BuildContext context)? footer;
 
   @override
   State<_PickerContent<T>> createState() => _PickerContentState<T>();
@@ -219,6 +223,13 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Expanded(child: _body()),
+          if (widget.footer != null)
+            Container(
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.divider)),
+              ),
+              child: widget.footer!(context),
+            ),
         ],
       ),
     );

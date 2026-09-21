@@ -10,6 +10,7 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/signature_pad.dart';
 import '../../data/models/department.dart';
+import '../../data/repositories/catalogs_repository.dart';
 import '../../data/repositories/departments_repository.dart';
 import 'new_equipment_controller.dart';
 
@@ -26,12 +27,15 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            TextField(
-              controller: controller.name,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: 'equipment.new.name'.tr,
-                hintText: 'Máy ly tâm…',
+            Obx(
+              () => TextField(
+                controller: controller.name,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: 'equipment.new.name'.tr,
+                  hintText: 'Máy ly tâm…',
+                  errorText: controller.fieldErrors['name'],
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -67,16 +71,41 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
+            // Nhóm máy.
             Obx(
-              () => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.apartment_outlined),
-                title: Text(
-                  controller.department.value == null
-                      ? 'equipment.new.department'.tr
-                      : controller.department.value!.name,
+              () => _PickerTile(
+                icon: Icons.category_outlined,
+                label: 'equipment.group'.tr,
+                value: controller.group.value?.name,
+                onTap: () => _pickCatalog(
+                  context,
+                  slug: 'equipment-groups',
+                  title: 'equipment.group'.tr,
+                  onPicked: controller.setGroup,
                 ),
-                trailing: const Icon(Icons.chevron_right),
+              ),
+            ),
+            // Hãng.
+            Obx(
+              () => _PickerTile(
+                icon: Icons.factory_outlined,
+                label: 'equipment.manufacturer'.tr,
+                value: controller.manufacturer.value?.name,
+                onTap: () => _pickCatalog(
+                  context,
+                  slug: 'manufacturers',
+                  title: 'equipment.manufacturer'.tr,
+                  onPicked: controller.setManufacturer,
+                ),
+              ),
+            ),
+            // Khoa/Phòng ban.
+            Obx(
+              () => _PickerTile(
+                icon: Icons.apartment_outlined,
+                label: 'equipment.new.department'.tr,
+                value: controller.department.value?.name,
+                error: controller.fieldErrors['departmentId'],
                 onTap: () async {
                   final departments = Get.find<DepartmentsRepository>();
                   final selection = await PickerSheet.show<String>(
@@ -100,10 +129,22 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                 },
               ),
             ),
+            // Phòng (disabled khi chưa chọn khoa).
+            Obx(
+              () => _PickerTile(
+                icon: Icons.meeting_room_outlined,
+                label: 'equipment.new.room'.tr,
+                value: controller.room.value?.name,
+                placeholder: 'equipment.new.roomPlaceholder'.tr,
+                enabled: controller.department.value != null,
+                error: controller.fieldErrors['roomId'],
+                onTap: () => controller.pickRoom(context),
+              ),
+            ),
             TextField(
               controller: controller.location,
               decoration: InputDecoration(
-                labelText: 'equipment.new.location'.tr,
+                labelText: 'equipment.new.locationInRoom'.tr,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -163,6 +204,85 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _pickCatalog(
+    BuildContext context, {
+    required String slug,
+    required String title,
+    required void Function(DepartmentRef) onPicked,
+  }) async {
+    final catalogs = Get.find<CatalogsRepository>();
+    final selection = await PickerSheet.show<String>(
+      context,
+      title: title,
+      loader: (q) async {
+        final list = await catalogs.list(slug, q: q, limit: 20);
+        return [
+          for (final DepartmentRef d in list)
+            PickerOption(value: d.id, code: d.code, name: d.name),
+        ];
+      },
+    );
+    final d = selection?.option;
+    if (d != null) {
+      onPicked(DepartmentRef(id: d.value, code: d.code, name: d.name));
+    }
+  }
+}
+
+/// Dòng chọn tham chiếu dạng tile (giá trị + lỗi field).
+class _PickerTile extends StatelessWidget {
+  const _PickerTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+    this.placeholder,
+    this.error,
+    this.enabled = true,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? value;
+  final String? placeholder;
+  final String? error;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          enabled: enabled,
+          leading: Icon(icon),
+          title: Text(
+            value ?? (enabled ? label : (placeholder ?? label)),
+            style: value == null && !enabled
+                ? TextStyle(color: theme.disabledColor)
+                : null,
+          ),
+          subtitle: value != null ? Text(label) : null,
+          trailing: const Icon(Icons.chevron_right),
+          onTap: enabled ? onTap : null,
+        ),
+        if (error != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 4),
+            child: Text(
+              error!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
