@@ -41,12 +41,7 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
       body: Obx(() {
-        final empty =
-            controller.repairsAssigned.isEmpty &&
-            controller.tasksDue.isEmpty &&
-            controller.requestsPending.isEmpty &&
-            controller.requestsApproved.isEmpty &&
-            controller.stocktakesOpen.isEmpty;
+        final empty = controller.data.value == null;
         if (controller.loading.value &&
             empty &&
             controller.cachedAt.value == null) {
@@ -74,78 +69,50 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     _WorkGroup(
                       title: 'home.task.repairsAssigned'.tr,
-                      total: controller.repairsAssignedTotal.value,
+                      total: controller.repairsAssignedTotal,
                       route: '${Routes.repairs}?segment=mine',
-                      children: [
-                        for (final r in controller.repairsAssigned)
-                          _WorkRow(
-                            title: '${r.code} — ${r.equipmentLabel}',
-                            status: 'status.repair.${r.status}'.tr,
-                            icon: Icons.build_outlined,
-                            onTap: () => Get.toNamed(Routes.repair(r.id)),
-                          ),
-                      ],
                     ),
-                    if (controller.showStocktakes.value)
-                      _WorkGroup(
-                        title: 'home.task.stocktakesOpen'.tr,
-                        total: controller.stocktakesOpenTotal.value,
-                        route: Routes.stocktakes,
-                        children: [
-                          for (final s in controller.stocktakesOpen)
-                            _WorkRow(
-                              title: '${s.code} — ${s.name}',
-                              status: 'stocktake.status.${s.status}'.tr,
-                              icon: Icons.fact_check_outlined,
-                              onTap: () => Get.toNamed(Routes.stocktake(s.id)),
-                            ),
-                        ],
-                      ),
+                    _WorkGroup(
+                      title: 'home.task.repairsPendingResponse'.tr,
+                      total: controller.repairsPendingResponse,
+                      route: '${Routes.repairs}?segment=mine',
+                    ),
+                    _WorkGroup(
+                      title: 'home.task.repairsOverdue'.tr,
+                      total: controller.repairsOverdue,
+                      route: '${Routes.repairs}?segment=mine',
+                    ),
+                    _WorkGroup(
+                      title: 'home.task.stocktakesOpen'.tr,
+                      total: controller.stocktakesOpenTotal,
+                      route: Routes.stocktakes,
+                    ),
                     _WorkGroup(
                       title: 'home.task.maintenanceDue'.tr,
-                      total: controller.tasksDueTotal.value,
+                      total: controller.tasksDueTotal,
                       route: Routes.maintenanceTasks,
-                      children: [
-                        for (final t in controller.tasksDue)
-                          _WorkRow(
-                            title: t.code,
-                            status:
-                                '${'status.task.${t.status}'.tr} · ${formatDate(t.scheduledAt)}',
-                            icon: Icons.event_available_outlined,
-                            onTap: () =>
-                                Get.toNamed(Routes.maintenanceTask(t.id)),
-                          ),
-                      ],
+                    ),
+                    _WorkGroup(
+                      title: 'home.task.maintenanceOverdue'.tr,
+                      total: controller.tasksOverdue,
+                      route: Routes.maintenanceTasks,
                     ),
                     _WorkGroup(
                       title: 'home.task.requestsPending'.tr,
-                      total: controller.requestsPendingTotal.value,
+                      total: controller.requestsPendingTotal,
                       route: '${Routes.requests}?segment=pending',
-                      children: [
-                        for (final r in controller.requestsPending)
-                          _WorkRow(
-                            title: '${r.code} — ${r.reason}',
-                            status: 'status.request.${r.status}'.tr,
-                            icon: Icons.description_outlined,
-                            onTap: () => Get.toNamed(Routes.request(r.id)),
-                          ),
-                      ],
                     ),
                     _WorkGroup(
                       title: 'home.task.requestsApproved'.tr,
-                      total: controller.requestsApprovedTotal.value,
+                      total: controller.requestsApprovedTotal,
                       route: '${Routes.requests}?segment=toIssue',
-                      children: [
-                        for (final r in controller.requestsApproved)
-                          _WorkRow(
-                            title: '${r.code} — ${r.reason}',
-                            status: 'status.request.${r.status}'.tr,
-                            icon: Icons.inventory_outlined,
-                            onTap: () => Get.toNamed(Routes.request(r.id)),
-                          ),
-                      ],
                     ),
-                    if (empty)
+                    _WorkGroup(
+                      title: 'home.task.requestsPendingReceive'.tr,
+                      total: controller.requestsPendingReceive,
+                      route: '${Routes.requests}?segment=mine',
+                    ),
+                    if (!controller.hasWork)
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: AppSpacing.sm,
@@ -166,9 +133,9 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: KpiTile(
                         label: 'home.alert.brokenUnassigned'.tr,
-                        value: '${controller.brokenUnassigned.value}',
+                        value: '${controller.brokenUnassigned}',
                         icon: Icons.report_problem_outlined,
-                        tone: controller.brokenUnassigned.value > 0
+                        tone: controller.brokenUnassigned > 0
                             ? StatusTone.danger
                             : StatusTone.success,
                         onTap: () =>
@@ -179,9 +146,9 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: KpiTile(
                         label: 'home.alert.suppliesLow'.tr,
-                        value: '${controller.suppliesAlert.value}',
+                        value: '${controller.suppliesAlert}',
                         icon: Icons.inventory_2_outlined,
-                        tone: controller.suppliesAlert.value > 0
+                        tone: controller.suppliesAlert > 0
                             ? StatusTone.warning
                             : StatusTone.success,
                         onTap: () => Get.toNamed(Routes.stockAlerts),
@@ -191,9 +158,9 @@ class HomeView extends GetView<HomeController> {
                     Expanded(
                       child: KpiTile(
                         label: 'home.alert.calibrationOverdue'.tr,
-                        value: '${controller.calibrationOverdue.value}',
+                        value: '${controller.calibrationOverdue}',
                         icon: Icons.verified_outlined,
-                        tone: controller.calibrationOverdue.value > 0
+                        tone: controller.calibrationOverdue > 0
                             ? StatusTone.danger
                             : StatusTone.success,
                         onTap: () => Get.toNamed(Routes.calibrations),
@@ -300,18 +267,16 @@ class _WorkGroup extends StatelessWidget {
     required this.title,
     required this.total,
     required this.route,
-    required this.children,
   });
 
   final String title;
   final int total;
   final String route;
-  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if (children.isEmpty) return const SizedBox.shrink();
+    if (total == 0) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Column(
@@ -325,59 +290,13 @@ class _WorkGroup extends StatelessWidget {
                   style: theme.textTheme.labelLarge,
                 ),
               ),
-              if (total > children.length)
-                TextButton(
-                  onPressed: () => Get.toNamed(route),
-                  child: Text('home.viewAll'.tr),
-                ),
+              TextButton(
+                onPressed: () => Get.toNamed(route),
+                child: Text('home.viewAll'.tr),
+              ),
             ],
           ),
-          ...children,
         ],
-      ),
-    );
-  }
-}
-
-class _WorkRow extends StatelessWidget {
-  const _WorkRow({
-    required this.title,
-    required this.status,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String title;
-  final String status;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: theme.colorScheme.primary),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.bodyMedium),
-                  Text(status, style: theme.textTheme.bodySmall),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -18,6 +18,8 @@ import '../data/repositories/faults_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
+import '../data/repositories/reports_repository.dart';
+import '../data/repositories/search_repository.dart';
 import '../data/repositories/settings_repository.dart';
 import '../data/repositories/stock_repository.dart';
 import '../data/repositories/stocktakes_repository.dart';
@@ -149,12 +151,8 @@ List<GetPage<dynamic>> featurePages() {
       middlewares: protected,
       binding: BindingsBuilder(
         () => Get.lazyPut(
-          () => GlobalSearchController(
-            equipment: Get.find<EquipmentRepository>(),
-            supplies: Get.find<SuppliesRepository>(),
-            repairs: Get.find<RepairsRepository>(),
-            requests: Get.find<RequestsRepository>(),
-          ),
+          () =>
+              GlobalSearchController(repository: Get.find<SearchRepository>()),
         ),
       ),
     ),
@@ -475,9 +473,8 @@ List<GetPage<dynamic>> featurePages() {
       binding: BindingsBuilder(
         () => Get.lazyPut(
           () => ReportsController(
+            reports: Get.find<ReportsRepository>(),
             equipment: Get.find<EquipmentRepository>(),
-            repairs: Get.find<RepairsRepository>(),
-            stock: Get.find<StockRepository>(),
             departments: Get.find<DepartmentsRepository>(),
             cache: Get.find<KvCache>(),
           ),

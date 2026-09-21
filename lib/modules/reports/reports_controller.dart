@@ -1,53 +1,57 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/cache/kv_cache.dart';
+import '../../core/services/pdf_file_service.dart';
+import '../../core/widgets/app_snackbar.dart';
 import '../../data/models/equipment.dart';
-import '../../data/models/repair_detail.dart';
+import '../../data/models/report.dart';
 import '../../data/repositories/departments_repository.dart';
 import '../../data/repositories/equipment_repository.dart';
-import '../../data/repositories/repairs_repository.dart';
-import '../../data/repositories/stock_repository.dart';
+import '../../data/repositories/reports_repository.dart';
 
-/// Báo cáo nhanh `/reports`: thẻ số liệu ghép API + máy theo khoa (cache 1h).
+typedef ReportFileAction = Future<void> Function(File file);
+typedef ReportFileWriter = Future<File> Function(ReportExport report);
+
+/// Báo cáo nhanh từ D1; máy theo khoa vẫn có cache riêng để dùng thực địa.
 class ReportsController extends GetxController {
   ReportsController({
+    required this.reports,
     required this.equipment,
-    required this.repairs,
-    required this.stock,
     required this.departments,
     this.cache,
-  });
+    ReportFileAction? openFile,
+    ReportFileAction? shareFile,
+    ReportFileWriter? writeFile,
+  }) : _openFile = openFile ?? PdfFileService.open,
+       _shareFile = shareFile ?? PdfFileService.share,
+       _writeFile = writeFile ?? _writeReportFile;
 
+  final ReportsRepository reports;
   final EquipmentRepository equipment;
-  final RepairsRepository repairs;
-  final StockRepository stock;
   final DepartmentsRepository departments;
   final KvCache? cache;
-
-  static const statuses = [
-    'active',
-    'broken',
-    'awaiting_parts',
-    'suspended',
-    'retired',
-    'disposed',
-  ];
+  final ReportFileAction _openFile;
+  final ReportFileAction _shareFile;
+  final ReportFileWriter _writeFile;
   static const cacheTtl = Duration(hours: 1);
 
-  final RxMap<String, int> equipmentByStatus = <String, int>{}.obs;
-  final Rxn<RepairStats> monthStats = Rxn<RepairStats>();
-  final RxList<WorkloadItem> workload = <WorkloadItem>[].obs;
-  final RxInt alertsTotal = 0.obs;
-  final RxnString stockValue = RxnString();
+  final RxList<DashboardCard> cards = <DashboardCard>[].obs;
+  final RxList<ReportMeta> reportList = <ReportMeta>[].obs;
+  final RxnString generatedAt = RxnString();
+  final RxnString exportingKey = RxnString();
 
   final RxnString departmentId = RxnString();
   final RxnString departmentName = RxnString();
   final RxList<EquipmentSummary> machines = <EquipmentSummary>[].obs;
   final Rxn<DateTime> machinesCachedAt = Rxn<DateTime>();
   final machinesSearch = TextEditingController();
+  final reportFrom = TextEditingController(text: _firstDayOfMonth());
+  final reportTo = TextEditingController(text: _today());
 
   final RxBool loading = true.obs;
   final Rxn<Object> error = Rxn<Object>();
@@ -55,55 +59,42 @@ class ReportsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    load();
+    unawaited(load());
   }
 
   Future<void> load() async {
     loading.value = true;
     error.value = null;
     Object? firstError;
-    var ok = 0;
-
-    for (final s in statuses) {
-      try {
-        equipmentByStatus[s] = (await equipment.count(status: s)).toInt();
-        ok++;
-      } catch (e) {
-        firstError ??= e;
-      }
-    }
-    final now = DateTime.now();
-    final from = DateTime(now.year, now.month, 1).toUtc().toIso8601String();
-    final to = now.toUtc().toIso8601String();
-    try {
-      monthStats.value = await repairs.stats(from: from, to: to);
-      ok++;
-    } catch (e) {
-      firstError ??= e;
-    }
-    try {
-      workload.assignAll(await repairs.workload());
-      ok++;
-    } catch (e) {
-      firstError ??= e;
-    }
-    try {
-      alertsTotal.value = (await stock.alerts(
-        resolved: false,
-        limit: 1,
-      )).total.toInt();
-      ok++;
-    } catch (e) {
-      firstError ??= e;
-    }
-    if (ok == 0) error.value = firstError;
+    var loaded = 0;
+    await Future.wait([
+      () async {
+        try {
+          final dashboard = await reports.dashboard();
+          cards.assignAll(dashboard.cards);
+          generatedAt.value = dashboard.generatedAt;
+          loaded++;
+        } catch (e) {
+          firstError ??= e;
+        }
+      }(),
+      () async {
+        try {
+          reportList.assignAll(await reports.list());
+          loaded++;
+        } catch (e) {
+          firstError ??= e;
+        }
+      }(),
+    ]);
+    if (loaded == 0) error.value = firstError;
     loading.value = false;
   }
 
   Future<void> pickDepartment() async {
     final list = await departments.list(limit: 50);
     if (list.isEmpty) return;
-    final d = await Get.bottomSheet<dynamic>(
+    final selected = await Get.bottomSheet<dynamic>(
       SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -119,10 +110,10 @@ class ReportsController extends GetxController {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  for (final x in list)
+                  for (final item in list)
                     ListTile(
-                      title: Text('${x.code} — ${x.name}'),
-                      onTap: () => Get.back(result: x),
+                      title: Text('${item.code} — ${item.name}'),
+                      onTap: () => Get.back(result: item),
                     ),
                 ],
               ),
@@ -132,9 +123,9 @@ class ReportsController extends GetxController {
       ),
       backgroundColor: Get.theme.colorScheme.surface,
     );
-    if (d == null) return;
-    departmentId.value = d.id as String;
-    departmentName.value = d.name as String;
+    if (selected == null) return;
+    departmentId.value = selected.id as String;
+    departmentName.value = selected.name as String;
     await loadMachines();
   }
 
@@ -151,39 +142,135 @@ class ReportsController extends GetxController {
       });
     } catch (e) {
       final cached = await cache?.get(key);
-      if (cached != null) {
-        final raw = cached.value['items'];
-        if (raw is List) {
-          machines.assignAll(
-            raw
-                .whereType<Map>()
-                .map(
-                  (m) =>
-                      EquipmentSummary.fromJson(Map<String, dynamic>.from(m)),
-                )
-                .toList(),
-          );
-          machinesCachedAt.value = cached.updatedAt;
-        }
-      } else {
+      if (cached == null) {
         error.value = e;
+        return;
+      }
+      final raw = cached.value['items'];
+      if (raw is List) {
+        machines.assignAll(
+          raw.whereType<Map>().map(
+            (item) =>
+                EquipmentSummary.fromJson(Map<String, dynamic>.from(item)),
+          ),
+        );
+        machinesCachedAt.value = cached.updatedAt;
       }
     }
   }
 
-  /// Danh sách báo cáo cố định (hợp đồng D1) — API `/v1/reports` chưa có.
-  static const reportKeys = [
-    ('equipment_inventory', 'reports.key.equipment_inventory'),
-    ('equipment_maintenance', 'reports.key.equipment_maintenance'),
-    ('repairs_summary', 'reports.key.repairs_summary'),
-    ('stock_inventory', 'reports.key.stock_inventory'),
-    ('stock_movement', 'reports.key.stock_movement'),
-    ('calibration_due', 'reports.key.calibration_due'),
-  ];
+  Future<void> chooseExport(ReportMeta report) async {
+    final choice = await Get.bottomSheet<String>(
+      SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: reportFrom,
+                      decoration: InputDecoration(
+                        labelText: 'reports.from'.tr,
+                        hintText: 'reports.dateHint'.tr,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: reportTo,
+                      decoration: InputDecoration(
+                        labelText: 'reports.to'.tr,
+                        hintText: 'reports.dateHint'.tr,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.open_in_new),
+              title: Text('reports.openXlsx'.tr),
+              onTap: () => Get.back(result: 'open:xlsx'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.share_outlined),
+              title: Text('reports.shareXlsx'.tr),
+              onTap: () => Get.back(result: 'share:xlsx'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_outlined),
+              title: Text('reports.openPdf'.tr),
+              onTap: () => Get.back(result: 'open:pdf'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.share_outlined),
+              title: Text('reports.sharePdf'.tr),
+              onTap: () => Get.back(result: 'share:pdf'),
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Get.theme.colorScheme.surface,
+    );
+    if (choice == null) return;
+    final parts = choice.split(':');
+    await export(report, format: parts[1], share: parts[0] == 'share');
+  }
+
+  Future<bool> export(
+    ReportMeta report, {
+    required String format,
+    required bool share,
+  }) async {
+    exportingKey.value = report.key;
+    try {
+      final result = await reports.export(
+        report.key,
+        format: format,
+        departmentId: departmentId.value,
+        from: reportFrom.text.trim(),
+        to: reportTo.text.trim(),
+      );
+      final file = await _writeFile(result);
+      await (share ? _shareFile(file) : _openFile(file));
+      return true;
+    } catch (e) {
+      AppSnackbar.error(e);
+      return false;
+    } finally {
+      exportingKey.value = null;
+    }
+  }
 
   @override
   void onClose() {
     machinesSearch.dispose();
+    reportFrom.dispose();
+    reportTo.dispose();
     super.onClose();
   }
+}
+
+String _date(DateTime value) =>
+    '${value.year.toString().padLeft(4, '0')}-'
+    '${value.month.toString().padLeft(2, '0')}-'
+    '${value.day.toString().padLeft(2, '0')}';
+
+String _firstDayOfMonth() {
+  final now = DateTime.now();
+  return _date(DateTime(now.year, now.month));
+}
+
+String _today() => _date(DateTime.now());
+
+Future<File> _writeReportFile(ReportExport report) async {
+  final dir = await getTemporaryDirectory();
+  final safeName = report.fileName.replaceAll(RegExp(r'[^\w.\-]'), '_');
+  final file = File('${dir.path}/$safeName');
+  await file.writeAsBytes(report.bytes, flush: true);
+  return file;
 }

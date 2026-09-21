@@ -7,14 +7,18 @@ import 'package:labasset_mobile/core/stocktake/stocktake_local_store.dart';
 import 'package:labasset_mobile/core/sync/outbox_service.dart';
 import 'package:labasset_mobile/core/widgets/empty_state.dart';
 import 'package:labasset_mobile/core/widgets/error_state.dart';
+import 'package:labasset_mobile/data/models/my_tasks.dart';
+import 'package:labasset_mobile/data/models/report.dart';
 import 'package:labasset_mobile/data/repositories/ai_repository.dart';
 import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
 import 'package:labasset_mobile/data/repositories/departments_repository.dart';
 import 'package:labasset_mobile/data/repositories/equipment_repository.dart';
 import 'package:labasset_mobile/data/repositories/files_repository.dart';
+import 'package:labasset_mobile/data/repositories/me_repository.dart';
 import 'package:labasset_mobile/data/repositories/notifications_repository.dart';
 import 'package:labasset_mobile/data/repositories/repairs_repository.dart';
 import 'package:labasset_mobile/data/repositories/requests_repository.dart';
+import 'package:labasset_mobile/data/repositories/reports_repository.dart';
 import 'package:labasset_mobile/data/repositories/settings_repository.dart';
 import 'package:labasset_mobile/data/repositories/stock_repository.dart';
 import 'package:labasset_mobile/data/repositories/stocktakes_repository.dart';
@@ -79,18 +83,12 @@ class _Attachments extends Mock implements AttachmentService {}
 
 class _Files extends Mock implements FilesRepository {}
 
+class _MeRepo extends Mock implements MeRepository {}
+
+class _ReportsRepo extends Mock implements ReportsRepository {}
+
 class _Home extends HomeController {
-  _Home()
-    : super(
-        store: fakeStore(),
-        settings: _SettingsRepo(),
-        repairs: _RepairsRepo(),
-        tasks: _TasksRepo(),
-        requests: _RequestsRepo(),
-        equipment: _EquipmentRepo(),
-        stock: _StockRepo(),
-        stocktakes: _StocktakesRepo(),
-      );
+  _Home() : super(me: _MeRepo(), settings: _SettingsRepo());
   @override
   // Test fake: intentionally skip network bootstrap.
   // ignore: must_call_super
@@ -151,9 +149,8 @@ class _StocktakeCount extends StocktakeCountController {
 class _Reports extends ReportsController {
   _Reports()
     : super(
+        reports: _ReportsRepo(),
         equipment: _EquipmentRepo(),
-        repairs: _RepairsRepo(),
-        stock: _StockRepo(),
         departments: _DepartmentsRepo(),
       );
   @override
@@ -180,6 +177,37 @@ void main() {
     );
     await tester.pumpWidget(wrap(const HomeView()));
     expect(find.text('Hôm nay chưa có việc nào'), findsOneWidget);
+  });
+
+  testWidgets('home_view render số nhóm việc từ D18', (tester) async {
+    final home = Get.put<HomeController>(_Home());
+    home.loading.value = false;
+    home.data.value = const MyTasksResponse(
+      repairs: RepairTasks(assigned: 2, pendingResponse: 0, overdue: 0),
+      maintenance: MaintenanceTasks(due7d: 0, overdue: 0),
+      requests: RequestTasks(
+        pendingApproval: 0,
+        pendingIssue: 0,
+        pendingReceive: 0,
+      ),
+      stocktakes: StocktakeTasks(counting: 0),
+      alerts: TaskAlerts(
+        repairsNew: 0,
+        stock: StockAlertCounts(
+          lowStock: 0,
+          expiring: 0,
+          expired: 0,
+          openVialExpiring: 0,
+          stale: 0,
+        ),
+        calibrationOverdue: 0,
+      ),
+    );
+    Get.put(
+      NotificationsController(repo: _NotificationsRepo(), store: fakeStore()),
+    );
+    await tester.pumpWidget(wrap(const HomeView()));
+    expect(find.text('Sửa chữa được giao (2)'), findsOneWidget);
   });
 
   testWidgets('repairs_list_view render empty', (tester) async {
@@ -253,6 +281,23 @@ void main() {
     expect(find.byType(ErrorState), findsOneWidget);
   });
 
+  testWidgets('reports_view render dashboard và danh sách D1', (tester) async {
+    final c = Get.put<ReportsController>(_Reports());
+    c.loading.value = false;
+    c.cards.add(
+      const DashboardCard(
+        key: 'equipment.total',
+        title: 'Tổng thiết bị',
+        value: 12,
+        link: '/equipment',
+      ),
+    );
+    c.reportList.add(reportForWidget);
+    await tester.pumpWidget(wrap(const ReportsView()));
+    expect(find.text('Tổng thiết bị'), findsOneWidget);
+    expect(find.text('Hiện trạng thiết bị'), findsOneWidget);
+  });
+
   testWidgets('ai_view render empty sau khi tải', (tester) async {
     final c = Get.put<AiController>(_Ai());
     c.loading.value = false;
@@ -260,3 +305,11 @@ void main() {
     expect(find.byType(EmptyState), findsOneWidget);
   });
 }
+
+const reportForWidget = ReportMeta(
+  key: 'equipment.byStatus',
+  title: 'Hiện trạng thiết bị',
+  group: 'equipment',
+  params: {'type': 'object'},
+  columns: [],
+);

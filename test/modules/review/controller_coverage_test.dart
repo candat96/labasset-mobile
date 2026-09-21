@@ -18,6 +18,7 @@ import 'package:labasset_mobile/data/repositories/equipment_repository.dart';
 import 'package:labasset_mobile/data/repositories/faults_repository.dart';
 import 'package:labasset_mobile/data/repositories/repairs_repository.dart';
 import 'package:labasset_mobile/data/repositories/requests_repository.dart';
+import 'package:labasset_mobile/data/repositories/reports_repository.dart';
 import 'package:labasset_mobile/data/repositories/settings_repository.dart';
 import 'package:labasset_mobile/data/repositories/stock_repository.dart';
 import 'package:labasset_mobile/data/repositories/stocktakes_repository.dart';
@@ -79,6 +80,8 @@ class _Catalogs extends Mock implements CatalogsRepository {}
 class _Departments extends Mock implements DepartmentsRepository {}
 
 class _Cache extends Mock implements KvCache {}
+
+class _ReportsRepo extends Mock implements ReportsRepository {}
 
 void main() {
   setUp(() => Get.testMode = true);
@@ -276,26 +279,12 @@ void main() {
   });
 
   test('ReportsController báo lỗi khi mọi nguồn đều thất bại', () async {
-    final equipment = _Equipment();
-    final repairs = _Repairs();
-    final stock = _Stock();
-    when(
-      () => equipment.count(status: any(named: 'status')),
-    ).thenThrow(Exception('equipment'));
-    when(
-      () => repairs.stats(
-        from: any(named: 'from'),
-        to: any(named: 'to'),
-      ),
-    ).thenThrow(Exception('stats'));
-    when(repairs.workload).thenThrow(Exception('workload'));
-    when(
-      () => stock.alerts(resolved: false, limit: 1),
-    ).thenThrow(Exception('alerts'));
+    final reports = _ReportsRepo();
+    when(reports.dashboard).thenThrow(Exception('dashboard'));
+    when(reports.list).thenThrow(Exception('reports'));
     final c = ReportsController(
-      equipment: equipment,
-      repairs: repairs,
-      stock: stock,
+      reports: reports,
+      equipment: _Equipment(),
       departments: _Departments(),
       cache: _Cache(),
     );

@@ -16,6 +16,7 @@ class SearchView extends GetView<GlobalSearchController> {
     'supplies': Icons.inventory_2_outlined,
     'repairs': Icons.build_outlined,
     'requests': Icons.description_outlined,
+    'faults': Icons.warning_amber_outlined,
   };
 
   @override

@@ -8,12 +8,17 @@ class Ep {
   static const otpVerify = '/v1/auth/otp/verify';
   static const forgotPassword = '/v1/auth/forgot-password';
   static const me = '/v1/auth/me';
+  static const myTasks = '/v1/me/tasks';
+  static const search = '/v1/search';
   static const changePassword = '/v1/auth/change-password';
   static const logout = '/v1/auth/logout';
   static const sessions = '/v1/auth/sessions';
   static String session(String id) => '/v1/auth/sessions/$id';
 
   static const settingsPublic = '/v1/settings/public';
+  static const dashboard = '/v1/dashboard';
+  static const reports = '/v1/reports';
+  static String report(String key) => '/v1/reports/$key';
 
   static const equipmentList = '/v1/equipment';
   static String equipment(String id) => '/v1/equipment/$id';

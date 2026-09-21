@@ -3,42 +3,16 @@ import 'dart:async';
 import 'package:get/get.dart';
 
 import '../../core/cache/kv_cache.dart';
-import '../../core/errors/api_error.dart';
-import '../../core/storage/session_store.dart';
-import '../../data/models/repair.dart';
-import '../../data/models/request.dart';
-import '../../data/models/task.dart';
-import '../../data/models/stocktake.dart';
-import '../../data/repositories/equipment_repository.dart';
-import '../../data/repositories/repairs_repository.dart';
-import '../../data/repositories/requests_repository.dart';
+import '../../data/models/my_tasks.dart';
+import '../../data/repositories/me_repository.dart';
 import '../../data/repositories/settings_repository.dart';
-import '../../data/repositories/stock_repository.dart';
-import '../../data/repositories/stocktakes_repository.dart';
-import '../../data/repositories/tasks_repository.dart';
 
-/// Trang chủ: "Việc của tôi hôm nay" + cảnh báo ghép từ API, cache khi offline.
+/// Trang chủ lấy toàn bộ nhóm việc và cảnh báo bằng một call `/v1/me/tasks`.
 class HomeController extends GetxController {
-  HomeController({
-    required this.store,
-    required this.settings,
-    required this.repairs,
-    required this.tasks,
-    required this.requests,
-    required this.equipment,
-    required this.stock,
-    required this.stocktakes,
-    this.cache,
-  });
+  HomeController({required this.me, required this.settings, this.cache});
 
-  final SessionStore store;
+  final MeRepository me;
   final SettingsRepository settings;
-  final RepairsRepository repairs;
-  final TasksRepository tasks;
-  final RequestsRepository requests;
-  final EquipmentRepository equipment;
-  final StockRepository stock;
-  final StocktakesRepository stocktakes;
   final KvCache? cache;
 
   static const cacheKey = 'home.snapshot';
@@ -47,160 +21,61 @@ class HomeController extends GetxController {
   final RxBool loading = true.obs;
   final Rxn<Object> error = Rxn<Object>();
   final Rxn<DateTime> cachedAt = Rxn<DateTime>();
+  final Rxn<MyTasksResponse> data = Rxn<MyTasksResponse>();
 
-  final RxList<RepairSummary> repairsAssigned = <RepairSummary>[].obs;
-  final RxInt repairsAssignedTotal = 0.obs;
-  final RxList<TaskSummary> tasksDue = <TaskSummary>[].obs;
-  final RxInt tasksDueTotal = 0.obs;
-  final RxList<RequestSummary> requestsPending = <RequestSummary>[].obs;
-  final RxInt requestsPendingTotal = 0.obs;
-  final RxList<RequestSummary> requestsApproved = <RequestSummary>[].obs;
-  final RxInt requestsApprovedTotal = 0.obs;
-  final RxList<StocktakeSession> stocktakesOpen = <StocktakeSession>[].obs;
-  final RxInt stocktakesOpenTotal = 0.obs;
-  final RxBool showStocktakes = true.obs;
+  int get repairsAssignedTotal => data.value?.repairs.assigned.toInt() ?? 0;
+  int get repairsPendingResponse =>
+      data.value?.repairs.pendingResponse.toInt() ?? 0;
+  int get repairsOverdue => data.value?.repairs.overdue.toInt() ?? 0;
+  int get tasksDueTotal => data.value?.maintenance.due7d.toInt() ?? 0;
+  int get tasksOverdue => data.value?.maintenance.overdue.toInt() ?? 0;
+  int get requestsPendingTotal =>
+      data.value?.requests.pendingApproval.toInt() ?? 0;
+  int get requestsApprovedTotal =>
+      data.value?.requests.pendingIssue.toInt() ?? 0;
+  int get requestsPendingReceive =>
+      data.value?.requests.pendingReceive.toInt() ?? 0;
+  int get stocktakesOpenTotal => data.value?.stocktakes.counting.toInt() ?? 0;
+  int get brokenUnassigned => data.value?.alerts.repairsNew.toInt() ?? 0;
+  int get suppliesAlert => data.value?.alerts.stock.total ?? 0;
+  int get calibrationOverdue =>
+      data.value?.alerts.calibrationOverdue.toInt() ?? 0;
 
-  final RxInt brokenUnassigned = 0.obs;
-  final RxInt suppliesAlert = 0.obs;
-  final RxInt calibrationOverdue = 0.obs;
+  bool get hasWork =>
+      repairsAssignedTotal +
+          repairsPendingResponse +
+          repairsOverdue +
+          tasksDueTotal +
+          tasksOverdue +
+          requestsPendingTotal +
+          requestsApprovedTotal +
+          requestsPendingReceive +
+          stocktakesOpenTotal >
+      0;
 
   @override
   void onInit() {
     super.onInit();
+    unawaited(_loadHospitalName());
     unawaited(load());
+  }
+
+  Future<void> _loadHospitalName() async {
+    hospitalName.value = await settings.hospitalName();
   }
 
   Future<void> load() async {
     loading.value = true;
     error.value = null;
-    Object? firstError;
-    var ok = 0;
-
-    Future<void> run(Future<void> Function() job) async {
-      try {
-        await job();
-        ok++;
-      } catch (e) {
-        firstError ??= e;
-      }
-    }
-
-    final list = <Future<void>>[];
-    list.add(
-      run(() async {
-        final page = await repairs.list(
-          assigneeId: 'me',
-          status: 'accepted,in_progress,awaiting_parts,awaiting_vendor',
-          limit: 3,
-        );
-        repairsAssigned.assignAll(page.items);
-        repairsAssignedTotal.value = page.total.toInt();
-      }),
-    );
-    list.add(
-      run(() async {
-        try {
-          final page = await stocktakes.list(status: 'counting', limit: 5);
-          stocktakesOpen.assignAll(page.items);
-          stocktakesOpenTotal.value = page.total.toInt();
-          showStocktakes.value = true;
-        } catch (e) {
-          final apiError = ApiError.from(e);
-          if (apiError.status == 403 || apiError.status == 404) {
-            stocktakesOpen.clear();
-            stocktakesOpenTotal.value = 0;
-            showStocktakes.value = false;
-            return;
-          }
-          rethrow;
-        }
-      }),
-    );
-    list.add(
-      run(() async {
-        final page = await tasks.list(
-          assigneeId: 'me',
-          status: 'scheduled,overdue',
-          to: _plusDays(7),
-          limit: 3,
-        );
-        tasksDue.assignAll(page.items);
-        tasksDueTotal.value = page.total.toInt();
-      }),
-    );
-    list.add(
-      run(() async {
-        final page = await requests.list(pendingForMe: true, limit: 3);
-        requestsPending.assignAll(page.items);
-        requestsPendingTotal.value = page.total.toInt();
-      }),
-    );
-    list.add(
-      run(() async {
-        final page = await requests.list(
-          status: 'approved,partially_approved',
-          limit: 3,
-        );
-        requestsApproved.assignAll(page.items);
-        requestsApprovedTotal.value = page.total.toInt();
-      }),
-    );
-    list.add(
-      run(() async {
-        final page = await repairs.list(status: 'new', limit: 1);
-        brokenUnassigned.value = page.total.toInt();
-      }),
-    );
-    list.add(
-      run(() async {
-        final page = await stock.alerts(resolved: false, limit: 1);
-        suppliesAlert.value = page.total.toInt();
-      }),
-    );
-    list.add(
-      run(() async {
-        calibrationOverdue.value = (await equipment.count(
-          calibrationOverdue: true,
-        )).toInt();
-      }),
-    );
-    await Future.wait(list);
-
-    if (ok == 0) {
-      error.value = firstError;
-      await _loadCache();
-    } else {
-      cachedAt.value = null;
-      unawaited(_saveCache());
-    }
-    loading.value = false;
-  }
-
-  static String _plusDays(int days) =>
-      DateTime.now().add(Duration(days: days)).toUtc().toIso8601String();
-
-  Map<String, dynamic> _snapshot() => {
-    'repairsAssigned': repairsAssigned.map((e) => e.toJson()).toList(),
-    'repairsAssignedTotal': repairsAssignedTotal.value,
-    'tasksDue': tasksDue.map((e) => e.toJson()).toList(),
-    'tasksDueTotal': tasksDueTotal.value,
-    'requestsPending': requestsPending.map((e) => e.toJson()).toList(),
-    'requestsPendingTotal': requestsPendingTotal.value,
-    'requestsApproved': requestsApproved.map((e) => e.toJson()).toList(),
-    'requestsApprovedTotal': requestsApprovedTotal.value,
-    'stocktakesOpen': stocktakesOpen.map((e) => e.toJson()).toList(),
-    'stocktakesOpenTotal': stocktakesOpenTotal.value,
-    'showStocktakes': showStocktakes.value,
-    'brokenUnassigned': brokenUnassigned.value,
-    'suppliesAlert': suppliesAlert.value,
-    'calibrationOverdue': calibrationOverdue.value,
-  };
-
-  Future<void> _saveCache() async {
     try {
-      await cache?.put(cacheKey, _snapshot());
-    } catch (_) {
-      // best-effort
+      data.value = await me.tasks();
+      cachedAt.value = null;
+      unawaited(cache?.put(cacheKey, data.value!.toJson()));
+    } catch (e) {
+      error.value = e;
+      await _loadCache();
+    } finally {
+      loading.value = false;
     }
   }
 
@@ -208,48 +83,10 @@ class HomeController extends GetxController {
     try {
       final cached = await cache?.get(cacheKey);
       if (cached == null) return;
-      final d = cached.value;
-      repairsAssigned.assignAll(
-        _items(d['repairsAssigned'], RepairSummary.fromJson),
-      );
-      repairsAssignedTotal.value =
-          (d['repairsAssignedTotal'] as num?)?.toInt() ?? 0;
-      tasksDue.assignAll(_items(d['tasksDue'], TaskSummary.fromJson));
-      tasksDueTotal.value = (d['tasksDueTotal'] as num?)?.toInt() ?? 0;
-      requestsPending.assignAll(
-        _items(d['requestsPending'], RequestSummary.fromJson),
-      );
-      requestsPendingTotal.value =
-          (d['requestsPendingTotal'] as num?)?.toInt() ?? 0;
-      requestsApproved.assignAll(
-        _items(d['requestsApproved'], RequestSummary.fromJson),
-      );
-      requestsApprovedTotal.value =
-          (d['requestsApprovedTotal'] as num?)?.toInt() ?? 0;
-      stocktakesOpen.assignAll(
-        _items(d['stocktakesOpen'], StocktakeSession.fromJson),
-      );
-      stocktakesOpenTotal.value =
-          (d['stocktakesOpenTotal'] as num?)?.toInt() ?? 0;
-      showStocktakes.value = d['showStocktakes'] as bool? ?? true;
-      brokenUnassigned.value = (d['brokenUnassigned'] as num?)?.toInt() ?? 0;
-      suppliesAlert.value = (d['suppliesAlert'] as num?)?.toInt() ?? 0;
-      calibrationOverdue.value =
-          (d['calibrationOverdue'] as num?)?.toInt() ?? 0;
+      data.value = MyTasksResponse.fromJson(cached.value);
       cachedAt.value = cached.updatedAt;
     } catch (_) {
-      // cache hỏng → coi như không có
+      // Cache hỏng được coi như không có cache.
     }
-  }
-
-  static List<T> _items<T>(
-    Object? raw,
-    T Function(Map<String, dynamic>) fromJson,
-  ) {
-    if (raw is! List) return [];
-    return raw
-        .whereType<Map>()
-        .map((m) => fromJson(Map<String, dynamic>.from(m)))
-        .toList();
   }
 }
