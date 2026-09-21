@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
@@ -22,7 +21,6 @@ class AuthScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: showBack
           ? AppBar(backgroundColor: Colors.transparent, shape: null)
@@ -37,25 +35,27 @@ class AuthScaffold extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                        ),
-                        child: Icon(
-                          LucideIcons.flaskConical,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text('app.name'.tr, style: context.appText.title),
-                    ],
+                  Center(
+                    child: Image.asset(
+                      'assets/brand/logo-512.png',
+                      width: 96,
+                      height: 96,
+                    ),
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'app.name'.tr,
+                    style: context.appText.display,
+                    textAlign: TextAlign.center,
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      subtitle!,
+                      style: context.appText.label,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.xl),
                   Card(
                     child: Padding(
@@ -64,8 +64,6 @@ class AuthScaffold extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(title, style: context.appText.title),
-                          if (subtitle != null)
-                            Text(subtitle!, style: context.appText.caption),
                           const SizedBox(height: AppSpacing.lg),
                           child,
                         ],

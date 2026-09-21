@@ -33,7 +33,14 @@ class HomeView extends GetView<HomeController> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() => Text(controller.hospitalName.value ?? 'app.name'.tr)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/brand/logo-512.png', width: 28, height: 28),
+            const SizedBox(width: AppSpacing.sm),
+            Text('app.name'.tr),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'search.title'.tr,
