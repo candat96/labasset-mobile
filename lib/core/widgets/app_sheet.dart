@@ -24,10 +24,14 @@ class AppSheet {
     bool showHandle = true,
     bool safeArea = true,
     bool avoidKeyboard = true,
+    double maxHeightFraction = 0.9,
   }) {
     return showModalBottomSheet<T>(
       context: context,
       useRootNavigator: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * maxHeightFraction,
+      ),
       isScrollControlled: isScrollControlled,
       isDismissible: isDismissible,
       enableDrag: enableDrag,

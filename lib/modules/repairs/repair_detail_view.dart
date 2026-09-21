@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/action_grid_sheet.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
@@ -495,8 +496,8 @@ class _ActionBar extends StatelessWidget {
           ),
         if (more.isNotEmpty)
           StickySecondaryButton(
-            label: 'common.more'.tr,
-            icon: LucideIcons.ellipsis,
+            label: 'common.actions'.tr,
+            icon: LucideIcons.layoutGrid,
             onPressed: () => _moreSheet(context, more),
           ),
       ],
@@ -504,37 +505,22 @@ class _ActionBar extends StatelessWidget {
   }
 
   Future<void> _moreSheet(BuildContext context, List<_RepairAction> items) =>
-      AppSheet.show<void>(
+      ActionGridSheet.show(
         context,
-        builder: (ctx) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+        title: 'common.actions'.tr,
+        groups: [
+          SheetActionGroup(
+            actions: [
               for (final a in items)
-                ListTile(
-                  leading: Icon(
-                    a.icon,
-                    color: a.key == 'repairs.action.cancel'
-                        ? ctx.status.danger
-                        : null,
-                  ),
-                  title: Text(
-                    a.key.tr,
-                    style: ctx.appText.bodyStrong.copyWith(
-                      color: a.key == 'repairs.action.cancel'
-                          ? ctx.status.danger
-                          : null,
-                    ),
-                  ),
-                  onTap: () {
-                    AppSheet.close(ctx);
-                    a.run();
-                  },
+                SheetAction(
+                  label: a.key.tr,
+                  icon: a.icon,
+                  onTap: a.run,
+                  danger: a.key == 'repairs.action.cancel',
                 ),
             ],
           ),
-        ),
+        ],
       );
 }
 

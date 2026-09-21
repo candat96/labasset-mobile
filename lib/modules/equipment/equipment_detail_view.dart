@@ -8,6 +8,8 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/action_grid_sheet.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/app_card.dart';
@@ -85,12 +87,8 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
       return DetailScaffold(
         title: e.code,
         onRefresh: controller.load,
-        header: Column(
-          children: [
-            _SummaryCard(e: e),
-            _QuickActions(controller: controller, e: e),
-          ],
-        ),
+        header: _SummaryCard(e: e),
+        bottomBar: _QuickActions(controller: controller, e: e),
         tabs: [
           'equipment.tab.specs'.tr,
           'equipment.tab.repairs'.tr,
@@ -326,31 +324,66 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
+/// Thanh hành động dính đáy: "Báo hỏng" (chính) + "Thao tác" mở sheet lưới
+/// chứa toàn bộ thao tác nhanh theo nhóm (thay hàng chip cuộn ngang).
 class _QuickActions extends StatelessWidget {
   const _QuickActions({required this.controller, required this.e});
 
   final EquipmentDetailController controller;
   final EquipmentDetail e;
 
+  static const _groups = [
+    (
+      title: 'equipment.actionGroup.incident',
+      keys: ['reportFault', 'adhocMaintenance', 'updateStatus', 'counters'],
+    ),
+    (title: 'equipment.actionGroup.stock', keys: ['issueSupplies']),
+    (
+      title: 'equipment.actionGroup.profile',
+      keys: ['addPhoto', 'location', 'note', 'transfer'],
+    ),
+    (title: 'equipment.actionGroup.other', keys: ['assistant', 'reprint']),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        children: [
-          for (final a in EquipmentDetailView._actionKeys)
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.sm),
-              child: ActionChip(
-                avatar: Icon(a.icon, size: 18),
-                label: Text('equipment.action.${a.key}'.tr),
-                onPressed: () => _run(context, a.key),
-              ),
-            ),
-        ],
+    return StickyActionBar(
+      primary: GradientButton(
+        label: 'equipment.action.reportFault'.tr,
+        icon: LucideIcons.triangleAlert,
+        onPressed: () => _run(context, 'reportFault'),
       ),
+      secondary: [
+        StickySecondaryButton(
+          label: 'common.actions'.tr,
+          icon: LucideIcons.layoutGrid,
+          onPressed: () => _openSheet(context),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openSheet(BuildContext context) {
+    final icons = {
+      for (final a in EquipmentDetailView._actionKeys) a.key: a.icon,
+    };
+    return ActionGridSheet.show(
+      context,
+      title: 'common.actions'.tr,
+      groups: [
+        for (final g in _groups)
+          SheetActionGroup(
+            title: g.title.tr,
+            actions: [
+              for (final k in g.keys)
+                SheetAction(
+                  label: 'equipment.action.$k'.tr,
+                  icon: icons[k]!,
+                  onTap: () => _run(context, k),
+                ),
+            ],
+          ),
+      ],
     );
   }
 

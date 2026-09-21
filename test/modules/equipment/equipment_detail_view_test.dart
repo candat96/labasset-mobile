@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:labasset_mobile/core/widgets/action_grid_sheet.dart';
+import 'package:labasset_mobile/core/widgets/detail_widgets.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/cache/kv_cache.dart';
 import 'package:labasset_mobile/data/models/equipment_detail.dart';
@@ -64,9 +66,25 @@ void main() {
     expect(find.text('TB-01'), findsWidgets);
     expect(find.text('Thông số'), findsWidgets);
     expect(find.text('Timeline'), findsOneWidget);
-    // Thao tác nhanh (các chip đầu hiển thị trong dải cuộn ngang)
+    // Thanh hành động dính đáy: Báo hỏng + Thao tác (không còn chip cuộn ngang).
+    expect(find.byType(StickyActionBar), findsOneWidget);
     expect(find.text('Báo hỏng'), findsOneWidget);
+    expect(find.byType(ActionChip), findsNothing);
+    expect(find.text('Bảo dưỡng đột xuất'), findsNothing);
+
+    // Bấm "Thao tác" → sheet lưới 3 cột đủ 11 thao tác theo nhóm.
+    await tester.tap(find.text('Thao tác'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ActionGridBody), findsOneWidget);
+    expect(find.text('SỰ CỐ & BẢO TRÌ'), findsOneWidget);
+    expect(find.text('HỒ SƠ'), findsOneWidget);
     expect(find.text('Bảo dưỡng đột xuất'), findsOneWidget);
     expect(find.text('Xuất vật tư'), findsOneWidget);
+    expect(find.text('In lại tem'), findsOneWidget);
+    // Đóng bằng nút X; không assertion.
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.byType(ActionGridBody), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 }

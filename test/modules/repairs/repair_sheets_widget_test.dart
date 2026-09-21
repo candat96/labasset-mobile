@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/cache/kv_cache.dart';
+import 'package:labasset_mobile/core/widgets/action_grid_sheet.dart';
 import 'package:labasset_mobile/core/widgets/detail_widgets.dart';
 import 'package:labasset_mobile/core/sync/outbox_service.dart';
 import 'package:labasset_mobile/data/models/repair_detail.dart';
@@ -79,7 +80,7 @@ void main() {
         () => repairs.changeStatus('r1', any(), any()),
       ).thenAnswer((_) async {});
 
-      await tester.tap(find.text('Thêm'));
+      await tester.tap(find.text('Thao tác'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Đổi trạng thái'));
       await tester.pumpAndSettle();
@@ -119,9 +120,14 @@ void main() {
       ),
     ).thenThrow(Exception('boom'));
 
-    await tester.tap(find.text('Thêm'));
+    await tester.tap(find.text('Thao tác'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ListTile, 'Chẩn đoán'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ActionGridBody),
+        matching: find.text('Chẩn đoán'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Chẩn đoán cũ'), findsOneWidget);
     await tester.tap(find.text('Lưu'));
