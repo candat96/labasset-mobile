@@ -18,19 +18,28 @@ class AppColors {
   static const onPrimaryContainerDark = Color(0xFFBFD6FF);
   static const linkDark = Color(0xFF7DB0FF);
 
-  static const background = Color(0xFFF1F5F9);
+  /// Nền màn hình: trắng thuần (người dùng chốt 2026-09-21); card tách lớp
+  /// bằng viền [cardBorder] + bóng [AppShadows.card], không dùng nền xám.
+  static const background = Color(0xFFFFFFFF);
   static const foreground = Color(0xFF0F172A);
   static const card = Color(0xFFFFFFFF);
+  static const cardBorder = Color(0x0F101828);
   static const subtle = Color(0xFF94A3B8);
-  static const muted = Color(0xFFF1F5F9);
+
+  /// Vùng phụ (chip, nền ô tìm, segment, chip icon trung tính).
+  static const muted = Color(0xFFF6F8FC);
+  static const segment = Color(0xFFE9EDF5);
   static const mutedForeground = Color(0xFF64748B);
   static const border = Color(0xFFE2E8F0);
   static const divider = Color(0xFFEEF2F7);
+  static const timelineLine = Color(0xFFE5E9F2);
 
   static const backgroundDark = Color(0xFF0B1220);
   static const foregroundDark = Color(0xFFE5EAF2);
   static const cardDark = Color(0xFF151E2E);
+  static const cardBorderDark = Color(0xFF22304A);
   static const mutedDark = Color(0xFF1C2739);
+  static const segmentDark = Color(0xFF1C2739);
   static const mutedForegroundDark = Color(0xFF94A3B8);
   static const subtleDark = Color(0xFF64748B);
   static const borderDark = Color(0xFF26334D);
@@ -48,7 +57,7 @@ class AppColors {
   static const info = Color(0xFF2977FF);
   static const infoBackground = Color(0xFFE8F0FF);
   static const infoForeground = Color(0xFF1747A6);
-  static const neutralBackground = Color(0xFFF1F5F9);
+  static const neutralBackground = Color(0xFFF6F8FC);
   static const neutralForeground = Color(0xFF475569);
 
   static const successDark = Color(0xFF4ADE80);
@@ -75,10 +84,11 @@ class AppSpacing {
 
 class AppRadius {
   AppRadius._();
-  static const card = 12.0;
-  static const tile = 10.0;
+  static const card = 16.0;
+  static const tile = 12.0;
   static const chip = 999.0;
-  static const sheet = 16.0;
+  static const sheet = 20.0;
+  static const hero = 24.0;
 
   // Bí danh tương thích cho widget cũ; vẫn quy về bốn bán kính chuẩn.
   static const sm = tile;
@@ -89,14 +99,71 @@ class AppRadius {
 class AppShadows {
   AppShadows._();
 
-  static const cardElevated = [
-    BoxShadow(color: Color(0x0F0F172A), offset: Offset(0, 1), blurRadius: 2),
-    BoxShadow(color: Color(0x1A0F172A), offset: Offset(0, 1), blurRadius: 3),
+  /// Card trên nền trắng: `0 1px 2px .04` + `0 6px 16px -8px .12`.
+  static const card = [
+    BoxShadow(color: Color(0x0A101828), offset: Offset(0, 1), blurRadius: 2),
+    BoxShadow(
+      color: Color(0x1F101828),
+      offset: Offset(0, 6),
+      blurRadius: 16,
+      spreadRadius: -8,
+    ),
+  ];
+
+  /// Bí danh cũ.
+  static const cardElevated = card;
+
+  /// Card nổi đè lên hero (ô tìm, form đăng nhập).
+  static const floating = [
+    BoxShadow(color: Color(0x0F101828), offset: Offset(0, 2), blurRadius: 4),
+    BoxShadow(
+      color: Color(0x29101828),
+      offset: Offset(0, 12),
+      blurRadius: 28,
+      spreadRadius: -10,
+    ),
   ];
 
   static const selected = [
-    BoxShadow(color: Color(0x140F172A), offset: Offset(0, 1), blurRadius: 2),
+    BoxShadow(color: Color(0x14101828), offset: Offset(0, 1), blurRadius: 3),
   ];
+
+  /// Bóng màu thương hiệu cho nút gradient / nút Quét.
+  static const brand = [
+    BoxShadow(
+      color: Color(0x592977FF),
+      offset: Offset(0, 8),
+      blurRadius: 20,
+      spreadRadius: -4,
+    ),
+  ];
+
+  /// Bóng hắt lên của bottom nav.
+  static const navUp = [
+    BoxShadow(
+      color: Color(0x14101828),
+      offset: Offset(0, -4),
+      blurRadius: 16,
+      spreadRadius: -4,
+    ),
+  ];
+}
+
+/// Gradient thương hiệu (135°, `#2977FF → #5C9BFF`).
+class AppGradients {
+  AppGradients._();
+
+  static const brand = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [AppColors.primary, AppColors.primaryDark],
+  );
+
+  static const brandDark = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1E63E0), AppColors.primaryDark],
+  );
 }
 
 /// Thang chữ duy nhất của ứng dụng; màu được áp theo light/dark theme.
@@ -129,28 +196,34 @@ class AppText extends ThemeExtension<AppText> {
   }) => AppText(
     display: TextStyle(
       fontSize: 28,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.5,
+      height: 1.15,
       color: foreground,
     ),
     title: TextStyle(
       fontSize: 20,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.2,
       color: foreground,
     ),
+    // Tiêu đề khối: 13/700 viết hoa, tracking .06em, màu muted.
     section: TextStyle(
-      fontSize: 15,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.2,
-      color: foreground,
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.78,
+      color: mutedForeground,
     ),
     body: TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+      height: 1.4,
       color: foreground,
     ),
     bodyStrong: TextStyle(
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: FontWeight.w600,
+      height: 1.35,
       color: foreground,
     ),
     label: TextStyle(
@@ -160,12 +233,13 @@ class AppText extends ThemeExtension<AppText> {
     ),
     caption: TextStyle(
       fontSize: 12,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w500,
       color: subtle,
     ),
     kpi: TextStyle(
-      fontSize: 26,
-      fontWeight: FontWeight.w700,
+      fontSize: 28,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.5,
       color: foreground,
       fontFeatures: const [FontFeature.tabularFigures()],
     ),

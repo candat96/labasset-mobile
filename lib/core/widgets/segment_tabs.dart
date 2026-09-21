@@ -27,7 +27,9 @@ class SegmentTabs<T> extends StatelessWidget {
       height: 40,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: theme.brightness == Brightness.dark
+            ? AppColors.segmentDark
+            : AppColors.segment,
         borderRadius: BorderRadius.circular(AppRadius.chip),
       ),
       child: Row(
@@ -79,7 +81,7 @@ class _SegmentItem extends StatelessWidget {
                 color: selected
                     ? theme.colorScheme.onSurface
                     : theme.colorScheme.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ),

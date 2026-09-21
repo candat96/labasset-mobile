@@ -4,6 +4,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
+/// Trạng thái rỗng: icon 40 trong tròn 88 nền primary-soft, tiêu đề 17/700,
+/// mô tả 14, nút hành động (nếu có). Đặt ở 1/3 trên, không căn giữa màn.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
@@ -20,15 +22,15 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) => Align(
-        alignment: const Alignment(0, -0.34),
+        alignment: const Alignment(0, -0.4),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: constraints.hasBoundedHeight
                 ? constraints.maxHeight * 0.6
-                : 240,
+                : 280,
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
@@ -36,38 +38,34 @@ class EmptyState extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 88,
+                  height: 88,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
+                    color: scheme.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    size: 28,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  child: Icon(icon, size: 40, color: scheme.onPrimaryContainer),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   title,
-                  style: context.appText.bodyStrong,
+                  style: context.appText.title.copyWith(fontSize: 17),
                   textAlign: TextAlign.center,
                 ),
                 if (description != null) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     description!,
-                    style: context.appText.label,
+                    style: context.appText.label.copyWith(fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
                 ],
                 if (action != null) ...[
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.lg),
                   OutlinedButtonTheme(
                     data: OutlinedButtonThemeData(
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 40),
+                        minimumSize: const Size(0, 44),
                       ),
                     ),
                     child: action!,

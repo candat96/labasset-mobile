@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'app_card.dart';
 
-/// Card có tiêu đề + hàng nút hành động, dùng thống nhất ở các màn chi tiết.
+/// Card có tiêu đề section (13/700 viết hoa) + hàng nút hành động.
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
@@ -22,30 +23,50 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: padding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (title != null || trailing != null || actions.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: Row(
-                  children: [
-                    if (title != null)
-                      Expanded(
-                        child: Text(title!, style: context.appText.section),
-                      ),
-                    ...[trailing].whereType<Widget>(),
-                    ...actions,
-                  ],
-                ),
+    return AppCard(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null || trailing != null || actions.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: Row(
+                children: [
+                  if (title != null) Expanded(child: SectionTitle(title!)),
+                  ...[trailing].whereType<Widget>(),
+                  ...actions,
+                ],
               ),
-            child,
-          ],
-        ),
+            ),
+          child,
+        ],
       ),
+    );
+  }
+}
+
+/// Tiêu đề khối dùng ngoài card (trên nền màn): viết hoa, 13/700, muted.
+class SectionTitle extends StatelessWidget {
+  const SectionTitle(this.text, {super.key, this.trailing});
+
+  final String text;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = Text(
+      text.toUpperCase(),
+      style: context.appText.section,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+    if (trailing == null) return title;
+    return Row(
+      children: [
+        Expanded(child: title),
+        trailing!,
+      ],
     );
   }
 }

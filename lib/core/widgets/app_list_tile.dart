@@ -3,7 +3,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'icon_chip.dart';
 
+/// Dòng danh sách: chip icon trái, tiêu đề 15/600, giá trị/badge/switch phải.
+/// [accent] = chip 36 nền primary-soft (trang chủ); mặc định chip 32 nền muted.
 class AppListTile extends StatelessWidget {
   const AppListTile({
     super.key,
@@ -15,6 +18,8 @@ class AppListTile extends StatelessWidget {
     this.switchValue,
     this.onSwitchChanged,
     this.showDivider = false,
+    this.accent = false,
+    this.height,
   });
 
   final IconData icon;
@@ -25,34 +30,43 @@ class AppListTile extends StatelessWidget {
   final bool? switchValue;
   final ValueChanged<bool>? onSwitchChanged;
   final bool showDivider;
+  final bool accent;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final chipSize = accent ? 36.0 : 32.0;
     return Column(
       children: [
         SizedBox(
-          height: 52,
+          height: height ?? (accent ? 56 : 52),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(AppRadius.tile),
             child: Row(
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                IconChip(
+                  icon: icon,
+                  size: chipSize,
+                  iconSize: accent ? 20 : 18,
+                  radius: accent ? 12 : 10,
+                  background: accent
+                      ? null
+                      : theme.colorScheme.surfaceContainerHighest,
+                  foreground: accent
+                      ? null
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: AppSpacing.md),
-                Expanded(child: Text(title, style: context.appText.body)),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.appText.bodyStrong,
+                  ),
+                ),
                 if (value != null)
                   Text(value!, style: context.appText.label)
                 else if (trailing != null)
@@ -63,7 +77,7 @@ class AppListTile extends StatelessWidget {
                     onChanged: onSwitchChanged,
                   ),
                 if (onTap != null) ...[
-                  const SizedBox(width: AppSpacing.xs),
+                  const SizedBox(width: AppSpacing.sm),
                   Icon(
                     LucideIcons.chevronRight,
                     size: 18,
@@ -76,7 +90,7 @@ class AppListTile extends StatelessWidget {
         ),
         if (showDivider)
           Padding(
-            padding: const EdgeInsets.only(left: 56),
+            padding: EdgeInsets.only(left: chipSize + AppSpacing.md),
             child: Divider(height: 1, color: theme.dividerColor),
           ),
       ],

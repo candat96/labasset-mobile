@@ -25,7 +25,8 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Thông số'), findsOneWidget);
+    // Tiêu đề section hiển thị viết hoa (UI 10).
+    expect(find.text('THÔNG SỐ'), findsOneWidget);
     expect(find.byIcon(Icons.edit), findsOneWidget);
     expect(find.text('voltage 220V'), findsOneWidget);
   });
@@ -46,18 +47,20 @@ void main() {
       ),
     );
     expect(find.text('3'), findsOneWidget);
+    // Thẻ 140×96: chip icon + số cùng hàng trên, nhãn 2 dòng dưới (không cắt).
     final tileSize = tester.getSize(find.byType(KpiTile));
-    expect(tileSize.height, 120);
+    expect(tileSize.height, 96);
+    expect(tileSize.width, 140);
     final label = tester.widget<Text>(find.text('Máy hỏng'));
     expect(label.maxLines, 2);
-    expect(label.overflow, TextOverflow.ellipsis);
+    expect(label.overflow, isNot(TextOverflow.ellipsis));
     expect(
       tester.getTopLeft(find.byIcon(Icons.warning_amber_outlined)).dy,
       lessThan(tester.getTopLeft(find.text('Máy hỏng')).dy),
     );
     expect(
-      tester.getTopLeft(find.text('Máy hỏng')).dy,
-      lessThan(tester.getTopLeft(find.text('3')).dy),
+      tester.getTopLeft(find.text('3')).dy,
+      lessThan(tester.getTopLeft(find.text('Máy hỏng')).dy),
     );
     await tester.tap(find.text('3'));
     expect(tapped, isTrue);

@@ -160,6 +160,18 @@ class AppStatusColors extends ThemeExtension<AppStatusColors> {
 extension AppThemeX on BuildContext {
   AppStatusColors get status => Theme.of(this).extension<AppStatusColors>()!;
   AppText get appText => Theme.of(this).extension<AppText>()!;
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
+
+  /// Gradient thương hiệu theo theme hiện tại.
+  LinearGradient get brandGradient =>
+      isDark ? AppGradients.brandDark : AppGradients.brand;
+
+  /// Viền card 1px mờ theo theme hiện tại.
+  Color get cardBorder =>
+      isDark ? AppColors.cardBorderDark : AppColors.cardBorder;
+
+  /// Bóng card (dark không dùng bóng, chỉ viền).
+  List<BoxShadow> get cardShadow => isDark ? const [] : AppShadows.card;
 }
 
 class AppTheme {
@@ -186,6 +198,7 @@ class AppTheme {
     required ColorScheme scheme,
     required Color background,
     required Color card,
+    required Color cardBorder,
     required Color border,
     required Color divider,
     required Color muted,
@@ -221,23 +234,25 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: appText.title.copyWith(fontFamily: _fontFamily),
       ),
+      // Card: nền card + viền 1px mờ + bóng nhẹ (light) — tách lớp trên nền trắng.
       cardTheme: CardThemeData(
         color: card,
-        elevation: isDark ? 0 : 1,
-        shadowColor: const Color(0x260F172A),
+        elevation: isDark ? 0 : 2,
+        shadowColor: isDark ? Colors.transparent : const Color(0x1F101828),
+        surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.card),
-          side: isDark ? BorderSide(color: border) : BorderSide.none,
+          side: BorderSide(color: cardBorder),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         filled: true,
-        fillColor: card,
+        fillColor: isDark ? card : muted,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
+          horizontal: 14,
+          vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.tile),
@@ -245,7 +260,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.tile),
-          borderSide: BorderSide(color: border),
+          borderSide: BorderSide(color: isDark ? border : cardBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.tile),
@@ -255,17 +270,31 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(48),
+          minimumSize: const Size.fromHeight(52),
           shape: shape,
-          textStyle: text.labelLarge,
+          textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(48),
+          minimumSize: const Size.fromHeight(52),
           shape: shape,
           side: BorderSide(color: border),
           foregroundColor: scheme.onSurface,
+          textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        highlightElevation: 0,
+        extendedTextStyle: text.labelLarge?.copyWith(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -292,17 +321,25 @@ class AppTheme {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStatePropertyAll(appText.caption),
       ),
+      // TabBar kiểu pill: item chọn nền card + bóng, không underline.
       tabBarTheme: TabBarThemeData(
-        labelColor: scheme.primary,
+        labelColor: scheme.onSurface,
         unselectedLabelColor: mutedFg,
         labelStyle: appText.label.copyWith(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
         ),
-        indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(color: scheme.primary, width: 2),
+        unselectedLabelStyle: appText.label.copyWith(fontSize: 14),
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          color: card,
+          borderRadius: BorderRadius.circular(AppRadius.chip),
+          boxShadow: isDark ? null : AppShadows.selected,
         ),
-        dividerColor: divider,
+        dividerColor: Colors.transparent,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 14),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: card,
@@ -344,6 +381,7 @@ class AppTheme {
     ),
     background: AppColors.background,
     card: AppColors.card,
+    cardBorder: AppColors.cardBorder,
     border: AppColors.border,
     divider: AppColors.divider,
     muted: AppColors.muted,
@@ -371,6 +409,7 @@ class AppTheme {
     ),
     background: AppColors.backgroundDark,
     card: AppColors.cardDark,
+    cardBorder: AppColors.cardBorderDark,
     border: AppColors.borderDark,
     divider: AppColors.dividerDark,
     muted: AppColors.mutedDark,

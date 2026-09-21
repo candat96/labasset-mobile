@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'icon_chip.dart';
 import 'status_badge.dart';
 
-/// Thẻ số liệu cho trang chủ/thống kê: nhãn, giá trị, icon, tone màu.
+/// Thẻ cảnh báo nhỏ 140×96 cuộn ngang: chip icon + số 24/800 cùng hàng,
+/// nhãn 12 tối đa hai dòng (không cắt "…"). Số 0 → neutral.
 class KpiTile extends StatelessWidget {
   const KpiTile({
     super.key,
@@ -13,6 +15,7 @@ class KpiTile extends StatelessWidget {
     this.icon,
     this.tone = StatusTone.info,
     this.onTap,
+    this.width = 140,
   });
 
   final String label;
@@ -20,55 +23,78 @@ class KpiTile extends StatelessWidget {
   final IconData? icon;
   final StatusTone tone;
   final VoidCallback? onTap;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveTone = value.trim() == '0' ? StatusTone.muted : tone;
+    final zero = value.trim() == '0';
+    final effectiveTone = zero ? StatusTone.muted : tone;
     final palette = paletteForTone(context, effectiveTone);
+    final scheme = Theme.of(context).colorScheme;
+    final borderRadius = BorderRadius.circular(AppRadius.card);
     return SizedBox(
-      height: 120,
-      child: Material(
-        color: palette.background,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (icon != null)
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: palette.color.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
+      width: width,
+      height: 96,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: zero ? scheme.surface : palette.background,
+          borderRadius: borderRadius,
+          border: Border.all(
+            color: zero
+                ? context.cardBorder
+                : palette.color.withValues(alpha: 0.14),
+          ),
+          boxShadow: context.cardShadow,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: borderRadius,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            borderRadius: borderRadius,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (icon != null)
+                        IconChip(
+                          icon: icon!,
+                          size: 32,
+                          iconSize: 18,
+                          radius: 10,
+                          tone: effectiveTone,
+                          background: zero
+                              ? null
+                              : palette.color.withValues(alpha: 0.14),
+                        ),
+                      const Spacer(),
+                      Text(
+                        value,
+                        style: context.appText.kpi.copyWith(
+                          fontSize: 24,
+                          color: zero ? scheme.onSurface : palette.foreground,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    label,
+                    maxLines: 2,
+                    style: context.appText.caption.copyWith(
+                      height: 1.25,
+                      fontWeight: FontWeight.w600,
+                      color: zero
+                          ? scheme.onSurfaceVariant
+                          : palette.foreground,
                     ),
-                    child: Icon(icon, size: 18, color: palette.color),
                   ),
-                Text(
-                  label,
-                  style: context.appText.caption.copyWith(
-                    color: palette.foreground,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  value,
-                  style: context.appText.kpi.copyWith(
-                    color: palette.foreground,
-                    fontSize: 24,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

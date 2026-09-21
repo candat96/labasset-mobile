@@ -175,6 +175,7 @@ void main() {
     Get.put(
       NotificationsController(repo: _NotificationsRepo(), store: fakeStore()),
     );
+    Get.put(fakeStore());
     await tester.pumpWidget(wrap(const HomeView()));
     expect(find.text('Hôm nay chưa có việc nào'), findsOneWidget);
   });
@@ -206,6 +207,7 @@ void main() {
     Get.put(
       NotificationsController(repo: _NotificationsRepo(), store: fakeStore()),
     );
+    Get.put(fakeStore());
     await tester.pumpWidget(wrap(const HomeView()));
     expect(find.text('Sửa chữa được giao'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
@@ -243,7 +245,8 @@ void main() {
     c.loading.value = false;
     c.alertTotals['low_stock'] = 2;
     await tester.pumpWidget(wrap(const StockOverviewView()));
-    expect(find.text('Cảnh báo tồn kho'), findsOneWidget);
+    // Tiêu đề SectionCard hiển thị viết hoa (UI 10).
+    expect(find.text('CẢNH BÁO TỒN KHO'), findsOneWidget);
   });
 
   testWidgets('issue_form_view render nút lưu bị khoá khi thiếu dữ liệu', (
