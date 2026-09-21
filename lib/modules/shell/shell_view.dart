@@ -71,7 +71,7 @@ class ShellView extends GetView<ShellController> {
   }
 
   Future<void> _openRepair() async {
-    final id = await Get.toNamed<String>(Routes.repairNew);
+    final id = (await Get.toNamed(Routes.repairNew)) as String?;
     if (id != null) await Get.toNamed(Routes.repair(id));
     await Get.find<RepairsController>().load();
   }

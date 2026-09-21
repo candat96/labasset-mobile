@@ -225,10 +225,9 @@ class _Step2 extends StatelessWidget {
   }
 
   Future<void> _scan(BuildContext context, ReceiptFormController c) async {
-    final codes = await Get.toNamed<List<String>>(
-      Routes.scan,
-      arguments: {'continuous': true},
-    );
+    final codes =
+        (await Get.toNamed(Routes.scan, arguments: {'continuous': true}))
+            as List<String>?;
     final code = codes?.firstOrNull;
     if (code == null) return;
     final supply = await c.scanManufacturerCode(code);

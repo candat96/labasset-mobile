@@ -368,10 +368,9 @@ class _BottomBar extends StatelessWidget {
 }
 
 Future<void> _start(BuildContext context, MaintenanceTaskController c) async {
-  final qr = await Get.toNamed<List<String>>(
-    Routes.scan,
-    arguments: {'continuous': true},
-  );
+  final qr =
+      (await Get.toNamed(Routes.scan, arguments: {'continuous': true}))
+          as List<String>?;
   final token = qr?.firstOrNull;
   if (token == null) {
     if (!c.isAdmin) return;

@@ -53,9 +53,11 @@ class RepairsTab extends GetView<EquipmentRepairsTabController> {
   const RepairsTab({super.key});
 
   Future<void> _report() async {
-    final id = await Get.toNamed<String>(
-      '${Routes.repairNew}?equipmentId=${controller.equipmentId}',
-    );
+    final id =
+        (await Get.toNamed(
+              '${Routes.repairNew}?equipmentId=${controller.equipmentId}',
+            ))
+            as String?;
     if (id != null) await Get.toNamed(Routes.repair(id));
     await controller.load();
   }

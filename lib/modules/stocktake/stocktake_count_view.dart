@@ -248,10 +248,9 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
   }
 
   Future<void> _scanContinuous(BuildContext context) async {
-    final codes = await Get.toNamed<List<String>>(
-      Routes.scan,
-      arguments: {'continuous': true},
-    );
+    final codes =
+        (await Get.toNamed(Routes.scan, arguments: {'continuous': true}))
+            as List<String>?;
     if (!context.mounted) return;
     if (codes == null || codes.isEmpty) return;
     for (final code in codes) {

@@ -177,10 +177,9 @@ class IssueFormView extends GetView<IssueFormController> {
   }
 
   Future<void> _scanLot(BuildContext context, IssueFormController c) async {
-    final codes = await Get.toNamed<List<String>>(
-      Routes.scan,
-      arguments: {'continuous': true},
-    );
+    final codes =
+        (await Get.toNamed(Routes.scan, arguments: {'continuous': true}))
+            as List<String>?;
     final code = codes?.firstOrNull;
     if (code == null) return;
     final stockRepo = Get.find<StockRepository>();

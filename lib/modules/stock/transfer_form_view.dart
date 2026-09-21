@@ -104,10 +104,9 @@ class TransferFormView extends GetView<TransferFormController> {
   }
 
   Future<void> _scanContinuous(BuildContext context) async {
-    final codes = await Get.toNamed<List<String>>(
-      Routes.scan,
-      arguments: {'continuous': true},
-    );
+    final codes =
+        (await Get.toNamed(Routes.scan, arguments: {'continuous': true}))
+            as List<String>?;
     if (codes == null || codes.isEmpty) return;
     for (final code in codes) {
       final lot = await controller.findLot(code);

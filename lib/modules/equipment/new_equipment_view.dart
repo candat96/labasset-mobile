@@ -54,10 +54,12 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                   tooltip: 'equipment.new.scanSerial'.tr,
                   icon: const Icon(Icons.qr_code_scanner),
                   onPressed: () async {
-                    final codes = await Get.toNamed<List<String>>(
-                      Routes.scan,
-                      arguments: {'continuous': true},
-                    );
+                    final codes =
+                        (await Get.toNamed(
+                              Routes.scan,
+                              arguments: {'continuous': true},
+                            ))
+                            as List<String>?;
                     final code = codes?.firstOrNull;
                     if (code != null) controller.serial.text = code;
                   },
