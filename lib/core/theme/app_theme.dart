@@ -329,7 +329,7 @@ class AppTheme {
     brightness: Brightness.light,
     scheme: const ColorScheme.light(
       primary: AppColors.primary,
-      onPrimary: Colors.white,
+      onPrimary: AppColors.onPrimary,
       primaryContainer: AppColors.primaryContainer,
       onPrimaryContainer: AppColors.onPrimaryContainer,
       secondary: AppColors.primaryContainer,
@@ -356,7 +356,7 @@ class AppTheme {
     brightness: Brightness.dark,
     scheme: const ColorScheme.dark(
       primary: AppColors.primaryDark,
-      onPrimary: AppColors.backgroundDark,
+      onPrimary: AppColors.onPrimaryDark,
       primaryContainer: AppColors.primaryContainerDark,
       onPrimaryContainer: AppColors.onPrimaryContainerDark,
       secondary: AppColors.primaryContainerDark,

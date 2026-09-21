@@ -4,12 +4,19 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const primary = Color(0xFF0369A1);
-  static const primaryContainer = Color(0xFFE0F2FE);
-  static const onPrimaryContainer = Color(0xFF075985);
-  static const primaryDark = Color(0xFF38BDF8);
-  static const primaryContainerDark = Color(0xFF0C2A3F);
-  static const onPrimaryContainerDark = Color(0xFFBAE6FD);
+  static const primary = Color(0xFF2977FF);
+  static const primaryHover = Color(0xFF1E63E0);
+  static const primaryPressed = Color(0xFF1A55C2);
+  static const onPrimary = Color(0xFFFFFFFF);
+  static const primaryContainer = Color(0xFFE8F0FF);
+  static const onPrimaryContainer = Color(0xFF1747A6);
+  static const link = Color(0xFF1E63E0);
+  static const primaryDark = Color(0xFF5C9BFF);
+  static const primaryHoverDark = Color(0xFF7DB0FF);
+  static const onPrimaryDark = Color(0xFF0B1A33);
+  static const primaryContainerDark = Color(0xFF132B57);
+  static const onPrimaryContainerDark = Color(0xFFBFD6FF);
+  static const linkDark = Color(0xFF7DB0FF);
 
   static const background = Color(0xFFF1F5F9);
   static const foreground = Color(0xFF0F172A);
@@ -38,9 +45,9 @@ class AppColors {
   static const danger = Color(0xFFB91C1C);
   static const dangerBackground = Color(0xFFFEE2E2);
   static const dangerForeground = Color(0xFF991B1B);
-  static const info = Color(0xFF0369A1);
-  static const infoBackground = Color(0xFFE0F2FE);
-  static const infoForeground = Color(0xFF075985);
+  static const info = Color(0xFF2977FF);
+  static const infoBackground = Color(0xFFE8F0FF);
+  static const infoForeground = Color(0xFF1747A6);
   static const neutralBackground = Color(0xFFF1F5F9);
   static const neutralForeground = Color(0xFF475569);
 
@@ -50,8 +57,8 @@ class AppColors {
   static const warningBackgroundDark = Color(0xFF2E2109);
   static const dangerDark = Color(0xFFF87171);
   static const dangerBackgroundDark = Color(0xFF341417);
-  static const infoDark = Color(0xFF38BDF8);
-  static const infoBackgroundDark = Color(0xFF0C2A3F);
+  static const infoDark = Color(0xFF5C9BFF);
+  static const infoBackgroundDark = Color(0xFF132B57);
   static const neutralBackgroundDark = Color(0xFF1C2739);
   static const neutralForegroundDark = Color(0xFF94A3B8);
 }
