@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:labasset_mobile/core/widgets/app_buttons.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/config/env.dart';
 import 'package:labasset_mobile/data/repositories/auth_repository.dart';
@@ -51,7 +52,7 @@ void main() {
   ) async {
     await pump(tester, 'single');
     expect(find.text('Mã bệnh viện'), findsNothing);
-    await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
+    await tester.tap(find.widgetWithText(GradientButton, 'Đăng nhập'));
     await tester.pumpAndSettle();
     expect(find.text('Bắt buộc'), findsNWidgets(2));
   });
