@@ -21,14 +21,14 @@ Project bắt buộc Flutter 3.47.5 qua FVM (`.fvmrc`): dùng `fvm flutter ...` 
 ```bash
 fvm flutter pub get
 fvm dart run build_runner build -d      # sinh *.g.dart
-fvm flutter run --dart-define=API_URL=http://localhost:3000        # iOS simulator
-fvm flutter run --dart-define=API_URL=http://10.0.2.2:3000     # Android emulator (mặc định)
-fvm flutter run --dart-define=API_URL=http://192.168.1.10:3000 # thiết bị thật (IP LAN máy chạy API)
+fvm flutter run --dart-define=API_URL=http://localhost:3969        # iOS simulator
+fvm flutter run --dart-define=API_URL=http://10.0.2.2:3969     # Android emulator (mặc định)
+fvm flutter run --dart-define=API_URL=http://192.168.1.10:3969 # thiết bị thật (IP LAN máy chạy API)
 ```
 
 | dart-define | Ý nghĩa |
 | --- | --- |
-| `API_URL` | Gốc API. Mặc định `http://10.0.2.2:3000` (Android) / `http://localhost:3000` (iOS) |
+| `API_URL` | Gốc API. Mặc định `http://10.0.2.2:3969` (Android) / `http://localhost:3969` (iOS) |
 | `TENANT_MODE` | `multi` \| `single`; bỏ trống → đọc `GET /health` |
 
 API dev: xem README `labasset-api`. Tài khoản `admin` tenant `BVDEMO`; lần đầu `mustChangePassword` →
