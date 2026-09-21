@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/format/format.dart';
@@ -9,7 +10,9 @@ import '../../core/routes/app_routes.dart';
 import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/status_badge.dart';
@@ -47,18 +50,18 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
           actions: [
             IconButton(
               tooltip: 'repairs.report.open'.tr,
-              icon: const Icon(Icons.picture_as_pdf_outlined),
+              icon: const Icon(LucideIcons.fileText),
               onPressed: () => _exportPdf(context, controller),
             ),
             IconButton(
               tooltip: 'common.share'.tr,
-              icon: const Icon(Icons.share_outlined),
+              icon: const Icon(LucideIcons.share2),
               onPressed: () => _exportPdf(context, controller, share: true),
             ),
             if (controller.canStart)
               IconButton(
                 tooltip: 'maintenance.skip'.tr,
-                icon: const Icon(Icons.skip_next_outlined),
+                icon: const Icon(LucideIcons.skipForward),
                 onPressed: () => _skip(controller),
               ),
           ],
@@ -66,10 +69,14 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
         body: Column(
           children: [
             _Header(t: t, controller: controller),
-            const Divider(height: 1),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.xs,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                ),
                 children: [
                   for (final item in t.templateItems)
                     _ChecklistCard(item: item, controller: controller),
@@ -104,57 +111,50 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => Get.toNamed(Routes.equipment(t.equipmentId)),
-                  child: Text(
-                    t.equipmentLabel,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
+    final overdue = t.status == 'overdue';
+    return DetailHeaderCard(
+      icon: LucideIcons.calendarCheck,
+      title: t.equipmentLabel,
+      onTitleTap: () => Get.toNamed(Routes.equipment(t.equipmentId)),
+      code: t.code,
+      badges: [
+        StatusBadge(
+          tone: toneForTaskStatus(t.status),
+          label: 'status.task.${t.status}'.tr,
+        ),
+      ],
+      stats: [
+        DetailStat(
+          'maintenance.scheduled'.tr,
+          formatDateTime(t.scheduledAt),
+          icon: LucideIcons.calendarDays,
+        ),
+        if (t.dueAt != null)
+          DetailStat(
+            'maintenance.due'.tr,
+            formatDateTime(t.dueAt),
+            icon: overdue ? LucideIcons.clockAlert : LucideIcons.clock3,
+            color: overdue ? context.status.danger : null,
+          ),
+      ],
+      extra: Obx(() {
+        final notes = <Widget>[
+          if (controller.draftRestored.value)
+            Text(
+              'maintenance.draftRestored'.tr,
+              style: context.appText.caption.copyWith(
+                color: context.status.warning,
               ),
-              StatusBadge(
-                tone: toneForTaskStatus(t.status),
-                label: 'status.task.${t.status}'.tr,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            '${'maintenance.scheduled'.tr}: ${formatDateTime(t.scheduledAt)}'
-            '${t.dueAt == null ? '' : ' · ${'maintenance.due'.tr}: ${formatDateTime(t.dueAt)}'}',
-            style: theme.textTheme.bodySmall,
-          ),
-          Obx(
-            () => controller.draftRestored.value
-                ? Text(
-                    'maintenance.draftRestored'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: context.status.warning,
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-          Obx(
-            () => controller.saving.value
-                ? Text(
-                    'maintenance.savingDraft'.tr,
-                    style: theme.textTheme.labelSmall,
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ),
+            ),
+          if (controller.saving.value)
+            Text('maintenance.savingDraft'.tr, style: context.appText.caption),
+        ];
+        if (notes.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: notes,
+        );
+      }),
     );
   }
 }
@@ -320,55 +320,48 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (controller.canStart) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: FilledButton.icon(
-            onPressed: () => _start(context, controller),
-            icon: const Icon(Icons.play_arrow),
-            label: Text('maintenance.start'.tr),
-          ),
+      return StickyActionBar(
+        primary: GradientButton(
+          label: 'maintenance.start'.tr,
+          icon: LucideIcons.play,
+          onPressed: () => _start(context, controller),
         ),
       );
     }
     if (controller.canFinish) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _sign(controller),
-                  icon: const Icon(Icons.draw_outlined),
-                  label: Text('maintenance.sign'.tr),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => _finish(controller),
-                  icon: const Icon(Icons.check),
-                  label: Text('maintenance.finish'.tr),
-                ),
-              ),
-            ],
+      return StickyActionBar(
+        secondary: [
+          StickySecondaryButton(
+            label: 'maintenance.sign'.tr,
+            icon: LucideIcons.penLine,
+            onPressed: () => _sign(controller),
           ),
+        ],
+        primary: GradientButton(
+          label: 'maintenance.finish'.tr,
+          icon: LucideIcons.check,
+          onPressed: () => _finish(controller),
         ),
       );
     }
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Text(
-          t.status == 'done'
-              ? '${'maintenance.overall'.tr}: ${t.overallPass == true ? 'maintenance.result.pass'.tr : 'maintenance.result.fail'.tr}'
-              : '',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium,
-        ),
+    if (t.status != 'done') return const SizedBox.shrink();
+    final pass = t.overallPass == true;
+    return StickyActionBar(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            pass ? LucideIcons.circleCheck : LucideIcons.circleX,
+            size: 20,
+            color: pass ? context.status.success : context.status.danger,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            '${'maintenance.overall'.tr}: ${pass ? 'maintenance.result.pass'.tr : 'maintenance.result.fail'.tr}',
+            style: context.appText.bodyStrong,
+          ),
+        ],
       ),
     );
   }

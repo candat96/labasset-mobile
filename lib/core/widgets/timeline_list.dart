@@ -11,6 +11,7 @@ class TimelineEntry {
     this.summary,
     this.by,
     this.icon = Icons.circle_outlined,
+    this.color,
   });
 
   final String title;
@@ -18,6 +19,9 @@ class TimelineEntry {
   final String? summary;
   final String? by;
   final IconData icon;
+
+  /// Màu dot theo trạng thái; null = primary.
+  final Color? color;
 }
 
 /// Dòng thời gian sự kiện (máy, phiếu…): chấm + đường nối, thời gian tương đối.
@@ -46,17 +50,28 @@ class TimelineList extends StatelessWidget {
                   width: 28,
                   child: Column(
                     children: [
-                      Icon(
-                        items[i].icon,
-                        size: 16,
-                        color: theme.colorScheme.primary,
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: (items[i].color ?? theme.colorScheme.primary)
+                              .withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          items[i].icon,
+                          size: 13,
+                          color: items[i].color ?? theme.colorScheme.primary,
+                        ),
                       ),
                       if (i != items.length - 1)
                         Expanded(
                           child: Container(
                             width: 2,
                             margin: const EdgeInsets.symmetric(vertical: 2),
-                            color: theme.colorScheme.outlineVariant,
+                            color: theme.brightness == Brightness.dark
+                                ? AppColors.dividerDark
+                                : AppColors.timelineLine,
                           ),
                         ),
                     ],

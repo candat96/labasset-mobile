@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/attachments_grid.dart';
+import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -48,26 +51,21 @@ class RepairDetailView extends GetView<RepairDetailController> {
       return DefaultTabController(
         length: 7,
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(d.code),
-            bottom: TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                Tab(text: 'repairs.tab.overview'.tr),
-                Tab(text: 'repairs.tab.logs'.tr),
-                Tab(text: 'repairs.tab.parts'.tr),
-                Tab(text: 'repairs.tab.vendors'.tr),
-                Tab(text: 'repairs.tab.costs'.tr),
-                Tab(text: 'repairs.tab.docs'.tr),
-                Tab(text: 'repairs.tab.report'.tr),
-              ],
-            ),
-          ),
+          appBar: AppBar(title: Text(d.code)),
           body: Column(
             children: [
               _Header(d: d),
-              const Divider(height: 1),
+              PillTabBar(
+                tabs: [
+                  'repairs.tab.overview'.tr,
+                  'repairs.tab.logs'.tr,
+                  'repairs.tab.parts'.tr,
+                  'repairs.tab.vendors'.tr,
+                  'repairs.tab.costs'.tr,
+                  'repairs.tab.docs'.tr,
+                  'repairs.tab.report'.tr,
+                ],
+              ),
               Expanded(
                 child: TabBarView(
                   children: [
@@ -97,79 +95,59 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final overdue =
         d.isOverdue ||
         (d.dueAt != null &&
             (DateTime.tryParse(d.dueAt!)?.isBefore(DateTime.now()) ?? false));
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
+    return DetailHeaderCard(
+      icon: LucideIcons.wrench,
+      title: d.equipmentLabel,
+      onTitleTap: () => Get.toNamed(Routes.equipment(d.equipmentId)),
+      code: d.code,
+      margin: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
+        AppSpacing.lg,
+        0,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => Get.toNamed(Routes.equipment(d.equipmentId)),
-                  child: Text(
-                    d.equipmentLabel,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ),
-              StatusBadge(
-                tone: toneForRepairSeverity(d.severity),
-                label: 'status.severity.${d.severity}'.tr,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              StatusBadge(
-                tone: toneForRepairStatus(d.status),
-                label: 'status.repair.${d.status}'.tr,
-              ),
-            ],
+      badges: [
+        StatusBadge(
+          tone: toneForRepairStatus(d.status),
+          label: 'status.repair.${d.status}'.tr,
+        ),
+        StatusBadge(
+          tone: toneForRepairSeverity(d.severity),
+          label: 'status.severity.${d.severity}'.tr,
+        ),
+      ],
+      stats: [
+        if (d.dueAt != null)
+          DetailStat(
+            'repairs.overview.due'.tr,
+            formatSla(d.dueAt),
+            icon: overdue ? LucideIcons.clockAlert : LucideIcons.clock3,
+            color: overdue ? context.status.danger : null,
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(
-            spacing: AppSpacing.md,
-            children: [
-              if (d.dueAt != null)
-                Text(
-                  formatSla(d.dueAt),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: overdue ? context.status.danger : null,
-                    fontWeight: overdue ? FontWeight.w600 : null,
-                  ),
-                ),
-              Text(
-                '${'equipment.staff'.tr}: ${d.assignee?.fullName ?? 'repairs.assignee.none'.tr}',
-                style: theme.textTheme.labelMedium,
-              ),
-              if (d.equipmentDown)
-                Text(
-                  'repairs.down'.tr,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: context.status.danger,
-                  ),
-                ),
-              if (d.costWarning)
-                Text(
-                  'repairs.overview.cost'.tr,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: context.status.warning,
-                  ),
-                ),
-            ],
+        DetailStat(
+          'equipment.staff'.tr,
+          d.assignee?.fullName ?? 'repairs.assignee.none'.tr,
+          icon: LucideIcons.userRound,
+        ),
+        if (d.equipmentDown)
+          DetailStat(
+            '',
+            'repairs.down'.tr,
+            icon: LucideIcons.powerOff,
+            color: context.status.danger,
           ),
-        ],
-      ),
+        if (d.costWarning)
+          DetailStat(
+            'repairs.overview.cost'.tr,
+            formatVnd(d.totalCost),
+            icon: LucideIcons.banknote,
+            color: context.status.warning,
+          ),
+      ],
     );
   }
 }
@@ -181,23 +159,8 @@ class _Overview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    Widget row(String label, String? value) {
-      if (value == null || value.isEmpty) return const SizedBox.shrink();
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 130,
-              child: Text(label, style: theme.textTheme.bodySmall),
-            ),
-            Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
-          ],
-        ),
-      );
-    }
+    Widget row(String label, String? value) =>
+        InfoRow(label: label, value: value);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -222,7 +185,11 @@ class _Overview extends StatelessWidget {
               ),
               row('repairs.overview.due'.tr, formatDateTime(d.dueAt)),
               row('repairs.overview.created'.tr, formatDateTime(d.createdAt)),
-              row('repairs.overview.cost'.tr, formatVnd(d.totalCost)),
+              InfoRow(
+                label: 'repairs.overview.cost'.tr,
+                value: formatVnd(d.totalCost),
+                showDivider: false,
+              ),
             ],
           ),
         ),
@@ -333,6 +300,7 @@ class _Logs extends StatelessWidget {
                       at: l.at,
                       summary: l.note,
                       by: l.byUserId,
+                      color: l.pending ? context.status.warning : null,
                       icon: l.pending
                           ? Icons.cloud_upload_outlined
                           : Icons.check_circle_outline,
@@ -412,6 +380,13 @@ Future<void> _addLog(RepairDetailController c) async {
   minutes.dispose();
 }
 
+typedef _RepairAction = ({
+  String key,
+  IconData icon,
+  VoidCallback run,
+  bool outlined,
+});
+
 class _ActionBar extends StatelessWidget {
   const _ActionBar({required this.controller, required this.d});
 
@@ -420,71 +395,152 @@ class _ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actions = <Widget>[
-      if (controller.canAccept)
-        _btn('repairs.action.accept', () => controller.accept()),
-      if (controller.canRespond) ...[
-        _btn(
-          'repairs.action.respondYes',
-          () => controller.respond(accepted: true),
-        ),
-        _btn(
-          'repairs.action.respondNo',
-          () => controller.respond(accepted: false),
-          outlined: true,
-        ),
-      ],
-      if (controller.canAssign)
-        _btn('repairs.action.assign', () => _assign(context, controller, d)),
-      if (controller.canDiagnose)
-        _btn(
-          'repairs.action.diagnose',
-          () => _diagnose(context, controller, d),
-        ),
-      if (controller.canChangeStatus)
-        _btn(
-          'repairs.action.changeStatus',
-          () => _changeStatus(context, controller),
-        ),
-      if (controller.canComplete)
-        _btn('repairs.action.complete', () => _complete(context, controller)),
-      if (controller.canAcceptance)
-        _btn(
-          'repairs.action.acceptance',
-          () => _acceptance(context, controller),
-        ),
-      if (controller.canClose)
-        _btn('repairs.action.close', () => controller.close(), outlined: true),
-      if (controller.canCancel)
-        _btn(
-          'repairs.action.cancel',
-          () => _cancel(context, controller),
-          outlined: true,
-        ),
-    ];
-    if (actions.isEmpty) return const SizedBox.shrink();
-    return SafeArea(
-      child: SizedBox(
-        height: 56,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          children: [
-            for (final a in actions)
-              Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.sm),
-                child: Center(child: a),
-              ),
+    // (khoá i18n, icon, hành động, phụ?) — nút chính = mục đầu không phụ.
+    final actions =
+        <({String key, IconData icon, VoidCallback run, bool outlined})>[
+          if (controller.canAccept)
+            (
+              key: 'repairs.action.accept',
+              icon: LucideIcons.check,
+              run: () => controller.accept(),
+              outlined: false,
+            ),
+          if (controller.canRespond) ...[
+            (
+              key: 'repairs.action.respondYes',
+              icon: LucideIcons.check,
+              run: () => controller.respond(accepted: true),
+              outlined: false,
+            ),
+            (
+              key: 'repairs.action.respondNo',
+              icon: LucideIcons.x,
+              run: () => controller.respond(accepted: false),
+              outlined: true,
+            ),
           ],
-        ),
-      ),
+          if (controller.canAssign)
+            (
+              key: 'repairs.action.assign',
+              icon: LucideIcons.userPlus,
+              run: () => _assign(context, controller, d),
+              outlined: false,
+            ),
+          if (controller.canDiagnose)
+            (
+              key: 'repairs.action.diagnose',
+              icon: LucideIcons.stethoscope,
+              run: () => _diagnose(context, controller, d),
+              outlined: false,
+            ),
+          if (controller.canChangeStatus)
+            (
+              key: 'repairs.action.changeStatus',
+              icon: LucideIcons.refreshCw,
+              run: () => _changeStatus(context, controller),
+              outlined: false,
+            ),
+          if (controller.canComplete)
+            (
+              key: 'repairs.action.complete',
+              icon: LucideIcons.circleCheck,
+              run: () => _complete(context, controller),
+              outlined: false,
+            ),
+          if (controller.canAcceptance)
+            (
+              key: 'repairs.action.acceptance',
+              icon: LucideIcons.clipboardCheck,
+              run: () => _acceptance(context, controller),
+              outlined: false,
+            ),
+          if (controller.canClose)
+            (
+              key: 'repairs.action.close',
+              icon: LucideIcons.lock,
+              run: () => controller.close(),
+              outlined: true,
+            ),
+          if (controller.canCancel)
+            (
+              key: 'repairs.action.cancel',
+              icon: LucideIcons.ban,
+              run: () => _cancel(context, controller),
+              outlined: true,
+            ),
+        ];
+    if (actions.isEmpty) return const SizedBox.shrink();
+    final primaryIndex = actions.indexWhere((a) => !a.outlined);
+    final primary = primaryIndex >= 0 ? actions[primaryIndex] : null;
+    final rest = [
+      for (var i = 0; i < actions.length; i++)
+        if (i != primaryIndex) actions[i],
+    ];
+    // Tối đa một nút phụ cạnh nút chính; nhiều hơn → gom vào "Thêm".
+    final fitsInline = rest.length <= (primary == null ? 2 : 1);
+    final inline = fitsInline ? rest : <_RepairAction>[];
+    final more = fitsInline ? <_RepairAction>[] : rest;
+    return StickyActionBar(
+      primary: primary == null
+          ? null
+          : GradientButton(
+              label: primary.key.tr,
+              icon: primary.icon,
+              onPressed: primary.run,
+            ),
+      secondary: [
+        for (final a in inline)
+          StickySecondaryButton(
+            label: a.key.tr,
+            icon: a.icon,
+            onPressed: a.run,
+            danger: a.key == 'repairs.action.cancel',
+          ),
+        if (more.isNotEmpty)
+          StickySecondaryButton(
+            label: 'common.more'.tr,
+            icon: LucideIcons.ellipsis,
+            onPressed: () => _moreSheet(context, more),
+          ),
+      ],
     );
   }
 
-  Widget _btn(String key, VoidCallback onTap, {bool outlined = false}) =>
-      outlined
-      ? OutlinedButton(onPressed: onTap, child: Text(key.tr))
-      : FilledButton(onPressed: onTap, child: Text(key.tr));
+  Future<void> _moreSheet(BuildContext context, List<_RepairAction> items) =>
+      Get.bottomSheet<void>(
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final a in items)
+                  ListTile(
+                    leading: Icon(
+                      a.icon,
+                      color: a.key == 'repairs.action.cancel'
+                          ? context.status.danger
+                          : null,
+                    ),
+                    title: Text(
+                      a.key.tr,
+                      style: context.appText.bodyStrong.copyWith(
+                        color: a.key == 'repairs.action.cancel'
+                            ? context.status.danger
+                            : null,
+                      ),
+                    ),
+                    onTap: () {
+                      Get.back();
+                      a.run();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
+        backgroundColor: Get.theme.colorScheme.surface,
+      );
 }
 
 Future<void> _assign(

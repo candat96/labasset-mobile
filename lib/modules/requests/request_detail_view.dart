@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/app_theme.dart';
@@ -7,6 +8,8 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/qty_field.dart';
+import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/section_card.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/request_detail.dart';
@@ -44,52 +47,57 @@ class RequestDetailView extends GetView<RequestDetailController> {
             if (controller.canApprove)
               IconButton(
                 tooltip: 'requests.reject'.tr,
-                icon: const Icon(Icons.block_outlined),
+                icon: const Icon(LucideIcons.ban),
                 onPressed: () => _reject(controller),
               ),
           ],
         ),
         body: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xl,
+          ),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${d.departmentName ?? d.departmentId} · ${d.requesterName ?? d.requesterId}',
-                            style: theme.textTheme.titleSmall,
-                          ),
-                        ),
-                        StatusBadge(
-                          tone: toneForRequestStatus(d.status),
-                          label: 'status.request.${d.status}'.tr,
-                        ),
-                      ],
-                    ),
-                    if (d.priority == 'urgent')
-                      Text(
-                        'requests.urgent'.tr,
-                        style: TextStyle(color: context.status.danger),
-                      ),
-                    Text('${'requests.reason'.tr}: ${d.reason}'),
-                    if (d.neededBy != null)
-                      Text(
-                        '${'requests.neededBy'.tr}: ${formatDate(d.neededBy)}',
-                      ),
-                    if (d.rejectedReason != null)
-                      Text(
-                        '${'requests.rejectedReason'.tr}: ${d.rejectedReason}',
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                  ],
+            DetailHeaderCard(
+              margin: EdgeInsets.zero,
+              icon: LucideIcons.fileCheck,
+              title: d.departmentName ?? d.departmentId,
+              code: d.code,
+              badges: [
+                StatusBadge(
+                  tone: toneForRequestStatus(d.status),
+                  label: 'status.request.${d.status}'.tr,
                 ),
-              ),
+                if (d.priority == 'urgent')
+                  StatusBadge(
+                    tone: StatusTone.danger,
+                    label: 'requests.urgent'.tr,
+                  ),
+              ],
+              subtitle: '${'requests.reason'.tr}: ${d.reason}',
+              stats: [
+                DetailStat(
+                  'requests.requester'.tr,
+                  d.requesterName ?? d.requesterId,
+                  icon: LucideIcons.userRound,
+                ),
+                if (d.neededBy != null)
+                  DetailStat(
+                    'requests.neededBy'.tr,
+                    formatDate(d.neededBy),
+                    icon: LucideIcons.calendarClock,
+                  ),
+              ],
+              extra: d.rejectedReason == null
+                  ? null
+                  : Text(
+                      '${'requests.rejectedReason'.tr}: ${d.rejectedReason}',
+                      style: context.appText.label.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
             ),
             const SizedBox(height: AppSpacing.sm),
             SectionCard(
@@ -108,34 +116,46 @@ class RequestDetailView extends GetView<RequestDetailController> {
                     ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text(c.body),
+                      title: Text(c.body, style: context.appText.body),
                       subtitle: Text(
                         '${c.userName ?? c.userId ?? ''} · ${formatRelative(c.createdAt)}',
                       ),
                     ),
                   TextButton.icon(
                     onPressed: () => _comment(controller),
-                    icon: const Icon(Icons.add_comment_outlined),
+                    icon: const Icon(LucideIcons.messageSquarePlus, size: 18),
                     label: Text('requests.addComment'.tr),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            if (controller.canApprove)
-              FilledButton.icon(
-                onPressed: () => _approve(context, controller),
-                icon: const Icon(Icons.check),
-                label: Text('requests.approve'.tr),
-              ),
-            if (controller.canIssue)
-              FilledButton.icon(
-                onPressed: () => _issue(controller),
-                icon: const Icon(Icons.outbox_outlined),
-                label: Text('requests.issue'.tr),
-              ),
           ],
         ),
+        bottomNavigationBar: controller.canApprove
+            ? StickyActionBar(
+                secondary: [
+                  StickySecondaryButton(
+                    label: 'requests.reject'.tr,
+                    icon: LucideIcons.ban,
+                    danger: true,
+                    onPressed: () => _reject(controller),
+                  ),
+                ],
+                primary: GradientButton(
+                  label: 'requests.approve'.tr,
+                  icon: LucideIcons.check,
+                  onPressed: () => _approve(context, controller),
+                ),
+              )
+            : controller.canIssue
+            ? StickyActionBar(
+                primary: GradientButton(
+                  label: 'requests.issue'.tr,
+                  icon: LucideIcons.packageMinus,
+                  onPressed: () => _issue(controller),
+                ),
+              )
+            : null,
       );
     });
   }

@@ -9,7 +9,10 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/attachments_grid.dart';
+import '../../core/widgets/detail_widgets.dart';
+import '../../core/widgets/icon_chip.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -79,29 +82,24 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
       return DefaultTabController(
         length: 9,
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(e.code),
-            bottom: TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                Tab(text: 'equipment.tab.specs'.tr),
-                Tab(text: 'equipment.tab.network'.tr),
-                Tab(text: 'equipment.tab.accessories'.tr),
-                Tab(text: 'equipment.tab.software'.tr),
-                Tab(text: 'equipment.tab.components'.tr),
-                Tab(text: 'equipment.tab.supplies'.tr),
-                Tab(text: 'equipment.tab.documents'.tr),
-                Tab(text: 'equipment.tab.timeline'.tr),
-                Tab(text: 'equipment.tab.faults'.tr),
-              ],
-            ),
-          ),
+          appBar: AppBar(title: Text(e.code)),
           body: Column(
             children: [
               _SummaryCard(e: e),
               _QuickActions(controller: controller, e: e),
-              const Divider(height: 1),
+              PillTabBar(
+                tabs: [
+                  'equipment.tab.specs'.tr,
+                  'equipment.tab.network'.tr,
+                  'equipment.tab.accessories'.tr,
+                  'equipment.tab.software'.tr,
+                  'equipment.tab.components'.tr,
+                  'equipment.tab.supplies'.tr,
+                  'equipment.tab.documents'.tr,
+                  'equipment.tab.timeline'.tr,
+                  'equipment.tab.faults'.tr,
+                ],
+              ),
               Expanded(
                 child: TabBarView(
                   children: [
@@ -168,97 +166,103 @@ class _SummaryCard extends StatelessWidget {
         AppSpacing.lg,
         0,
       ),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.tile),
-                    ),
-                    child: Icon(
-                      LucideIcons.monitorCog,
-                      size: 24,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
+      child: AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const IconChip(
+                  icon: LucideIcons.monitorCog,
+                  size: 48,
+                  iconSize: 24,
+                  radius: 14,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(e.name, style: context.appText.title),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            e.code,
+                            style: context.appText.label.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          StatusBadge(
+                            tone: toneForEquipmentStatus(e.status),
+                            label: 'status.${e.status}'.tr,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(e.name, style: context.appText.title),
-                        Text(e.code, style: context.appText.caption),
-                      ],
-                    ),
-                  ),
-                  StatusBadge(
-                    tone: toneForEquipmentStatus(e.status),
-                    label: 'status.${e.status}'.tr,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                [
-                  e.model,
-                  e.serial == null ? null : 'SN ${e.serial}',
-                  [
-                    e.department?.name,
-                    e.location,
-                  ].whereType<String>().join(' · '),
-                ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
-                style: theme.textTheme.bodySmall,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Wrap(
-                spacing: AppSpacing.md,
-                children: [
-                  _due(
-                    context,
-                    'equipment.nextMaintenance'.tr,
-                    e.nextMaintenanceAt,
-                  ),
-                  _due(
-                    context,
-                    'equipment.nextCalibration'.tr,
-                    e.nextCalibrationAt,
-                    force: overdue,
-                  ),
-                  _due(context, 'equipment.warranty'.tr, e.warrantyUntil),
-                ],
-              ),
-              if (e.counts != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  children: [
-                    _count(
-                      context,
-                      'equipment.counts.accessories'.tr,
-                      e.counts!.accessories,
-                    ),
-                    _count(
-                      context,
-                      'equipment.counts.componentsDue'.tr,
-                      e.counts!.componentsDue,
-                    ),
-                    _count(
-                      context,
-                      'equipment.counts.openRepairs'.tr,
-                      e.counts!.openRepairs,
-                    ),
-                  ],
                 ),
               ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              [
+                e.model,
+                e.serial == null ? null : 'SN ${e.serial}',
+                [
+                  e.department?.name,
+                  e.location,
+                ].whereType<String>().join(' · '),
+              ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.md,
+              children: [
+                _due(
+                  context,
+                  'equipment.nextMaintenance'.tr,
+                  e.nextMaintenanceAt,
+                ),
+                _due(
+                  context,
+                  'equipment.nextCalibration'.tr,
+                  e.nextCalibrationAt,
+                  force: overdue,
+                ),
+                _due(context, 'equipment.warranty'.tr, e.warrantyUntil),
+              ],
+            ),
+            if (e.counts != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  _count(
+                    context,
+                    'equipment.counts.accessories'.tr,
+                    e.counts!.accessories,
+                  ),
+                  _count(
+                    context,
+                    'equipment.counts.componentsDue'.tr,
+                    e.counts!.componentsDue,
+                  ),
+                  _count(
+                    context,
+                    'equipment.counts.openRepairs'.tr,
+                    e.counts!.openRepairs,
+                  ),
+                ],
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -272,34 +276,55 @@ class _SummaryCard extends StatelessWidget {
   }) {
     final d = iso == null ? null : DateTime.tryParse(iso);
     final isOverdue = force || (d != null && d.isBefore(DateTime.now()));
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          isOverdue ? Icons.warning_amber_outlined : Icons.event_outlined,
-          size: 14,
-          color: isOverdue
-              ? context.status.danger
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '$label: ${d == null ? '—' : formatDate(d)}',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: isOverdue ? context.status.danger : null,
-          ),
-        ),
-      ],
+    return _chip(
+      context,
+      icon: isOverdue ? LucideIcons.triangleAlert : LucideIcons.calendarDays,
+      label: label,
+      value: d == null ? '—' : formatDate(d),
+      color: isOverdue ? context.status.danger : null,
     );
   }
 
-  Widget _count(BuildContext context, String label, num value) => Padding(
-    padding: const EdgeInsets.only(right: AppSpacing.md),
-    child: Text(
-      '$label: $value',
-      style: Theme.of(context).textTheme.labelMedium,
-    ),
-  );
+  Widget _count(BuildContext context, String label, num value) =>
+      _chip(context, label: label, value: '$value');
+
+  Widget _chip(
+    BuildContext context, {
+    IconData? icon,
+    required String label,
+    required String value,
+    Color? color,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = context.appText;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color?.withValues(alpha: 0.1) ?? scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: color ?? text.label.color),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            '$label: ',
+            style: text.caption.copyWith(color: color ?? text.label.color),
+          ),
+          Text(
+            value,
+            style: text.caption.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color ?? scheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _QuickActions extends StatelessWidget {
