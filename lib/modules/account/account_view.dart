@@ -6,8 +6,11 @@ import '../../core/routes/app_routes.dart';
 import '../../core/sync/outbox_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_list_tile.dart';
+import '../../core/widgets/large_title_scaffold.dart';
 import '../../core/widgets/section_card.dart';
+import '../../data/models/user_view.dart';
 import 'account_controller.dart';
 import 'my_stats_controller.dart';
 
@@ -17,67 +20,19 @@ class AccountView extends GetView<AccountController> {
   @override
   Widget build(BuildContext context) {
     final store = controller.store;
-    return Scaffold(
-      appBar: AppBar(title: Text('account.title'.tr)),
+    return LargeTitleScaffold(
+      title: 'account.title'.tr,
       body: Obx(() {
         final user = store.user.value;
         return ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.xxl * 2,
+          ),
           children: [
-            if (user != null)
-              Card(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  onTap: () => Get.toNamed(Routes.profile),
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer,
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                          child: Text(
-                            user.fullName.isNotEmpty
-                                ? user.fullName.characters.first
-                                : '?',
-                            style: context.appText.bodyStrong,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.fullName,
-                                style: context.appText.bodyStrong,
-                              ),
-                              Text(
-                                user.roles
-                                    .map((role) => 'auth.roles.$role'.tr)
-                                    .join(' · '),
-                                style: context.appText.caption,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: context.appText.caption.color,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            const SizedBox(height: AppSpacing.md),
-            const _MyStatsCard(),
+            if (user != null) _AccountCard(user: user),
             const SizedBox(height: AppSpacing.md),
             SectionCard(
               title: 'account.security'.tr,
@@ -160,28 +115,190 @@ class AccountView extends GetView<AccountController> {
                     title: 'account.theme'.tr,
                     value: 'account.theme.${store.themeMode.value.name}'.tr,
                     onTap: () => _pickTheme(controller),
-                    showDivider: true,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                      onPressed: controller.logout,
-                      icon: const Icon(LucideIcons.logOut, size: 20),
-                      label: Text('auth.logout'.tr),
-                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.xxl * 2),
+            const SizedBox(height: AppSpacing.md),
+            AppCard(
+              padding: EdgeInsets.zero,
+              onTap: controller.logout,
+              child: SizedBox(
+                height: 52,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.logOut,
+                        size: 20,
+                        color: context.status.danger,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'auth.logout'.tr,
+                        style: context.appText.bodyStrong.copyWith(
+                          color: context.status.danger,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         );
       }),
     );
   }
+}
+
+/// Khối tài khoản: avatar 64 chữ cái nền gradient, tên 20/700, chip vai trò,
+/// hàng 3 số (việc xong / chờ / quá hạn) 20/800.
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({required this.user});
+
+  final UserView user;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final stats = Get.find<MyStatsController>();
+    final initial = user.fullName.isNotEmpty
+        ? user.fullName.trim().split(' ').last.characters.first.toUpperCase()
+        : '?';
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(AppRadius.tile),
+            onTap: () => Get.toNamed(Routes.profile),
+            child: Row(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: context.brandGradient,
+                    shape: BoxShape.circle,
+                    boxShadow: context.isDark ? null : AppShadows.brand,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    initial,
+                    style: context.appText.display.copyWith(
+                      fontSize: 26,
+                      color: scheme.onPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.appText.title,
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          for (final role in user.roles)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: scheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.chip,
+                                ),
+                              ),
+                              child: Text(
+                                'auth.roles.$role'.tr,
+                                style: context.appText.caption.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: scheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 18,
+                  color: context.appText.caption.color,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Divider(height: 1, color: Theme.of(context).dividerColor),
+          const SizedBox(height: AppSpacing.md),
+          Obx(
+            () => Row(
+              children: [
+                _Stat(
+                  label: 'account.stats.completed'.tr,
+                  value: '${stats.completed.value}',
+                ),
+                _Stat(
+                  label: 'account.stats.maintenance'.tr,
+                  value: '${stats.maintenanceDone.value}',
+                ),
+                _Stat(
+                  label: 'account.stats.overdue'.tr,
+                  value: '${stats.overdue.value}',
+                  danger: stats.overdue.value > 0,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value, this.danger = false});
+
+  final String label;
+  final String value;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Column(
+      children: [
+        Text(
+          value,
+          style: context.appText.kpi.copyWith(
+            fontSize: 20,
+            color: danger ? context.status.danger : null,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.appText.caption,
+        ),
+      ],
+    ),
+  );
 }
 
 Future<void> _pickTheme(AccountController controller) async {
@@ -208,62 +325,6 @@ Future<void> _pickTheme(AccountController controller) async {
           ),
         ),
       ),
-    ),
-  );
-}
-
-class _MyStatsCard extends StatelessWidget {
-  const _MyStatsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<MyStatsController>();
-    return SectionCard(
-      title: 'account.myStats'.tr,
-      child: Obx(
-        () => Row(
-          children: [
-            _stat(
-              context,
-              'account.stats.completed'.tr,
-              '${controller.completed.value}',
-            ),
-            _stat(
-              context,
-              'account.stats.overdue'.tr,
-              '${controller.overdue.value}',
-            ),
-            _stat(
-              context,
-              'account.stats.maintenance'.tr,
-              '${controller.maintenanceDone.value}',
-            ),
-            _stat(
-              context,
-              'account.stats.rating'.tr,
-              controller.avgRating.value?.toStringAsFixed(1) ?? '—',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _stat(BuildContext context, String label, String value) => Expanded(
-    child: Column(
-      children: [
-        Text(
-          value,
-          style: context.appText.kpi.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: context.appText.caption,
-        ),
-      ],
     ),
   );
 }
