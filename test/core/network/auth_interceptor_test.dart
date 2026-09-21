@@ -79,7 +79,7 @@ void main() {
       ),
     ).thenAnswer((_) async {});
     when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
-    store = SessionStore(storage: storage);
+    store = SessionStore(storage: storage, checkFreshInstall: false);
     await store.saveSession(LoginResult.fromJson(_session()));
     logoutReasons = [];
     route = (o) async => (404, {'code': 'NOT_FOUND', 'message': ''});
@@ -215,6 +215,27 @@ void main() {
     );
     expect(logoutReasons, ['tenant']);
     expect(store.accessToken, isNull);
+  });
+
+  test('TENANT_NOT_FOUND clears stale session with reason tenant', () async {
+    route = (o) async => (404, {'code': 'TENANT_NOT_FOUND', 'message': ''});
+    await expectLater(
+      dio.get<dynamic>('/v1/auth/me'),
+      throwsA(isA<DioException>()),
+    );
+    expect(logoutReasons, ['tenant']);
+    expect(store.accessToken, isNull);
+    expect(store.tenantId, isNull);
+  });
+
+  test('ordinary 404 does not clear session', () async {
+    route = (o) async => (404, {'code': 'NOT_FOUND', 'message': ''});
+    await expectLater(
+      dio.get<dynamic>('/v1/repairs/missing'),
+      throwsA(isA<DioException>()),
+    );
+    expect(logoutReasons, isEmpty);
+    expect(store.accessToken, 'A1');
   });
 
   test('ApiError maps body and network', () {

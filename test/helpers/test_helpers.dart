@@ -41,7 +41,7 @@ SessionStore fakeStore() {
     ),
   ).thenAnswer((_) async {});
   when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
-  return SessionStore(storage: storage);
+  return SessionStore(storage: storage, checkFreshInstall: false);
 }
 
 UserView fakeUser({
