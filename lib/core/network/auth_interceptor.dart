@@ -50,7 +50,9 @@ class AuthInterceptor extends Interceptor {
     final res = err.response;
     final opts = err.requestOptions;
     final code = _code(res);
-    if (code == 'TENANT_SUSPENDED' || code == 'TENANT_MISMATCH') {
+    if (code == 'TENANT_NOT_FOUND' ||
+        code == 'TENANT_SUSPENDED' ||
+        code == 'TENANT_MISMATCH') {
       await _lose('tenant');
       return handler.next(err);
     }
