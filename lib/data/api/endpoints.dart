@@ -186,6 +186,14 @@ class Ep {
   static String fileComplete(String id) => '/v1/files/$id/complete';
   static String fileUrl(String id) => '/v1/files/$id/url';
 
+  // AI (D2) — API thật.
+  static const aiStatus = '/v1/ai/status';
+  static const aiConversations = '/v1/ai/conversations';
+  static String aiConversation(String id) => '/v1/ai/conversations/$id';
+  static String aiMessages(String id) => '/v1/ai/conversations/$id/messages';
+  static String aiMessageFeedback(String id) => '/v1/ai/messages/$id/feedback';
+  static const aiDigestWeekly = '/v1/ai/digest/weekly';
+
   static const devices = '/v1/devices';
   static String device(String token) =>
       '/v1/devices/${Uri.encodeComponent(token)}';

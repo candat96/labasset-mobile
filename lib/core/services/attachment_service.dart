@@ -181,6 +181,33 @@ class AttachmentService {
     }
   }
 
+  /// Tải tệp lên và trả `fileId` (chưa gắn attachment) — dùng cho AI
+  /// (`attachmentFileIds`). Chỉ online; lỗi thì ném ra để UI báo.
+  Future<String> uploadFileBytes({
+    required String name,
+    required String mime,
+    required Uint8List bytes,
+  }) async {
+    final presign = await files.presign(
+      name: name,
+      mime: mime,
+      size: bytes.length,
+    );
+    await _uploadDio.put<void>(
+      presign.uploadUrl,
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        contentType: mime,
+        headers: {
+          ...presign.headers.map((k, v) => MapEntry(k, '$v')),
+          Headers.contentLengthHeader: bytes.length,
+        },
+      ),
+    );
+    await files.complete(presign.fileId);
+    return presign.fileId;
+  }
+
   Future<Uint8List?> _compress(XFile picked) async {
     if (picked.path.isEmpty) return null;
     try {

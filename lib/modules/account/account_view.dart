@@ -13,6 +13,7 @@ import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/large_title_scaffold.dart';
 import '../../core/widgets/section_card.dart';
 import '../../data/models/user_view.dart';
+import '../ai/ai_status_controller.dart';
 import 'account_controller.dart';
 import 'my_stats_controller.dart';
 
@@ -99,6 +100,14 @@ class AccountView extends GetView<AccountController> {
               title: 'account.options'.tr,
               child: Column(
                 children: [
+                  AiGate(
+                    child: AppListTile(
+                      icon: LucideIcons.sparkles,
+                      title: 'ai.title'.tr,
+                      onTap: () => Get.toNamed(Routes.aiConversations),
+                      showDivider: true,
+                    ),
+                  ),
                   AppListTile(
                     icon: LucideIcons.bell,
                     title: 'account.notifications'.tr,

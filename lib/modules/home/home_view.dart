@@ -16,6 +16,7 @@ import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/section_card.dart';
 import '../../core/widgets/shortcut_tile.dart';
 import '../../core/widgets/status_badge.dart';
+import '../ai/ai_status_controller.dart';
 import '../notifications/notification_bell.dart';
 import 'home_controller.dart';
 
@@ -146,27 +147,30 @@ class HomeView extends GetView<HomeController> {
       mainAxisSpacing: AppSpacing.xs,
       crossAxisSpacing: AppSpacing.xs,
       childAspectRatio: 0.92,
-      children: [
-        for (final s in _shortcuts)
-          ShortcutTile(
-            icon: s.icon,
-            label: 'placeholder.${s.key}'.tr,
-            onTap: () => Get.toNamed(switch (s.key) {
-              'equipmentList' => Routes.equipmentList,
-              'equipmentNew' => Routes.equipmentNew,
-              'calendar' => Routes.calendar,
-              'stocktake' => Routes.stocktakes,
-              'reports' => Routes.reports,
-              'assistant' => Routes.ai,
-              'reportFault' => Routes.repairNew,
-              'stockIssue' => Routes.stockIssueNew,
-              'stockReceipt' => Routes.stockReceiptNew,
-              _ => Routes.stock,
-            }),
-          ),
-      ],
+      children: [for (final s in _shortcuts) _shortcut(s.key, s.icon)],
     ),
   ];
+
+  /// Lối tắt; riêng "Trợ lý AI" ẩn khi API tắt (`AiGate`).
+  Widget _shortcut(String key, IconData icon) {
+    final tile = ShortcutTile(
+      icon: icon,
+      label: 'placeholder.$key'.tr,
+      onTap: () => Get.toNamed(switch (key) {
+        'equipmentList' => Routes.equipmentList,
+        'equipmentNew' => Routes.equipmentNew,
+        'calendar' => Routes.calendar,
+        'stocktake' => Routes.stocktakes,
+        'reports' => Routes.reports,
+        'assistant' => Routes.aiConversations,
+        'reportFault' => Routes.repairNew,
+        'stockIssue' => Routes.stockIssueNew,
+        'stockReceipt' => Routes.stockReceiptNew,
+        _ => Routes.stock,
+      }),
+    );
+    return key == 'assistant' ? AiGate(child: tile) : tile;
+  }
 }
 
 /// Hero gradient: logo + tên app + chuông, lời chào, viện · ngày; ô tìm kiếm

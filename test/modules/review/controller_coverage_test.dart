@@ -161,12 +161,12 @@ void main() {
     expect(c.error.value, isNotNull);
   });
 
-  test('AiController tạo và xoá hội thoại local', () {
-    final c = AiController(repo: _Ai());
-    final conversation = c.newConversation(title: 'Test');
-    expect(c.current.value, conversation);
-    c.delete(conversation);
-    expect(c.current.value, isNull);
+  test('AiController load lỗi ghi error', () async {
+    final repo = _Ai();
+    when(() => repo.getConversation('c1')).thenThrow(Exception('load'));
+    final c = AiController(repo: repo, conversationId: 'c1');
+    await c.load();
+    expect(c.error.value, isNotNull);
   });
 
   test('MaintenanceTasksController load và chuyển TaskSummary', () async {

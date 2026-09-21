@@ -26,6 +26,7 @@ import '../data/repositories/stocktakes_repository.dart';
 import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import '../modules/account/lock_controller.dart';
+import '../modules/ai/ai_status_controller.dart';
 import '../modules/maintenance/maintenance_task_controller.dart';
 import '../modules/notifications/notifications_controller.dart';
 import '../modules/repairs/repair_detail_controller.dart';
@@ -77,6 +78,7 @@ Future<void> bootstrap() async {
   Get.put(CalibrationsRepository(dio), permanent: true);
   Get.put(StocktakesRepository(dio), permanent: true);
   Get.put(AiRepository(dio), permanent: true);
+  Get.put(AiStatusController(Get.find<AiRepository>()), permanent: true);
 
   // Kho cục bộ kiểm kê offline.
   final stocktakeStore = SqfliteStocktakeLocalStore();

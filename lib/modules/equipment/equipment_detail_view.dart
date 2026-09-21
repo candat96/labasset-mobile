@@ -25,8 +25,10 @@ import '../../core/widgets/status_badge.dart';
 import '../../data/models/department.dart';
 import '../../data/models/equipment_detail.dart';
 import '../../data/models/room.dart';
+import '../../data/repositories/ai_repository.dart';
 import '../../data/repositories/catalogs_repository.dart';
 import '../../data/repositories/departments_repository.dart';
+import '../ai/ai_status_controller.dart';
 import 'equipment_detail_controller.dart';
 import 'tabs/accessories_tab.dart';
 import 'tabs/components_tab.dart';
@@ -379,11 +381,12 @@ class _QuickActions extends StatelessWidget {
             title: g.title.tr,
             actions: [
               for (final k in g.keys)
-                SheetAction(
-                  label: 'equipment.action.$k'.tr,
-                  icon: icons[k]!,
-                  onTap: () => _run(context, k),
-                ),
+                if (k != 'assistant' || _aiEnabled())
+                  SheetAction(
+                    label: 'equipment.action.$k'.tr,
+                    icon: icons[k]!,
+                    onTap: () => _run(context, k),
+                  ),
             ],
           ),
       ],
@@ -414,10 +417,27 @@ class _QuickActions extends StatelessWidget {
       case 'transfer':
         await _transfer(context);
       case 'assistant':
-        await Get.toNamed(Routes.ai);
+        await _askAi();
       case 'reprint':
         await _reprint(context);
     }
+  }
+
+  /// "Hỏi AI về máy này": tạo hội thoại gắn máy rồi mở chat luôn.
+  Future<void> _askAi() async {
+    try {
+      final created = await Get.find<AiRepository>().createConversation(
+        equipmentId: e.id,
+      );
+      await Get.toNamed(Routes.aiChat(created.id));
+    } catch (err) {
+      AppSnackbar.error(err);
+    }
+  }
+
+  static bool _aiEnabled() {
+    if (!Get.isRegistered<AiStatusController>()) return true;
+    return Get.find<AiStatusController>().enabled;
   }
 
   Future<void> _adhoc(BuildContext context) async {

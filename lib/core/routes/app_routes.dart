@@ -36,6 +36,9 @@ class Routes {
   static const offlineData = '/offline-data';
   static const reports = '/reports';
   static const ai = '/ai';
+  static const aiConversations = '/ai/conversations';
+  static const aiChatDetail = '/ai/:id';
+  static String aiChat(String id) => '/ai/$id';
   static const repairs = '/repairs';
   static const repairNew = '/repairs/new';
   static const repairDetail = '/repairs/:id';

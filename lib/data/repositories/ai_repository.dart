@@ -5,125 +5,143 @@ import 'package:dio/dio.dart';
 
 import '../../core/ai/ai_models.dart';
 import '../../core/ai/sse_parser.dart';
-import '../api/endpoints_ai.dart';
+import '../api/endpoints.dart';
 
-/// Repository AI (D2). API chưa có → `status` trả apiMissing, chat dùng mock.
+/// Repository AI (D2) — API thật (`/v1/ai/*`), không còn mock.
 class AiRepository {
-  AiRepository(this._dio, {MockAiService? mock})
-    : mock = mock ?? MockAiService();
+  AiRepository(this._dio);
 
   final Dio _dio;
-  final MockAiService mock;
 
+  /// `GET /v1/ai/status`. 404/503/501 → `apiMissing` (EmptyState chưa hỗ trợ).
   Future<AiStatus> status() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>(EpAi.status);
+      final res = await _dio.get<Map<String, dynamic>>(Ep.aiStatus);
+      final d = res.data ?? const <String, dynamic>{};
+      final budget = d['budget'];
+      final rate = d['rateLimit'];
       return AiStatus(
-        enabled: (res.data?['enabled'] as bool?) ?? false,
+        enabled: d['enabled'] == true,
         apiMissing: false,
-        model: res.data?['model'] as String?,
+        model: d['model'] as String?,
+        budget: budget is Map<String, dynamic>
+            ? AiBudget(
+                monthlyTokenBudget:
+                    (budget['monthlyTokenBudget'] as num?)?.toInt() ?? 0,
+                used: (budget['used'] as num?)?.toInt() ?? 0,
+                remaining: (budget['remaining'] as num?)?.toInt(),
+              )
+            : null,
+        rateLimitPerHour: rate is Map<String, dynamic>
+            ? (rate['perHour'] as num?)?.toInt()
+            : null,
       );
-    } catch (e) {
-      final err = e is DioException ? e.response?.statusCode : null;
-      if (err == 404 || err == 501) {
-        return const AiStatus(enabled: false, apiMissing: true);
-      }
-      return const AiStatus(enabled: false, apiMissing: true);
-    }
-  }
-
-  /// Stream trả lời: dùng SSE thật khi API có, fallback mock khi thiếu.
-  Stream<SseEvent> sendMessage(
-    String conversationId,
-    String text, {
-    List<String> attachmentFileIds = const [],
-    CancelToken? cancelToken,
-  }) async* {
-    try {
-      final res = await _dio.post<ResponseBody>(
-        EpAi.messages(conversationId),
-        data: {
-          'text': text,
-          if (attachmentFileIds.isNotEmpty)
-            'attachmentFileIds': attachmentFileIds,
-        },
-        options: Options(responseType: ResponseType.stream),
-        cancelToken: cancelToken,
-      );
-      final parser = SseParser();
-      await for (final chunk in res.data!.stream) {
-        final raw = utf8.decode(chunk, allowMalformed: true);
-        for (final e in parser.add(raw)) {
-          yield e;
-        }
-      }
     } on DioException catch (e) {
-      if (CancelToken.isCancel(e)) rethrow;
-      final status = e.response?.statusCode;
-      // API chưa có (404) hoặc không kết nối được → chế độ mô phỏng.
-      if (status == 404 || status == 501 || e.response == null) {
-        yield* _mockStream(text, cancelToken);
-        return;
+      final code = e.response?.statusCode;
+      if (code == 404 || code == 503 || code == 501) {
+        return const AiStatus(enabled: false, apiMissing: true);
       }
       rethrow;
     }
   }
 
-  Stream<SseEvent> _mockStream(String text, CancelToken? cancel) async* {
-    final like = _DioCancel(cancel);
-    yield* mock.stream(text, cancel: like);
+  Future<AiConversationPage> listConversations({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      Ep.aiConversations,
+      queryParameters: {'page': page, 'limit': limit},
+    );
+    final d = res.data ?? const <String, dynamic>{};
+    final items = (d['items'] as List<dynamic>? ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(AiConversation.fromJson)
+        .toList();
+    return AiConversationPage(
+      items: items,
+      total: (d['total'] as num?)?.toInt() ?? items.length,
+      page: page,
+      limit: limit,
+    );
   }
-}
 
-class _DioCancel implements CancelTokenLike {
-  _DioCancel(this._token);
-  final CancelToken? _token;
+  Future<AiConversation> createConversation({
+    String? title,
+    String? equipmentId,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      Ep.aiConversations,
+      data: {
+        if (title != null && title.trim().isNotEmpty) 'title': title.trim(),
+        'equipmentId': ?equipmentId,
+      },
+    );
+    return AiConversation.fromJson(res.data!);
+  }
 
-  @override
-  bool get isCancelled => _token?.isCancelled ?? false;
-}
+  Future<AiConversationDetail> getConversation(String id) async {
+    final res = await _dio.get<Map<String, dynamic>>(Ep.aiConversation(id));
+    final d = res.data ?? const <String, dynamic>{};
+    return AiConversationDetail(
+      conversation: AiConversation.fromJson(d),
+      messages: (d['messages'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(AiMessage.fromJson)
+          .toList(),
+    );
+  }
 
-/// Áp dụng sự kiện SSE vào tin nhắn (reducer thuần, test được).
-class AiStreamReducer {
-  AiStreamReducer(this.message);
+  Future<void> deleteConversation(String id) =>
+      _dio.delete<void>(Ep.aiConversation(id));
 
-  final AiMessage message;
+  Future<void> feedback(String messageId, {required bool helpful}) =>
+      _dio.post<void>(
+        Ep.aiMessageFeedback(messageId),
+        data: {'feedback': helpful ? 'up' : 'down'},
+      );
 
-  void apply(SseEvent event) {
-    switch (event.event) {
-      case 'text':
-        message.text += event.data;
-      case 'tool':
-        final data = _json(event.data);
-        final rows = (data['rows'] as List<dynamic>? ?? [])
-            .whereType<Map<String, dynamic>>()
-            .toList();
-        message.tools = [
-          ...message.tools,
-          AiToolCard(
-            name: (data['name'] as String?) ?? 'tool',
-            rows: rows.take(50).toList(),
-            link: data['link'] as String?,
-          ),
-        ];
-      case 'sources':
-        final list = jsonDecode(event.data);
-        if (list is List) {
-          message.sources = list.whereType<String>().toList();
-        }
-      case 'error':
-        message.error = _json(event.data)['message'] as String? ?? event.data;
-      case 'done':
-        message.streaming = false;
+  /// `POST /v1/ai/conversations/:id/messages` → stream SSE.
+  Stream<SseEvent> sendMessage(
+    String conversationId,
+    String content, {
+    List<String> attachmentFileIds = const [],
+    CancelToken? cancelToken,
+  }) async* {
+    final res = await _dio.post<ResponseBody>(
+      Ep.aiMessages(conversationId),
+      data: {
+        'content': content,
+        if (attachmentFileIds.isNotEmpty)
+          'attachmentFileIds': attachmentFileIds,
+      },
+      options: Options(
+        responseType: ResponseType.stream,
+        headers: {'Accept': 'text/event-stream'},
+      ),
+      cancelToken: cancelToken,
+    );
+    final parser = SseParser();
+    await for (final chunk in res.data!.stream) {
+      final raw = utf8.decode(chunk, allowMalformed: true);
+      for (final e in parser.add(raw)) {
+        yield e;
+      }
     }
   }
 
-  static Map<String, dynamic> _json(String raw) {
-    try {
-      final d = jsonDecode(raw);
-      return d is Map<String, dynamic> ? d : const {};
-    } catch (_) {
-      return const {};
+  /// `GET /v1/ai/digest/weekly` → tóm tắt tuần.
+  Future<String> weeklyDigest({String? weekStart}) async {
+    final res = await _dio.get<dynamic>(
+      Ep.aiDigestWeekly,
+      queryParameters: {'weekStart': ?weekStart},
+    );
+    final d = res.data;
+    if (d is Map) {
+      return (d['summary'] as String?) ??
+          (d['text'] as String?) ??
+          d.toString();
     }
+    return d?.toString() ?? '';
   }
 }

@@ -27,6 +27,8 @@ import '../data/repositories/supplies_repository.dart';
 import '../data/repositories/tasks_repository.dart';
 import 'account/lock_view.dart';
 import 'ai/ai_controller.dart';
+import 'ai/ai_conversations_controller.dart';
+import 'ai/ai_conversations_view.dart';
 import 'ai/ai_view.dart';
 import 'calendar/calendar_controller.dart';
 import 'calendar/calendar_view.dart';
@@ -490,11 +492,44 @@ List<GetPage<dynamic>> featurePages() {
       ),
     ),
     GetPage(
+      name: Routes.aiConversations,
+      page: () => const AiConversationsView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => AiConversationsController(
+            repo: Get.find<AiRepository>(),
+            equipment: Get.find<EquipmentRepository>(),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
+      name: Routes.aiChatDetail,
+      page: () => const AiView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => AiController(
+            repo: Get.find<AiRepository>(),
+            conversationId: Get.parameters['id'],
+            equipment: Get.find<EquipmentRepository>(),
+          ),
+        ),
+      ),
+    ),
+    GetPage(
       name: Routes.ai,
       page: () => const AiView(),
       middlewares: protected,
       binding: BindingsBuilder(
-        () => Get.lazyPut(() => AiController(repo: Get.find<AiRepository>())),
+        () => Get.lazyPut(
+          () => AiController(
+            repo: Get.find<AiRepository>(),
+            equipmentId: Get.parameters['equipmentId'],
+            equipment: Get.find<EquipmentRepository>(),
+          ),
+        ),
       ),
     ),
     GetPage(
