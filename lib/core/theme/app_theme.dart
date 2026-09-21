@@ -187,6 +187,7 @@ class AppTheme {
     required Color background,
     required Color card,
     required Color border,
+    required Color divider,
     required Color muted,
     required Color mutedFg,
     required Color subtle,
@@ -198,8 +199,9 @@ class AppTheme {
       subtle: subtle,
     );
     final text = _textTheme(appText);
+    final isDark = brightness == Brightness.dark;
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.md),
+      borderRadius: BorderRadius.circular(AppRadius.tile),
     );
     return ThemeData(
       useMaterial3: true,
@@ -208,23 +210,25 @@ class AppTheme {
       fontFamily: _fontFamily,
       textTheme: text,
       scaffoldBackgroundColor: background,
-      dividerColor: border,
+      dividerColor: divider,
       appBarTheme: AppBarTheme(
-        backgroundColor: card,
+        backgroundColor: background,
         foregroundColor: scheme.onSurface,
         elevation: 0,
-        scrolledUnderElevation: 0,
+        scrolledUnderElevation: 1,
+        shadowColor: divider,
+        surfaceTintColor: background,
         centerTitle: false,
-        titleTextStyle: text.titleMedium,
-        shape: Border(bottom: BorderSide(color: border)),
+        titleTextStyle: appText.title.copyWith(fontFamily: _fontFamily),
       ),
       cardTheme: CardThemeData(
         color: card,
-        elevation: 0,
+        elevation: isDark ? 0 : 1,
+        shadowColor: const Color(0x260F172A),
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: border),
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          side: isDark ? BorderSide(color: border) : BorderSide.none,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -236,29 +240,29 @@ class AppTheme {
           vertical: 12,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.tile),
           borderSide: BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.tile),
           borderSide: BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.tile),
           borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
         labelStyle: text.bodyMedium,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
+          minimumSize: const Size.fromHeight(48),
           shape: shape,
           textStyle: text.labelLarge,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
+          minimumSize: const Size.fromHeight(48),
           shape: shape,
           side: BorderSide(color: border),
           foregroundColor: scheme.onSurface,
@@ -272,6 +276,33 @@ class AppTheme {
         labelStyle: text.labelMedium,
         side: BorderSide.none,
         shape: const StadiumBorder(),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: card,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.sheet),
+          ),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 64,
+        backgroundColor: card,
+        indicatorColor: scheme.primaryContainer,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        labelTextStyle: WidgetStatePropertyAll(appText.caption),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: scheme.primary,
+        unselectedLabelColor: mutedFg,
+        labelStyle: appText.label.copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: scheme.primary, width: 2),
+        ),
+        dividerColor: divider,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: card,
@@ -299,6 +330,8 @@ class AppTheme {
     scheme: const ColorScheme.light(
       primary: AppColors.primary,
       onPrimary: Colors.white,
+      primaryContainer: AppColors.primaryContainer,
+      onPrimaryContainer: AppColors.onPrimaryContainer,
       secondary: AppColors.primaryContainer,
       onSecondary: AppColors.onPrimaryContainer,
       surface: AppColors.card,
@@ -312,6 +345,7 @@ class AppTheme {
     background: AppColors.background,
     card: AppColors.card,
     border: AppColors.border,
+    divider: AppColors.divider,
     muted: AppColors.muted,
     mutedFg: AppColors.mutedForeground,
     subtle: AppColors.subtle,
@@ -323,6 +357,8 @@ class AppTheme {
     scheme: const ColorScheme.dark(
       primary: AppColors.primaryDark,
       onPrimary: AppColors.backgroundDark,
+      primaryContainer: AppColors.primaryContainerDark,
+      onPrimaryContainer: AppColors.onPrimaryContainerDark,
       secondary: AppColors.primaryContainerDark,
       onSecondary: AppColors.onPrimaryContainerDark,
       surface: AppColors.cardDark,
@@ -336,6 +372,7 @@ class AppTheme {
     background: AppColors.backgroundDark,
     card: AppColors.cardDark,
     border: AppColors.borderDark,
+    divider: AppColors.dividerDark,
     muted: AppColors.mutedDark,
     mutedFg: AppColors.mutedForegroundDark,
     subtle: AppColors.subtleDark,

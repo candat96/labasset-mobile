@@ -68,9 +68,28 @@ class AppSpacing {
 
 class AppRadius {
   AppRadius._();
-  static const sm = 4.0;
-  static const md = 6.0;
-  static const lg = 8.0;
+  static const card = 12.0;
+  static const tile = 10.0;
+  static const chip = 999.0;
+  static const sheet = 16.0;
+
+  // Bí danh tương thích cho widget cũ; vẫn quy về bốn bán kính chuẩn.
+  static const sm = tile;
+  static const md = tile;
+  static const lg = card;
+}
+
+class AppShadows {
+  AppShadows._();
+
+  static const cardElevated = [
+    BoxShadow(color: Color(0x0F0F172A), offset: Offset(0, 1), blurRadius: 2),
+    BoxShadow(color: Color(0x1A0F172A), offset: Offset(0, 1), blurRadius: 3),
+  ];
+
+  static const selected = [
+    BoxShadow(color: Color(0x140F172A), offset: Offset(0, 1), blurRadius: 2),
+  ];
 }
 
 /// Thang chữ duy nhất của ứng dụng; màu được áp theo light/dark theme.
