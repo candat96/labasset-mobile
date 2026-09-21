@@ -8,8 +8,8 @@ part 'room.g.dart';
 @JsonSerializable()
 class RoomRef {
   const RoomRef({
-    required this.id,
-    required this.code,
+    this.id,
+    this.code = '',
     required this.name,
     this.building,
     this.floor,
@@ -18,7 +18,8 @@ class RoomRef {
     this.departmentCode,
   });
 
-  final String id;
+  /// Null khi API chỉ trả bản rút gọn `{code, name}` (vd. danh sách sửa chữa).
+  final String? id;
   final String code;
   final String name;
   final String? building;

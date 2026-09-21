@@ -29,10 +29,13 @@ Dio createDio({
   if (kDebugMode) {
     dio.interceptors.add(
       LogInterceptor(
-        requestHeader: false,
+        requestHeader: true,
         responseHeader: false,
-        requestBody: false,
-        responseBody: false,
+        requestBody: true,
+        responseBody: true,
+        logPrint: (o) => debugPrint(
+          '[dio] ${o.toString().replaceAll(RegExp(r'password: [^,}]*'), 'password: ***')}',
+        ),
       ),
     );
   }

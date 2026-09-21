@@ -7,8 +7,8 @@ part of 'room.dart';
 // **************************************************************************
 
 RoomRef _$RoomRefFromJson(Map<String, dynamic> json) => RoomRef(
-  id: json['id'] as String,
-  code: json['code'] as String,
+  id: json['id'] as String?,
+  code: json['code'] as String? ?? '',
   name: json['name'] as String,
   building: json['building'] as String?,
   floor: json['floor'] as String?,
