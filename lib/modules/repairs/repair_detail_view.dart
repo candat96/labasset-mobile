@@ -12,6 +12,7 @@ import '../../core/widgets/attachments_grid.dart';
 import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/icon_chip.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/section_card.dart';
@@ -69,7 +70,7 @@ class RepairDetailView extends GetView<RepairDetailController> {
               Expanded(
                 child: TabBarView(
                   children: [
-                    _Overview(d: d),
+                    _Overview(d: d, controller: controller),
                     _Logs(controller: controller),
                     PartsTab(equipmentId: d.equipmentId),
                     const VendorsTab(),
@@ -153,9 +154,10 @@ class _Header extends StatelessWidget {
 }
 
 class _Overview extends StatelessWidget {
-  const _Overview({required this.d});
+  const _Overview({required this.d, required this.controller});
 
   final RepairDetail d;
+  final RepairDetailController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -239,8 +241,20 @@ class _Overview extends StatelessWidget {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text(a.userId ?? '—'),
-                    subtitle: Text('repairs.role.${a.role}'.tr),
+                    leading: const IconChip(
+                      icon: LucideIcons.userRound,
+                      size: 36,
+                      iconSize: 18,
+                    ),
+                    title: Text(
+                      _userLabel(a.userId, controller, detail: d) ??
+                          'repairs.assignee.unknown'.tr,
+                      style: context.appText.bodyStrong,
+                    ),
+                    subtitle: Text(
+                      'repairs.role.${a.role}'.tr,
+                      style: context.appText.label,
+                    ),
                     trailing: StatusBadge(
                       tone: switch (a.response) {
                         'accepted' => StatusTone.success,
@@ -295,11 +309,11 @@ class _Logs extends StatelessWidget {
                   for (final l in logs)
                     TimelineEntry(
                       title: l.pending
-                          ? '${l.action} · ${'repairs.logs.pending'.tr}'
-                          : l.action,
+                          ? '${repairLogLabel(l.action)} · ${'repairs.logs.pending'.tr}'
+                          : repairLogLabel(l.action),
                       at: l.at,
                       summary: l.note,
-                      by: l.byUserId,
+                      by: _userLabel(l.byUserId, controller),
                       color: l.pending ? context.status.warning : null,
                       icon: l.pending
                           ? Icons.cloud_upload_outlined
@@ -918,4 +932,39 @@ class _ReportTab extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Nhãn tiếng Việt cho `action` của nhật ký sửa chữa (API ghi mã enum:
+/// `created`, `accepted`, `assigned`, `assignment:<response>`, `diagnosis`,
+/// `status:<status>`, `completed`, `acceptance`, `acceptance_rejected`,
+/// `closed`, `cancelled`); chuỗi tự nhập từ app giữ nguyên.
+String repairLogLabel(String action) {
+  final a = action.trim();
+  if (a.startsWith('status:')) {
+    final v = a.substring('status:'.length);
+    return 'repairs.log.status'.trParams({'value': 'status.repair.$v'.tr});
+  }
+  if (a.startsWith('assignment:')) {
+    final v = a.substring('assignment:'.length);
+    return 'repairs.log.assignment'.trParams({
+      'value': 'repairs.response.$v'.tr,
+    });
+  }
+  final key = 'repairs.log.$a';
+  final label = key.tr;
+  return label == key ? action : label;
+}
+
+/// Tên người dùng thay cho UUID: bạn / NV phụ trách của phiếu; không rõ → null.
+String? _userLabel(
+  String? userId,
+  RepairDetailController c, {
+  RepairDetail? detail,
+}) {
+  if (userId == null || userId.isEmpty) return null;
+  if (userId == c.userId) return 'repairs.log.you'.tr;
+  final d = detail ?? c.item.value;
+  final assignee = d?.assignee;
+  if (assignee != null && assignee.id == userId) return assignee.fullName;
+  return null;
 }

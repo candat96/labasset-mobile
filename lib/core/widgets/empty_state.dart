@@ -32,7 +32,8 @@ class EmptyState extends StatelessWidget {
                 ? constraints.maxHeight * 0.6
                 : 280,
           ),
-          child: Padding(
+          // Cuộn được khi không gian quá thấp (tab con, bàn phím) → không overflow.
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
               mainAxisSize: MainAxisSize.min,

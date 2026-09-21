@@ -49,6 +49,9 @@ import 'repairs/repair_form_controller.dart';
 import 'repairs/repair_form_view.dart';
 import 'repairs/repairs_controller.dart';
 import 'repairs/repairs_view.dart';
+import 'repairs/tabs/vendors_tab.dart';
+import 'repairs/tabs/parts_tab.dart';
+import 'repairs/tabs/costs_tab.dart';
 import 'reports/reports_controller.dart';
 import 'reports/reports_view.dart';
 import 'requests/request_detail_controller.dart';
@@ -522,6 +525,32 @@ List<GetPage<dynamic>> featurePages() {
             id: id,
             userId: user?.id ?? '',
             roles: user?.roles ?? const [],
+          ),
+          tag: id,
+        );
+        // Controller các tab phụ (cùng tag = id phiếu).
+        Get.lazyPut(
+          () => PartsTabController(
+            repairs: Get.find<RepairsRepository>(),
+            supplies: Get.find<SuppliesRepository>(),
+            equipment: Get.find<EquipmentRepository>(),
+            ticketId: id,
+            equipmentId: '',
+          ),
+          tag: id,
+        );
+        Get.lazyPut(
+          () => VendorsTabController(
+            repairs: Get.find<RepairsRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
+            ticketId: id,
+          ),
+          tag: id,
+        );
+        Get.lazyPut(
+          () => CostsTabController(
+            repairs: Get.find<RepairsRepository>(),
+            ticketId: id,
           ),
           tag: id,
         );
