@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/models/attachment.dart';
 import '../services/attachment_service.dart';
 import '../theme/tokens.dart';
+import 'app_sheet.dart';
 import 'app_snackbar.dart';
 import 'confirm_sheet.dart';
 import 'empty_state.dart';
@@ -99,27 +100,19 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
   Future<void> _add() async {
     var kind = widget.kinds.first;
     if (widget.kinds.length > 1) {
-      final picked = await Get.bottomSheet<String>(
-        SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Text(
-                  'attachment.kindLabel'.tr,
-                  style: Get.textTheme.titleMedium,
-                ),
+      final picked = await AppSheet.show<String>(
+        context,
+        builder: (ctx) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SheetHeader(title: 'attachment.kindLabel'.tr),
+            for (final k in widget.kinds)
+              ListTile(
+                title: Text(attachmentKindLabel(k)),
+                onTap: () => AppSheet.close(ctx, k),
               ),
-              for (final k in widget.kinds)
-                ListTile(
-                  title: Text(attachmentKindLabel(k)),
-                  onTap: () => Get.back(result: k),
-                ),
-            ],
-          ),
+          ],
         ),
-        backgroundColor: Get.theme.colorScheme.surface,
       );
       if (picked == null) return;
       kind = picked;
@@ -147,25 +140,23 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
     }
   }
 
-  Future<ImageSource?> _pickSource() => Get.bottomSheet<ImageSource>(
-    SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.photo_camera_outlined),
-            title: Text('common.fromCamera'.tr),
-            onTap: () => Get.back(result: ImageSource.camera),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library_outlined),
-            title: Text('common.fromGallery'.tr),
-            onTap: () => Get.back(result: ImageSource.gallery),
-          ),
-        ],
-      ),
+  Future<ImageSource?> _pickSource() => AppSheet.show<ImageSource>(
+    context,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.photo_camera_outlined),
+          title: Text('common.fromCamera'.tr),
+          onTap: () => AppSheet.close(ctx, ImageSource.camera),
+        ),
+        ListTile(
+          leading: const Icon(Icons.photo_library_outlined),
+          title: Text('common.fromGallery'.tr),
+          onTap: () => AppSheet.close(ctx, ImageSource.gallery),
+        ),
+      ],
     ),
-    backgroundColor: Get.theme.colorScheme.surface,
   );
 
   Future<void> _download(String url, AttachmentView a) async {
@@ -197,7 +188,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
     if (a.isImage) {
       await showDialog<void>(
         context: context,
-        builder: (_) => Dialog(
+        builder: (ctx) => Dialog(
           insetPadding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -219,13 +210,13 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
                       child: Text('attachment.download'.tr),
                     ),
                   TextButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () => Navigator.pop(ctx),
                     child: Text('common.close'.tr),
                   ),
                   if (widget.canEdit)
                     TextButton(
                       onPressed: () {
-                        Get.back();
+                        Navigator.pop(ctx);
                         _delete(a);
                       },
                       child: Text(
@@ -245,7 +236,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
       if (widget.downloadable) {
         await showDialog<void>(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (ctx) => AlertDialog(
             title: Text(
               a.displayName.isNotEmpty
                   ? a.displayName
@@ -254,7 +245,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Get.back();
+                  Navigator.pop(ctx);
                   _download(url, a);
                 },
                 child: Text('attachment.download'.tr),
@@ -278,6 +269,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
 
   Future<void> _delete(AttachmentView a) async {
     final ok = await ConfirmSheet.show(
+      context,
       title: 'attachment.deleteConfirm'.tr,
       destructive: true,
     );

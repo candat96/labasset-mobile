@@ -7,7 +7,9 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../core/cache/kv_cache.dart';
 import '../../core/services/pdf_file_service.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/pick_ref.dart';
 import '../../data/models/equipment.dart';
 import '../../data/models/report.dart';
 import '../../data/repositories/departments_repository.dart';
@@ -91,41 +93,15 @@ class ReportsController extends GetxController {
     loading.value = false;
   }
 
-  Future<void> pickDepartment() async {
-    final list = await departments.list(limit: 50);
-    if (list.isEmpty) return;
-    final selected = await Get.bottomSheet<dynamic>(
-      SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                'reports.department'.tr,
-                style: Get.textTheme.titleMedium,
-              ),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final item in list)
-                    ListTile(
-                      title: Text('${item.code} — ${item.name}'),
-                      onTap: () => Get.back(result: item),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: Get.theme.colorScheme.surface,
+  Future<void> pickDepartment(BuildContext context) async {
+    final selected = await pickRef(
+      context,
+      title: 'reports.department'.tr,
+      loader: () => departments.list(limit: 50),
     );
     if (selected == null) return;
-    departmentId.value = selected.id as String;
-    departmentName.value = selected.name as String;
+    departmentId.value = selected.id;
+    departmentName.value = selected.name;
     await loadMachines();
   }
 
@@ -159,62 +135,51 @@ class ReportsController extends GetxController {
     }
   }
 
-  Future<void> chooseExport(ReportMeta report) async {
-    final choice = await Get.bottomSheet<String>(
-      SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: reportFrom,
-                      decoration: InputDecoration(
-                        labelText: 'reports.from'.tr,
-                        hintText: 'reports.dateHint'.tr,
-                      ),
+  Future<void> chooseExport(BuildContext context, ReportMeta report) async {
+    final choice = await AppSheet.show<String>(
+      context,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: reportFrom,
+                    decoration: InputDecoration(
+                      labelText: 'reports.from'.tr,
+                      hintText: 'reports.dateHint'.tr,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: reportTo,
-                      decoration: InputDecoration(
-                        labelText: 'reports.to'.tr,
-                        hintText: 'reports.dateHint'.tr,
-                      ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: reportTo,
+                    decoration: InputDecoration(
+                      labelText: 'reports.to'.tr,
+                      hintText: 'reports.dateHint'.tr,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
+          for (final (icon, key, value) in [
+            (Icons.open_in_new, 'reports.openXlsx', 'open:xlsx'),
+            (Icons.share_outlined, 'reports.shareXlsx', 'share:xlsx'),
+            (Icons.picture_as_pdf_outlined, 'reports.openPdf', 'open:pdf'),
+            (Icons.share_outlined, 'reports.sharePdf', 'share:pdf'),
+          ])
             ListTile(
-              leading: const Icon(Icons.open_in_new),
-              title: Text('reports.openXlsx'.tr),
-              onTap: () => Get.back(result: 'open:xlsx'),
+              leading: Icon(icon),
+              title: Text(key.tr),
+              onTap: () => AppSheet.close(ctx, value),
             ),
-            ListTile(
-              leading: const Icon(Icons.share_outlined),
-              title: Text('reports.shareXlsx'.tr),
-              onTap: () => Get.back(result: 'share:xlsx'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf_outlined),
-              title: Text('reports.openPdf'.tr),
-              onTap: () => Get.back(result: 'open:pdf'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.share_outlined),
-              title: Text('reports.sharePdf'.tr),
-              onTap: () => Get.back(result: 'share:pdf'),
-            ),
-          ],
-        ),
+        ],
       ),
-      backgroundColor: Get.theme.colorScheme.surface,
     );
     if (choice == null) return;
     final parts = choice.split(':');

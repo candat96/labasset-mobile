@@ -8,6 +8,8 @@ import '../../core/format/decimal_input.dart';
 import '../../core/network/connectivity.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/pick_ref.dart';
+import '../../core/widgets/picker_sheet.dart';
 import '../../data/models/department.dart';
 import '../../data/models/stock_extra.dart';
 import '../../data/models/supply.dart';
@@ -113,62 +115,33 @@ class ReceiptFormController extends GetxController {
   void setSupplier(DepartmentRef d) => supplier.value = d;
   void setFromDepartment(DepartmentRef d) => fromDepartment.value = d;
 
-  Future<void> pickWarehouse() async {
-    final d = await _pickCatalog('warehouses', 'stock.receipt.warehouse'.tr);
+  Future<void> pickWarehouse(BuildContext context) async {
+    final d = await pickRef(
+      context,
+      title: 'stock.receipt.warehouse'.tr,
+      kind: PickerKind.warehouse,
+      loader: () => catalogs.list('warehouses', limit: 50),
+    );
     if (d != null) warehouse.value = d;
   }
 
-  Future<void> pickSupplier() async {
-    final d = await _pickCatalog('suppliers', 'stock.receipt.supplier'.tr);
+  Future<void> pickSupplier(BuildContext context) async {
+    final d = await pickRef(
+      context,
+      title: 'stock.receipt.supplier'.tr,
+      kind: PickerKind.supplier,
+      loader: () => catalogs.list('suppliers', limit: 50),
+    );
     if (d != null) supplier.value = d;
   }
 
-  Future<void> pickFromDepartment() async {
-    final selection = await _pick(
+  Future<void> pickFromDepartment(BuildContext context) async {
+    final d = await pickRef(
+      context,
       title: 'stock.receipt.fromDepartment'.tr,
-      loader: () async {
-        final list = await departments.list(limit: 50);
-        return list;
-      },
+      loader: () => departments.list(limit: 50),
     );
-    if (selection != null) fromDepartment.value = selection;
-  }
-
-  Future<DepartmentRef?> _pickCatalog(String slug, String title) =>
-      _pick(title: title, loader: () => catalogs.list(slug, limit: 50));
-
-  Future<DepartmentRef?> _pick({
-    required String title,
-    required Future<List<DepartmentRef>> Function() loader,
-  }) async {
-    final list = await loader();
-    if (list.isEmpty) return null;
-    return await Get.bottomSheet<DepartmentRef>(
-      SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(title, style: Get.textTheme.titleMedium),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final d in list)
-                    ListTile(
-                      title: Text('${d.code} — ${d.name}'),
-                      onTap: () => Get.back(result: d),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: Get.theme.colorScheme.surface,
-    );
+    if (d != null) fromDepartment.value = d;
   }
 
   /// Quét mã hãng: tìm vật tư theo `manufacturerCode` (fallback `q`).

@@ -5,6 +5,8 @@ import '../../core/routes/app_routes.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
+import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/segment_tabs.dart';
@@ -255,53 +257,30 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
     if (codes == null || codes.isEmpty) return;
     for (final code in codes) {
       final item = controller.resolve(code);
+      if (!context.mounted) return;
       if (item == null) {
-        final qty = TextEditingController(text: '1');
-        final ok = await Get.dialog<bool>(
-          AlertDialog(
-            title: Text('stocktake.extraFound'.trParams({'code': code})),
-            content: QtyField(
-              controller: qty,
-              label: 'stocktake.countedQty'.tr,
-            ),
-            actions: [
-              TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-              FilledButton(
-                onPressed: () => Get.back(result: true),
-                child: Text('common.add'.tr),
-              ),
-            ],
-          ),
+        final qty = await AppDialog.prompt(
+          context,
+          title: 'stocktake.extraFound'.trParams({'code': code}),
+          label: 'stocktake.countedQty'.tr,
+          initial: '1',
+          confirmLabel: 'common.add'.tr,
         );
-        if (ok == true) {
-          await controller.addExtra(
-            code: code,
-            qty: qty.text.trim().isEmpty ? '1' : qty.text.trim(),
-          );
+        if (qty != null) {
+          await controller.addExtra(code: code, qty: qty.isEmpty ? '1' : qty);
         }
-        qty.dispose();
         continue;
       }
       if (item.counted) {
-        final again = await Get.dialog<bool>(
-          AlertDialog(
-            title: Text('stocktake.recount'.tr),
-            content: Text(
+        if (!context.mounted) return;
+        final again = await ConfirmSheet.show(
+          context,
+          title: 'stocktake.recount'.tr,
+          description:
               '${item.code} — ${item.name}\n${'stocktake.countedQty'.tr}: ${item.countedQty}',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(result: false),
-                child: Text('common.no'.tr),
-              ),
-              FilledButton(
-                onPressed: () => Get.back(result: true),
-                child: Text('common.yes'.tr),
-              ),
-            ],
-          ),
+          confirmLabel: 'common.yes'.tr,
         );
-        if (again != true) continue;
+        if (!again) continue;
       }
       if (!context.mounted) return;
       await _countSheet(context, item);
@@ -313,139 +292,118 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
     StocktakeLocalItem item,
   ) async {
     final isEquipment = item.equipmentId != null;
-    final qty = TextEditingController(
-      text: item.countedQty ?? (isEquipment ? '1' : item.bookQty),
-    );
     var status = item.countedStatus ?? 'active';
-    final location = TextEditingController(
-      text: item.countedLocation ?? item.location ?? '',
-    );
-    final note = TextEditingController(text: item.note ?? '');
     final clientId = controller.createClientId();
     var photoFileId = item.photoFileId;
     var photoQueued = false;
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: StatefulBuilder(
-            builder: (context, setState) => SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '${item.code} — ${item.name}',
-                    style: Get.theme.textTheme.titleSmall,
-                  ),
-                  Text(
-                    '${'stocktake.bookQty'.tr}: ${item.bookQty}'
-                    '${item.lotNo == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${item.lotNo}'}',
-                    style: Get.theme.textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  QtyField(
-                    controller: qty,
-                    label: isEquipment
-                        ? 'stocktake.presentQty'.tr
-                        : 'stocktake.countedQty'.tr,
-                  ),
-                  if (isEquipment) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: AppSpacing.xs,
-                      children: [
-                        for (final s in ['active', 'broken', 'suspended'])
-                          ChoiceChip(
-                            label: Text('status.$s'.tr),
-                            selected: status == s,
-                            onSelected: (v) {
-                              if (v) setState(() => status = s);
-                            },
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    TextField(
-                      controller: location,
-                      decoration: InputDecoration(
-                        labelText: 'stocktake.location'.tr,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.sm),
-                  TextField(
-                    controller: note,
-                    decoration: InputDecoration(
-                      labelText: 'repairs.logs.note'.tr,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      final upload = await controller.attachPhoto(
-                        item,
-                        clientId: clientId,
-                      );
-                      if (upload == null) return;
-                      setState(() {
-                        final fileId = upload.attachment?.fileId;
-                        if (fileId != null) photoFileId = fileId;
-                        if (upload.status == AttachmentUploadStatus.queued) {
-                          photoQueued = true;
-                        }
-                      });
-                    },
-                    icon: Icon(
-                      photoFileId != null || photoQueued
-                          ? Icons.check_circle_outline
-                          : Icons.camera_alt_outlined,
-                    ),
-                    label: Text(
-                      photoFileId != null
-                          ? 'stocktake.photo.attached'.tr
-                          : photoQueued
-                          ? 'stocktake.photo.queued'.tr
-                          : 'stocktake.photo.add'.tr,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  FilledButton(
-                    onPressed: () async {
-                      await controller.saveCount(
-                        item,
-                        qty: qty.text.trim().isEmpty
-                            ? (isEquipment ? '1' : item.bookQty)
-                            : qty.text.trim(),
-                        status: isEquipment ? status : null,
-                        location: isEquipment ? location.text.trim() : null,
-                        note: note.text.trim().isEmpty
-                            ? null
-                            : note.text.trim(),
-                        photoFileId: photoFileId,
-                        clientId: clientId,
-                      );
-                      Get.back();
-                    },
-                    child: Text('common.save'.tr),
-                  ),
-                ],
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        initial: {
+          'qty': item.countedQty ?? (isEquipment ? '1' : item.bookQty),
+          'location': item.countedLocation ?? item.location ?? '',
+          'note': item.note ?? '',
+        },
+        builder: (context, form) => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SheetHeader(title: '${item.code} — ${item.name}'),
+              Text(
+                '${'stocktake.bookQty'.tr}: ${item.bookQty}'
+                '${item.lotNo == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${item.lotNo}'}',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-            ),
+              const SizedBox(height: AppSpacing.md),
+              QtyField(
+                controller: form.field('qty'),
+                label: isEquipment
+                    ? 'stocktake.presentQty'.tr
+                    : 'stocktake.countedQty'.tr,
+              ),
+              if (isEquipment) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  children: [
+                    for (final s in ['active', 'broken', 'suspended'])
+                      ChoiceChip(
+                        label: Text('status.$s'.tr),
+                        selected: status == s,
+                        onSelected: (v) {
+                          if (v) form.refresh(() => status = s);
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: form.field('location'),
+                  decoration: InputDecoration(
+                    labelText: 'stocktake.location'.tr,
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                controller: form.field('note'),
+                decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final upload = await controller.attachPhoto(
+                    item,
+                    clientId: clientId,
+                  );
+                  if (upload == null) return;
+                  form.refresh(() {
+                    final fileId = upload.attachment?.fileId;
+                    if (fileId != null) photoFileId = fileId;
+                    if (upload.status == AttachmentUploadStatus.queued) {
+                      photoQueued = true;
+                    }
+                  });
+                },
+                icon: Icon(
+                  photoFileId != null || photoQueued
+                      ? Icons.check_circle_outline
+                      : Icons.camera_alt_outlined,
+                ),
+                label: Text(
+                  photoFileId != null
+                      ? 'stocktake.photo.attached'.tr
+                      : photoQueued
+                      ? 'stocktake.photo.queued'.tr
+                      : 'stocktake.photo.add'.tr,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton(
+                onPressed: form.busy
+                    ? null
+                    : () async {
+                        form.setBusy(true);
+                        await controller.saveCount(
+                          item,
+                          qty: form.text('qty').isEmpty
+                              ? (isEquipment ? '1' : item.bookQty)
+                              : form.text('qty'),
+                          status: isEquipment ? status : null,
+                          location: isEquipment ? form.text('location') : null,
+                          note: form.textOrNull('note'),
+                          photoFileId: photoFileId,
+                          clientId: clientId,
+                        );
+                        form.close();
+                      },
+                child: Text('common.save'.tr),
+              ),
+            ],
           ),
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    qty.dispose();
-    location.dispose();
-    note.dispose();
   }
 }

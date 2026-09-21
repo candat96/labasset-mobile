@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../core/format/format.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_snackbar.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/confirm_sheet.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -228,16 +229,18 @@ class SoftwareTab extends GetView<SoftwareTabController> {
                         spacing: AppSpacing.sm,
                         children: [
                           OutlinedButton(
-                            onPressed: () => _upgradeDialog(controller, s),
+                            onPressed: () =>
+                                _upgradeDialog(context, controller, s),
                             child: Text('equipment.software.upgrade'.tr),
                           ),
                           OutlinedButton(
-                            onPressed: () => _historySheet(controller, s),
+                            onPressed: () =>
+                                _historySheet(context, controller, s),
                             child: Text('equipment.software.history'.tr),
                           ),
                           OutlinedButton(
                             onPressed: () =>
-                                _formSheet(controller, software: s),
+                                _formSheet(context, controller, software: s),
                             child: Text('common.edit'.tr),
                           ),
                         ],
@@ -252,7 +255,7 @@ class SoftwareTab extends GetView<SoftwareTabController> {
       }),
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addSoftware',
-        onPressed: () => _formSheet(controller),
+        onPressed: () => _formSheet(context, controller),
         child: const Icon(Icons.add),
       ),
     );
@@ -260,123 +263,124 @@ class SoftwareTab extends GetView<SoftwareTabController> {
 }
 
 Future<void> _formSheet(
+  BuildContext context,
   SoftwareTabController c, {
   EquipmentSoftware? software,
 }) async {
-  final name = TextEditingController(text: software?.name ?? '');
-  final version = TextEditingController(text: software?.version ?? '');
-  final license = TextEditingController(
-    text: software?.licenseExpiresAt == null
-        ? ''
-        : formatDate(software!.licenseExpiresAt),
-  );
-  final note = TextEditingController(text: software?.notes ?? '');
-
-  await Get.bottomSheet(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                (software == null ? 'equipment.software.add' : 'common.edit')
-                    .tr,
-                style: Get.theme.textTheme.titleMedium,
+  var deleteRequested = false;
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      initial: {
+        'name': software?.name,
+        'version': software?.version,
+        'license': software?.licenseExpiresAt == null
+            ? ''
+            : formatDate(software!.licenseExpiresAt),
+        'note': software?.notes,
+      },
+      builder: (context, form) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(
+              title:
+                  (software == null ? 'equipment.software.add' : 'common.edit')
+                      .tr,
+            ),
+            TextField(
+              controller: form.field('name'),
+              decoration: InputDecoration(
+                labelText: 'equipment.software.name'.tr,
+                errorText: form.error('name'),
               ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: name,
-                decoration: InputDecoration(
-                  labelText: 'equipment.software.name'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('version'),
+              decoration: InputDecoration(
+                labelText: 'equipment.software.version'.tr,
               ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('license'),
+              readOnly: true,
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate:
+                      DateTime.tryParse(software?.licenseExpiresAt ?? '') ??
+                      DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null) {
+                  form.field('license').text = formatDate(picked);
+                }
+              },
+              decoration: InputDecoration(
+                labelText: 'equipment.software.license'.tr,
+                suffixIcon: const Icon(Icons.event_outlined),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('note'),
+              decoration: InputDecoration(
+                labelText: 'equipment.accessory.note'.tr,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      if (form.text('name').isEmpty) {
+                        form.setError('name', 'common.required'.tr);
+                        return;
+                      }
+                      form.setBusy(true);
+                      final ok = await c.save(
+                        sid: software?.id,
+                        name: form.text('name'),
+                        version: form.text('version'),
+                        licenseUntil: _iso(form.text('license')),
+                        note: form.text('note'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.save'.tr),
+            ),
+            if (software != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: version,
-                decoration: InputDecoration(
-                  labelText: 'equipment.software.version'.tr,
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: license,
-                readOnly: true,
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: Get.context!,
-                    initialDate:
-                        DateTime.tryParse(software?.licenseExpiresAt ?? '') ??
-                        DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) license.text = formatDate(picked);
+                onPressed: () {
+                  deleteRequested = true;
+                  form.close();
                 },
-                decoration: InputDecoration(
-                  labelText: 'equipment.software.license'.tr,
-                  suffixIcon: const Icon(Icons.event_outlined),
-                ),
+                icon: const Icon(Icons.delete_outline),
+                label: Text('common.delete'.tr),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: note,
-                decoration: InputDecoration(
-                  labelText: 'equipment.accessory.note'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final iso = _iso(license.text);
-                  final ok = await c.save(
-                    sid: software?.id,
-                    name: name.text.trim(),
-                    version: version.text.trim(),
-                    licenseUntil: iso,
-                    note: note.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
-              if (software != null) ...[
-                const SizedBox(height: AppSpacing.sm),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Get.theme.colorScheme.error,
-                  ),
-                  onPressed: () async {
-                    Get.back();
-                    final ok = await ConfirmSheet.show(
-                      title: 'attachment.deleteConfirm'.tr,
-                      destructive: true,
-                    );
-                    if (ok) await c.remove(software.id);
-                  },
-                  icon: const Icon(Icons.delete_outline),
-                  label: Text('common.delete'.tr),
-                ),
-              ],
             ],
-          ),
+          ],
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  name.dispose();
-  version.dispose();
-  license.dispose();
-  note.dispose();
+  if (deleteRequested && software != null && context.mounted) {
+    final ok = await ConfirmSheet.show(
+      context,
+      title: 'attachment.deleteConfirm'.tr,
+      destructive: true,
+    );
+    if (ok) await c.remove(software.id);
+  }
 }
 
 String? _iso(String? display) {
@@ -387,83 +391,92 @@ String? _iso(String? display) {
 }
 
 Future<void> _upgradeDialog(
+  BuildContext context,
   SoftwareTabController c,
   EquipmentSoftware s,
 ) async {
-  final version = TextEditingController();
-  final note = TextEditingController();
-  await Get.dialog<void>(
-    AlertDialog(
-      title: Text('equipment.software.upgrade'.tr),
-      content: Column(
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SheetHeader(title: 'equipment.software.upgrade'.tr),
           TextField(
-            controller: version,
+            controller: form.field('version'),
+            autofocus: true,
             decoration: InputDecoration(
               labelText: 'equipment.software.upgradeTo'.tr,
+              errorText: form.error('version'),
             ),
           ),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
-            controller: note,
+            controller: form.field('note'),
             decoration: InputDecoration(
               labelText: 'equipment.accessory.note'.tr,
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('version').isEmpty) {
+                      form.setError('version', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.upgrade(
+                      s,
+                      form.text('version'),
+                      form.text('note'),
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.save'.tr),
+          ),
         ],
       ),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-        FilledButton(
-          onPressed: () async {
-            if (version.text.trim().isEmpty) return;
-            final ok = await c.upgrade(
-              s,
-              version.text.trim(),
-              note.text.trim(),
-            );
-            if (ok) Get.back();
-          },
-          child: Text('common.save'.tr),
-        ),
-      ],
     ),
   );
-  version.dispose();
-  note.dispose();
 }
 
-Future<void> _historySheet(SoftwareTabController c, EquipmentSoftware s) async {
+Future<void> _historySheet(
+  BuildContext context,
+  SoftwareTabController c,
+  EquipmentSoftware s,
+) async {
   final history = await c.history(s.id);
-  await Get.bottomSheet(
-    SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'equipment.software.history'.tr,
-              style: Get.textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TimelineList(
-              items: [
-                for (final h in history)
-                  TimelineEntry(
-                    title: '${h.fromVersion ?? '—'} → ${h.toVersion}',
-                    at: h.changedAt,
-                    summary: h.note,
-                    by: h.changedBy,
-                  ),
-              ],
-            ),
-          ],
-        ),
+  if (!context.mounted) return;
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'equipment.software.history'.tr,
+            style: Theme.of(ctx).textTheme.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TimelineList(
+            items: [
+              for (final h in history)
+                TimelineEntry(
+                  title: '${h.fromVersion ?? '—'} → ${h.toVersion}',
+                  at: h.changedAt,
+                  summary: h.note,
+                  by: h.changedBy,
+                ),
+            ],
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
 }

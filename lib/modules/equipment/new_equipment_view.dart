@@ -80,7 +80,9 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                 onTap: () async {
                   final departments = Get.find<DepartmentsRepository>();
                   final selection = await PickerSheet.show<String>(
+                    context,
                     title: 'equipment.new.department'.tr,
+                    kind: PickerKind.department,
                     loader: (q) async {
                       final list = await departments.list(q: q, limit: 20);
                       return [
@@ -121,7 +123,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
               label: 'equipment.new.signature'.tr,
               bytes: controller.signature,
               onPick: () async {
-                final png = await SignaturePad.show();
+                final png = await SignaturePad.show(context);
                 if (png != null) controller.signature = png;
                 controller.update();
               },

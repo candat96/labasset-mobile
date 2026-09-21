@@ -7,6 +7,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/picker_sheet.dart';
 import '../../../core/widgets/qty_field.dart';
@@ -173,61 +174,54 @@ class PartsTab extends GetView<PartsTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addPart',
         tooltip: 'repairs.parts.add'.tr,
-        onPressed: () => _addPart(controller),
+        onPressed: () => _addPart(context, controller),
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-Future<void> _addPart(PartsTabController c) async {
+Future<void> _addPart(BuildContext context, PartsTabController c) async {
   var source = 'stock';
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (context, setState) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.lg,
         ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'repairs.parts.add'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.xs,
-                children: [
-                  for (final s in ['stock', 'purchased', 'component_replace'])
-                    ChoiceChip(
-                      label: Text('repairs.parts.source.$s'.tr),
-                      selected: source == s,
-                      onSelected: (v) {
-                        if (v) setState(() => source = s);
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              if (source == 'stock')
-                _StockForm(c: c)
-              else if (source == 'purchased')
-                _PurchasedForm(c: c)
-              else
-                _ComponentForm(c: c),
-            ],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'repairs.parts.add'.tr),
+            Wrap(
+              spacing: AppSpacing.xs,
+              children: [
+                for (final s in ['stock', 'purchased', 'component_replace'])
+                  ChoiceChip(
+                    label: Text('repairs.parts.source.$s'.tr),
+                    selected: source == s,
+                    onSelected: (v) {
+                      if (v) setState(() => source = s);
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (source == 'stock')
+              _StockForm(c: c)
+            else if (source == 'purchased')
+              _PurchasedForm(c: c)
+            else
+              _ComponentForm(c: c),
+          ],
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
 }
 
@@ -263,6 +257,7 @@ class _StockFormState extends State<_StockForm> {
           trailing: const Icon(Icons.chevron_right),
           onTap: () async {
             final selection = await PickerSheet.show<String>(
+              context,
               title: 'repairs.parts.pickSupply'.tr,
               loader: (q) async {
                 final page = await widget.c.supplies.list(q: q, limit: 20);
@@ -294,7 +289,7 @@ class _StockFormState extends State<_StockForm> {
               quantity: qty.text.trim(),
               note: note.text.trim().isEmpty ? null : note.text.trim(),
             );
-            if (ok) Get.back();
+            if (ok && context.mounted) AppSheet.close(context);
           },
           child: Text('common.save'.tr),
         ),
@@ -349,7 +344,7 @@ class _PurchasedFormState extends State<_PurchasedForm> {
                   ? null
                   : MoneyField.raw(cost.text),
             );
-            if (ok) Get.back();
+            if (ok && context.mounted) AppSheet.close(context);
           },
           child: Text('common.save'.tr),
         ),
@@ -433,7 +428,7 @@ class _ComponentFormState extends State<_ComponentForm> {
                   : MoneyField.raw(cost.text),
               reason: reason.text.trim().isEmpty ? null : reason.text.trim(),
             );
-            if (ok) Get.back();
+            if (ok && context.mounted) AppSheet.close(context);
           },
           child: Text('common.save'.tr),
         ),

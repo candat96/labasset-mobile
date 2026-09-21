@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
-import '../../core/widgets/qty_field.dart';
+import '../../core/widgets/app_sheet.dart';
 import 'transfer_form_controller.dart';
 
 /// Chuyển kho `/stock/transfers/new`.
@@ -30,6 +30,7 @@ class TransferFormView extends GetView<TransferFormController> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 final d = await controller.pickWarehouse(
+                  context,
                   'stock.transfer.from'.tr,
                 );
                 if (d != null) controller.setFrom(d);
@@ -48,6 +49,7 @@ class TransferFormView extends GetView<TransferFormController> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 final d = await controller.pickWarehouse(
+                  context,
                   'stock.transfer.to'.tr,
                 );
                 if (d != null) controller.setTo(d);
@@ -111,30 +113,16 @@ class TransferFormView extends GetView<TransferFormController> {
     for (final code in codes) {
       final lot = await controller.findLot(code);
       if (lot == null) continue;
-      final qty = TextEditingController(text: '1');
-      await Get.dialog<void>(
-        AlertDialog(
-          title: Text('${'scan.lot.lotNo'.tr}: ${lot.lotNo}'),
-          content: QtyField(
-            controller: qty,
-            label: 'repairs.parts.quantity'.tr,
-          ),
-          actions: [
-            TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-            FilledButton(
-              onPressed: () {
-                controller.addLine(
-                  lot,
-                  qty.text.trim().isEmpty ? '1' : qty.text.trim(),
-                );
-                Get.back();
-              },
-              child: Text('common.add'.tr),
-            ),
-          ],
-        ),
+      if (!context.mounted) return;
+      final qty = await AppDialog.prompt(
+        context,
+        title: '${'scan.lot.lotNo'.tr}: ${lot.lotNo}',
+        label: 'repairs.parts.quantity'.tr,
+        initial: '1',
+        confirmLabel: 'common.add'.tr,
       );
-      qty.dispose();
+      if (qty == null) continue;
+      controller.addLine(lot, qty.isEmpty ? '1' : qty);
     }
   }
 }

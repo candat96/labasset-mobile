@@ -65,7 +65,7 @@ class ReportsView extends GetView<ReportsController> {
               title: 'reports.machinesByDepartment'.tr,
               actions: [
                 TextButton(
-                  onPressed: controller.pickDepartment,
+                  onPressed: () => controller.pickDepartment(context),
                   child: Text(
                     controller.departmentName.value ?? 'common.pick'.tr,
                   ),
@@ -141,7 +141,7 @@ class ReportsView extends GetView<ReportsController> {
                             )
                           : const Icon(Icons.download_outlined),
                       onTap: controller.exportingKey.value == null
-                          ? () => controller.chooseExport(report)
+                          ? () => controller.chooseExport(context, report)
                           : null,
                     ),
                 ],

@@ -8,6 +8,7 @@ import '../../core/format/format.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -52,26 +53,13 @@ class _IssueDetailViewState extends State<IssueDetailView> {
   }
 
   Future<void> _sign() async {
-    final name = TextEditingController();
-    final png = await SignaturePad.show();
-    if (png == null) return;
-    final signer = await Get.dialog<String>(
-      AlertDialog(
-        title: Text('stock.issue.receiver'.tr),
-        content: TextField(
-          controller: name,
-          decoration: InputDecoration(labelText: 'repairs.sign.signer'.tr),
-        ),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () => Get.back(result: name.text.trim()),
-            child: Text('common.save'.tr),
-          ),
-        ],
-      ),
+    final png = await SignaturePad.show(context);
+    if (png == null || !mounted) return;
+    final signer = await AppDialog.prompt(
+      context,
+      title: 'stock.issue.receiver'.tr,
+      label: 'repairs.sign.signer'.tr,
     );
-    name.dispose();
     if (signer == null || signer.isEmpty) return;
     try {
       final service = Get.find<AttachmentService>();

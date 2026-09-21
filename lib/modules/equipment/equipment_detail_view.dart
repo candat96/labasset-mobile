@@ -8,6 +8,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/attachments_grid.dart';
@@ -366,194 +367,181 @@ class _QuickActions extends StatelessWidget {
       case 'reportFault':
         await Get.toNamed('${Routes.repairNew}?equipmentId=${e.id}');
       case 'adhocMaintenance':
-        await _adhoc();
+        await _adhoc(context);
       case 'issueSupplies':
         await Get.toNamed(
           Routes.stockIssueNew,
           arguments: {'equipmentId': e.id},
         );
       case 'counters':
-        await _counters();
+        await _counters(context);
       case 'updateStatus':
-        await _status();
+        await _status(context);
       case 'addPhoto':
-        await _photos();
+        await _photos(context);
       case 'location':
-        await _location();
+        await _location(context);
       case 'note':
-        await _note();
+        await _note(context);
       case 'transfer':
-        await _transfer();
+        await _transfer(context);
       case 'assistant':
         await Get.toNamed(Routes.ai);
       case 'reprint':
-        await _reprint();
+        await _reprint(context);
     }
   }
 
-  Future<void> _adhoc() async {
-    final note = TextEditingController();
-    await Get.dialog<void>(
-      AlertDialog(
-        title: Text('equipment.action.adhocMaintenance'.tr),
-        content: TextField(
-          controller: note,
-          decoration: InputDecoration(labelText: 'equipment.note.hint'.tr),
-        ),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () async {
-              Get.back();
-              await controller.createAdhocMaintenance(
-                notes: note.text.trim().isEmpty ? null : note.text.trim(),
-              );
-            },
-            child: Text('common.confirm'.tr),
-          ),
-        ],
-      ),
-    );
-    note.dispose();
-  }
-
-  Future<void> _counters() async {
-    final hours = TextEditingController(text: e.currentRunHours ?? '');
-    final tests = TextEditingController(
-      text: e.currentTestCount?.toString() ?? '',
-    );
-    final note = TextEditingController();
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'equipment.counters.title'.tr,
-                style: Get.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              QtyField(
-                controller: hours,
-                label: 'equipment.counters.runHours'.tr,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              QtyField(
-                controller: tests,
-                label: 'equipment.counters.testCount'.tr,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: note,
-                decoration: InputDecoration(
-                  labelText: 'equipment.counters.note'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final ok = await controller.addCounters(
-                    runHours: parseDecimalInput(hours.text)?.toString(),
-                    testCount: int.tryParse(tests.text.trim()),
-                    note: note.text.trim().isEmpty ? null : note.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
-            ],
-          ),
+  Future<void> _adhoc(BuildContext context) async {
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'equipment.action.adhocMaintenance'.tr),
+            TextField(
+              controller: form.field('note'),
+              autofocus: true,
+              maxLines: 2,
+              decoration: InputDecoration(labelText: 'equipment.note.hint'.tr),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      form.setBusy(true);
+                      final ok = await controller.createAdhocMaintenance(
+                        notes: form.textOrNull('note'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.confirm'.tr),
+            ),
+          ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    hours.dispose();
-    tests.dispose();
-    note.dispose();
   }
 
-  Future<void> _status() async {
+  Future<void> _counters(BuildContext context) async {
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        initial: {
+          'hours': e.currentRunHours,
+          'tests': e.currentTestCount?.toString(),
+        },
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'equipment.counters.title'.tr),
+            QtyField(
+              controller: form.field('hours'),
+              label: 'equipment.counters.runHours'.tr,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            QtyField(
+              controller: form.field('tests'),
+              label: 'equipment.counters.testCount'.tr,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('note'),
+              decoration: InputDecoration(
+                labelText: 'equipment.counters.note'.tr,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      form.setBusy(true);
+                      final ok = await controller.addCounters(
+                        runHours: parseDecimalInput(
+                          form.text('hours'),
+                        )?.toString(),
+                        testCount: int.tryParse(form.text('tests')),
+                        note: form.textOrNull('note'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.save'.tr),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _status(BuildContext context) async {
     final allowed = controller.allowedTransitions(e.status);
     if (allowed.isEmpty) {
       AppSnackbar.info('equipment.status.noTransition'.tr);
       return;
     }
     var selected = allowed.first;
-    final reason = TextEditingController();
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: StatefulBuilder(
-            builder: (context, setState) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'equipment.status.title'.tr,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<String>(
-                  initialValue: selected,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.status.to'.tr,
-                  ),
-                  items: [
-                    for (final s in allowed)
-                      DropdownMenuItem(value: s, child: Text('status.$s'.tr)),
-                  ],
-                  onChanged: (v) => setState(() => selected = v ?? selected),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: reason,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.status.reason'.tr,
-                    hintText: 'equipment.status.reasonHint'.tr,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(
-                  onPressed: () async {
-                    if (reason.text.trim().isEmpty) return;
-                    final ok = await controller.changeStatus(
-                      selected,
-                      reason.text.trim(),
-                    );
-                    if (ok) Get.back();
-                  },
-                  child: Text('common.confirm'.tr),
-                ),
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'equipment.status.title'.tr),
+            DropdownButtonFormField<String>(
+              initialValue: selected,
+              decoration: InputDecoration(labelText: 'equipment.status.to'.tr),
+              items: [
+                for (final s in allowed)
+                  DropdownMenuItem(value: s, child: Text('status.$s'.tr)),
               ],
+              onChanged: (v) => form.refresh(() => selected = v ?? selected),
             ),
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('reason'),
+              decoration: InputDecoration(
+                labelText: 'equipment.status.reason'.tr,
+                hintText: 'equipment.status.reasonHint'.tr,
+                errorText: form.error('reason'),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      if (form.text('reason').isEmpty) {
+                        form.setError('reason', 'common.required'.tr);
+                        return;
+                      }
+                      form.setBusy(true);
+                      final ok = await controller.changeStatus(
+                        selected,
+                        form.text('reason'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.confirm'.tr),
+            ),
+          ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    reason.dispose();
   }
 
-  Future<void> _photos() => Get.dialog<void>(
-    Dialog(
+  Future<void> _photos(BuildContext context) => showDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    builder: (ctx) => Dialog(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: SingleChildScrollView(
@@ -567,105 +555,76 @@ class _QuickActions extends StatelessWidget {
     ),
   );
 
-  Future<void> _location() async {
-    final location = TextEditingController(text: e.location ?? '');
-    final ip = TextEditingController();
-    final mac = TextEditingController();
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'equipment.location.title'.tr,
-                style: Get.textTheme.titleMedium,
+  Future<void> _location(BuildContext context) async {
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        initial: {'location': e.location},
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'equipment.location.title'.tr),
+            TextField(
+              controller: form.field('location'),
+              decoration: InputDecoration(
+                labelText: 'equipment.location.label'.tr,
               ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: location,
-                decoration: InputDecoration(
-                  labelText: 'equipment.location.label'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('ip'),
+              decoration: InputDecoration(
+                labelText: 'equipment.location.ip'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: ip,
-                decoration: InputDecoration(
-                  labelText: 'equipment.location.ip'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('mac'),
+              decoration: InputDecoration(
+                labelText: 'equipment.location.mac'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: mac,
-                decoration: InputDecoration(
-                  labelText: 'equipment.location.mac'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  await controller.saveLocation(location.text.trim());
-                  if (ip.text.trim().isNotEmpty || mac.text.trim().isNotEmpty) {
-                    await controller.saveNetwork(
-                      ip: ip.text.trim(),
-                      mac: mac.text.trim(),
-                    );
-                  }
-                  Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      form.setBusy(true);
+                      await controller.saveLocation(form.text('location'));
+                      if (form.text('ip').isNotEmpty ||
+                          form.text('mac').isNotEmpty) {
+                        await controller.saveNetwork(
+                          ip: form.text('ip'),
+                          mac: form.text('mac'),
+                        );
+                      }
+                      form.close();
+                    },
+              child: Text('common.save'.tr),
+            ),
+          ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    location.dispose();
-    ip.dispose();
-    mac.dispose();
   }
 
-  Future<void> _note() async {
-    final text = TextEditingController();
-    await Get.dialog<void>(
-      AlertDialog(
-        title: Text('equipment.note.title'.tr),
-        content: TextField(
-          controller: text,
-          maxLines: 3,
-          decoration: InputDecoration(hintText: 'equipment.note.hint'.tr),
-        ),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () async {
-              final v = text.text;
-              Get.back();
-              if (v.trim().isNotEmpty) await controller.addNote(v.trim());
-            },
-            child: Text('common.save'.tr),
-          ),
-        ],
-      ),
+  Future<void> _note(BuildContext context) async {
+    final v = await AppDialog.prompt(
+      context,
+      title: 'equipment.note.title'.tr,
+      label: 'equipment.note.hint'.tr,
+      maxLines: 3,
     );
-    text.dispose();
+    if (v != null && v.isNotEmpty) await controller.addNote(v);
   }
 
-  Future<void> _transfer() async {
+  Future<void> _transfer(BuildContext context) async {
     final departments = Get.find<DepartmentsRepository>();
     final selection = await PickerSheet.show<String>(
+      context,
       title: 'equipment.transfer.toDepartment'.tr,
+      kind: PickerKind.department,
       loader: (q) async {
         final list = await departments.list(q: q, limit: 20);
         return [
@@ -675,71 +634,60 @@ class _QuickActions extends StatelessWidget {
       },
     );
     final dept = selection?.option;
-    if (dept == null) return;
-    final location = TextEditingController();
-    final reason = TextEditingController();
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'equipment.transfer.title'.tr,
-                style: Get.textTheme.titleMedium,
+    if (dept == null || !context.mounted) return;
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'equipment.transfer.title'.tr),
+            Text(dept.label),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: form.field('location'),
+              decoration: InputDecoration(
+                labelText: 'equipment.transfer.toLocation'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(dept.label),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: location,
-                decoration: InputDecoration(
-                  labelText: 'equipment.transfer.toLocation'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('reason'),
+              decoration: InputDecoration(
+                labelText: 'equipment.transfer.reason'.tr,
+                errorText: form.error('reason'),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: reason,
-                decoration: InputDecoration(
-                  labelText: 'equipment.transfer.reason'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  if (reason.text.trim().isEmpty) return;
-                  final ok = await controller.createTransfer(
-                    toDepartmentId: dept.value,
-                    toLocation: location.text.trim().isEmpty
-                        ? null
-                        : location.text.trim(),
-                    reason: reason.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      if (form.text('reason').isEmpty) {
+                        form.setError('reason', 'common.required'.tr);
+                        return;
+                      }
+                      form.setBusy(true);
+                      final ok = await controller.createTransfer(
+                        toDepartmentId: dept.value,
+                        toLocation: form.textOrNull('location'),
+                        reason: form.text('reason'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.confirm'.tr),
+            ),
+          ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    location.dispose();
-    reason.dispose();
   }
 
-  Future<void> _reprint() async {
+  Future<void> _reprint(BuildContext context) async {
     final ok = await ConfirmSheet.show(
+      context,
       title: 'scan.reprint'.tr,
       confirmLabel: 'common.confirm'.tr,
     );

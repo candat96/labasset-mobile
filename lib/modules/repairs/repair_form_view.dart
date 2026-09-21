@@ -61,6 +61,7 @@ class RepairFormView extends GetView<RepairFormController> {
                 onTap: () async {
                   final repo = Get.find<EquipmentRepository>();
                   final selection = await PickerSheet.show<String>(
+                    context,
                     title: 'repairs.form.pick'.tr,
                     loader: (q) async {
                       final page = await repo.search(q, limit: 20);

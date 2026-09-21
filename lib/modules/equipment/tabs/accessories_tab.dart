@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_snackbar.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/confirm_sheet.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -136,7 +137,7 @@ class AccessoriesTab extends GetView<AccessoriesTabController> {
                     },
                     label: 'status.accessory.${a.condition}'.tr,
                   ),
-                  onTap: () => _showForm(controller, accessory: a),
+                  onTap: () => _showForm(context, controller, accessory: a),
                 ),
               );
             },
@@ -146,7 +147,7 @@ class AccessoriesTab extends GetView<AccessoriesTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addAccessory',
         tooltip: 'equipment.accessory.add'.tr,
-        onPressed: () => _showForm(controller),
+        onPressed: () => _showForm(context, controller),
         child: const Icon(Icons.add),
       ),
     );
@@ -154,142 +155,144 @@ class AccessoriesTab extends GetView<AccessoriesTabController> {
 }
 
 Future<void> _showForm(
+  BuildContext context,
   AccessoriesTabController c, {
   EquipmentAccessory? accessory,
 }) async {
-  final name = TextEditingController(text: accessory?.name ?? '');
-  final code = TextEditingController(text: accessory?.code ?? '');
-  final qty = TextEditingController(
-    text: accessory?.quantity.toString() ?? '1',
-  );
-  final note = TextEditingController(text: accessory?.notes ?? '');
   var type = accessory?.type ?? 'other';
   var condition = accessory?.condition ?? 'good';
+  var deleteRequested = false;
 
-  await Get.bottomSheet(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: SingleChildScrollView(
-          child: StatefulBuilder(
-            builder: (context, setState) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      initial: {
+        'name': accessory?.name,
+        'code': accessory?.code,
+        'qty': accessory?.quantity.toString() ?? '1',
+        'note': accessory?.notes,
+      },
+      builder: (context, form) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(
+              title:
                   (accessory == null
                           ? 'equipment.accessory.add'
                           : 'equipment.accessory.edit')
                       .tr,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextField(
-                  controller: name,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.accessory.name'.tr,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: code,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.accessory.code'.tr,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: type,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.accessory.type'.tr,
-                  ),
-                  items: [
-                    for (final t in kAccessoryTypes)
-                      DropdownMenuItem(
-                        value: t,
-                        child: Text('equipment.accessory.type.$t'.tr),
-                      ),
-                  ],
-                  onChanged: (v) => setState(() => type = v ?? type),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                QtyField(
-                  controller: qty,
-                  label: 'equipment.accessory.quantity'.tr,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: condition,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.accessory.condition'.tr,
-                  ),
-                  items: [
-                    for (final t in kAccessoryConditions)
-                      DropdownMenuItem(
-                        value: t,
-                        child: Text('status.accessory.$t'.tr),
-                      ),
-                  ],
-                  onChanged: (v) => setState(() => condition = v ?? condition),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: note,
-                  decoration: InputDecoration(
-                    labelText: 'equipment.accessory.note'.tr,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(
-                  onPressed: () async {
-                    final q = qty.text;
-                    final ok = await c.save(
-                      id2: accessory?.id,
-                      name: name.text.trim(),
-                      code: code.text.trim(),
-                      type: type,
-                      quantity: num.tryParse(q.replaceAll(',', '.')) ?? 1,
-                      condition: condition,
-                      note: note.text.trim(),
-                    );
-                    if (ok) Get.back();
-                  },
-                  child: Text('common.save'.tr),
-                ),
-                if (accessory != null) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                    onPressed: () async {
-                      Get.back();
-                      final ok = await ConfirmSheet.show(
-                        title: 'attachment.deleteConfirm'.tr,
-                        destructive: true,
-                      );
-                      if (ok) await c.remove(accessory.id);
-                    },
-                    icon: const Icon(Icons.delete_outline),
-                    label: Text('common.delete'.tr),
-                  ),
-                ],
-              ],
             ),
-          ),
+            TextField(
+              controller: form.field('name'),
+              decoration: InputDecoration(
+                labelText: 'equipment.accessory.name'.tr,
+                errorText: form.error('name'),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('code'),
+              decoration: InputDecoration(
+                labelText: 'equipment.accessory.code'.tr,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            DropdownButtonFormField<String>(
+              initialValue: type,
+              decoration: InputDecoration(
+                labelText: 'equipment.accessory.type'.tr,
+              ),
+              items: [
+                for (final t in kAccessoryTypes)
+                  DropdownMenuItem(
+                    value: t,
+                    child: Text('equipment.accessory.type.$t'.tr),
+                  ),
+              ],
+              onChanged: (v) => form.refresh(() => type = v ?? type),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            QtyField(
+              controller: form.field('qty'),
+              label: 'equipment.accessory.quantity'.tr,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            DropdownButtonFormField<String>(
+              initialValue: condition,
+              decoration: InputDecoration(
+                labelText: 'equipment.accessory.condition'.tr,
+              ),
+              items: [
+                for (final t in kAccessoryConditions)
+                  DropdownMenuItem(
+                    value: t,
+                    child: Text('status.accessory.$t'.tr),
+                  ),
+              ],
+              onChanged: (v) => form.refresh(() => condition = v ?? condition),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('note'),
+              decoration: InputDecoration(
+                labelText: 'equipment.accessory.note'.tr,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      if (form.text('name').isEmpty) {
+                        form.setError('name', 'common.required'.tr);
+                        return;
+                      }
+                      form.setBusy(true);
+                      final ok = await c.save(
+                        id2: accessory?.id,
+                        name: form.text('name'),
+                        code: form.text('code'),
+                        type: type,
+                        quantity:
+                            num.tryParse(
+                              form.text('qty').replaceAll(',', '.'),
+                            ) ??
+                            1,
+                        condition: condition,
+                        note: form.text('note'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.save'.tr),
+            ),
+            if (accessory != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                onPressed: () {
+                  deleteRequested = true;
+                  form.close();
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: Text('common.delete'.tr),
+              ),
+            ],
+          ],
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  name.dispose();
-  code.dispose();
-  qty.dispose();
-  note.dispose();
+  if (deleteRequested && accessory != null && context.mounted) {
+    final ok = await ConfirmSheet.show(
+      context,
+      title: 'attachment.deleteConfirm'.tr,
+      destructive: true,
+    );
+    if (ok) await c.remove(accessory.id);
+  }
 }

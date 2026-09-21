@@ -7,6 +7,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/attachments_grid.dart';
 import '../../core/widgets/detail_widgets.dart';
@@ -328,70 +329,64 @@ class _Logs extends StatelessWidget {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addLog',
         tooltip: 'repairs.logs.add'.tr,
-        onPressed: () => _addLog(controller),
+        onPressed: () => _addLog(context, controller),
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-Future<void> _addLog(RepairDetailController c) async {
-  final action = TextEditingController();
-  final note = TextEditingController();
-  final minutes = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('repairs.logs.add'.tr, style: Get.theme.textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: action,
-              decoration: InputDecoration(labelText: 'repairs.logs.action'.tr),
+Future<void> _addLog(BuildContext context, RepairDetailController c) async {
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.logs.add'.tr),
+          TextField(
+            controller: form.field('action'),
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'repairs.logs.action'.tr,
+              errorText: form.error('action'),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: note,
-              decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: minutes,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'repairs.logs.minutes'.tr),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: () async {
-                if (action.text.trim().isEmpty) return;
-                Get.back();
-                await c.addLog(
-                  action: action.text.trim(),
-                  note: note.text.trim().isEmpty ? null : note.text.trim(),
-                  durationMinutes: num.tryParse(minutes.text.trim()),
-                );
-              },
-              child: Text('common.save'.tr),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: form.field('note'),
+            decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: form.field('minutes'),
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'repairs.logs.minutes'.tr),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('action').isEmpty) {
+                      form.setError('action', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    await c.addLog(
+                      action: form.text('action'),
+                      note: form.textOrNull('note'),
+                      durationMinutes: num.tryParse(form.text('minutes')),
+                    );
+                    form.close();
+                  },
+            child: Text('common.save'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  action.dispose();
-  note.dispose();
-  minutes.dispose();
 }
 
 typedef _RepairAction = ({
@@ -521,39 +516,37 @@ class _ActionBar extends StatelessWidget {
   }
 
   Future<void> _moreSheet(BuildContext context, List<_RepairAction> items) =>
-      Get.bottomSheet<void>(
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final a in items)
-                  ListTile(
-                    leading: Icon(
-                      a.icon,
+      AppSheet.show<void>(
+        context,
+        builder: (ctx) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final a in items)
+                ListTile(
+                  leading: Icon(
+                    a.icon,
+                    color: a.key == 'repairs.action.cancel'
+                        ? ctx.status.danger
+                        : null,
+                  ),
+                  title: Text(
+                    a.key.tr,
+                    style: ctx.appText.bodyStrong.copyWith(
                       color: a.key == 'repairs.action.cancel'
-                          ? context.status.danger
+                          ? ctx.status.danger
                           : null,
                     ),
-                    title: Text(
-                      a.key.tr,
-                      style: context.appText.bodyStrong.copyWith(
-                        color: a.key == 'repairs.action.cancel'
-                            ? context.status.danger
-                            : null,
-                      ),
-                    ),
-                    onTap: () {
-                      Get.back();
-                      a.run();
-                    },
                   ),
-              ],
-            ),
+                  onTap: () {
+                    AppSheet.close(ctx);
+                    a.run();
+                  },
+                ),
+            ],
           ),
         ),
-        backgroundColor: Get.theme.colorScheme.surface,
       );
 }
 
@@ -564,7 +557,9 @@ Future<void> _assign(
 ) async {
   final repo = c.repairs;
   final suggest = await repo.assignSuggest(d.equipmentId);
+  if (!context.mounted) return;
   final selection = await PickerSheet.show<String>(
+    context,
     title: 'repairs.assign.title'.tr,
     loader: (q) async {
       final list = q.isEmpty
@@ -597,75 +592,67 @@ Future<void> _diagnose(
   RepairDetailController c,
   RepairDetail d,
 ) async {
-  final text = TextEditingController(text: d.diagnosis ?? '');
   var resolutionType = d.resolutionType;
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'repairs.diagnose.title'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: text,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: 'repairs.diagnose.text'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<String>(
-                initialValue: resolutionType,
-                decoration: InputDecoration(
-                  labelText: 'repairs.diagnose.resolutionType'.tr,
-                ),
-                items: [
-                  for (final t in [
-                    'internal',
-                    'vendor',
-                    'warranty',
-                    'spare_equipment',
-                  ])
-                    DropdownMenuItem(
-                      value: t,
-                      child: Text('repairs.resolution.$t'.tr),
-                    ),
-                ],
-                onChanged: (v) => setState(() => resolutionType = v),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  if (text.text.trim().isEmpty) return;
-                  final ok = await c.diagnose(
-                    diagnosis: text.text.trim(),
-                    resolutionType: resolutionType,
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
-            ],
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      initial: {'text': d.diagnosis},
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.diagnose.title'.tr),
+          TextField(
+            controller: form.field('text'),
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'repairs.diagnose.text'.tr,
+              errorText: form.error('text'),
+            ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.sm),
+          DropdownButtonFormField<String>(
+            initialValue: resolutionType,
+            decoration: InputDecoration(
+              labelText: 'repairs.diagnose.resolutionType'.tr,
+            ),
+            items: [
+              for (final t in [
+                'internal',
+                'vendor',
+                'warranty',
+                'spare_equipment',
+              ])
+                DropdownMenuItem(
+                  value: t,
+                  child: Text('repairs.resolution.$t'.tr),
+                ),
+            ],
+            onChanged: (v) => form.refresh(() => resolutionType = v),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('text').isEmpty) {
+                      form.setError('text', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.diagnose(
+                      diagnosis: form.text('text'),
+                      resolutionType: resolutionType,
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.save'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  text.dispose();
 }
 
 Future<void> _changeStatus(
@@ -673,221 +660,196 @@ Future<void> _changeStatus(
   RepairDetailController c,
 ) async {
   var target = RepairDetailController.statusTargets.first;
-  final note = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'repairs.status.title'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<String>(
-                initialValue: target,
-                decoration: InputDecoration(
-                  labelText: 'repairs.status.target'.tr,
-                ),
-                items: [
-                  for (final s in RepairDetailController.statusTargets)
-                    DropdownMenuItem(
-                      value: s,
-                      child: Text('status.repair.$s'.tr),
-                    ),
-                ],
-                onChanged: (v) => setState(() => target = v ?? target),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: note,
-                decoration: InputDecoration(
-                  labelText: 'repairs.status.note'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final ok = await c.changeStatus(target, note.text.trim());
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.status.title'.tr),
+          DropdownButtonFormField<String>(
+            initialValue: target,
+            decoration: InputDecoration(labelText: 'repairs.status.target'.tr),
+            items: [
+              for (final s in RepairDetailController.statusTargets)
+                DropdownMenuItem(value: s, child: Text('status.repair.$s'.tr)),
             ],
+            onChanged: (v) => form.refresh(() => target = v ?? target),
           ),
-        ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: form.field('note'),
+            decoration: InputDecoration(labelText: 'repairs.status.note'.tr),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    form.setBusy(true);
+                    final ok = await c.changeStatus(target, form.text('note'));
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.confirm'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  note.dispose();
 }
 
 Future<void> _complete(BuildContext context, RepairDetailController c) async {
-  final summary = TextEditingController();
   var calibration = false;
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'repairs.complete.title'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: summary,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: 'repairs.complete.summary'.tr,
-                ),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('repairs.complete.calibration'.tr),
-                value: calibration,
-                onChanged: (v) => setState(() => calibration = v),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              FilledButton(
-                onPressed: () async {
-                  if (summary.text.trim().isEmpty) return;
-                  final ok = await c.complete(
-                    resolutionSummary: summary.text.trim(),
-                    calibrationRequired: calibration,
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
-            ],
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.complete.title'.tr),
+          TextField(
+            controller: form.field('summary'),
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'repairs.complete.summary'.tr,
+              errorText: form.error('summary'),
+            ),
           ),
-        ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('repairs.complete.calibration'.tr),
+            value: calibration,
+            onChanged: (v) => form.refresh(() => calibration = v),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('summary').isEmpty) {
+                      form.setError('summary', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.complete(
+                      resolutionSummary: form.text('summary'),
+                      calibrationRequired: calibration,
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.confirm'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  summary.dispose();
 }
 
 Future<void> _acceptance(BuildContext context, RepairDetailController c) async {
   var accepted = true;
   var rating = 5;
-  final note = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'repairs.acceptance.title'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('repairs.acceptance.accepted'.tr),
-                value: accepted,
-                onChanged: (v) => setState(() => accepted = v),
-              ),
-              if (accepted)
-                Row(
-                  children: [
-                    Text('repairs.acceptance.rating'.tr),
-                    const Spacer(),
-                    for (var i = 1; i <= 5; i++)
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () => setState(() => rating = i),
-                        icon: Icon(
-                          i <= rating ? Icons.star : Icons.star_border_outlined,
-                          color: context.status.warning,
-                        ),
-                      ),
-                  ],
-                ),
-              TextField(
-                controller: note,
-                decoration: InputDecoration(
-                  labelText: 'repairs.acceptance.note'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final ok = await c.acceptance(
-                    accepted: accepted,
-                    rating: accepted ? rating : null,
-                    note: note.text.trim().isEmpty ? null : note.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
-            ],
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.acceptance.title'.tr),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('repairs.acceptance.accepted'.tr),
+            value: accepted,
+            onChanged: (v) => form.refresh(() => accepted = v),
           ),
-        ),
+          if (accepted)
+            Row(
+              children: [
+                Text('repairs.acceptance.rating'.tr),
+                const Spacer(),
+                for (var i = 1; i <= 5; i++)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => form.refresh(() => rating = i),
+                    icon: Icon(
+                      i <= rating ? Icons.star : Icons.star_border_outlined,
+                      color: context.status.warning,
+                    ),
+                  ),
+              ],
+            ),
+          TextField(
+            controller: form.field('note'),
+            decoration: InputDecoration(
+              labelText: 'repairs.acceptance.note'.tr,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    form.setBusy(true);
+                    final ok = await c.acceptance(
+                      accepted: accepted,
+                      rating: accepted ? rating : null,
+                      note: form.textOrNull('note'),
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.confirm'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  note.dispose();
 }
 
 Future<void> _cancel(BuildContext context, RepairDetailController c) async {
-  final reason = TextEditingController();
-  await Get.dialog<void>(
-    AlertDialog(
-      title: Text('repairs.cancel.title'.tr),
-      content: TextField(
-        controller: reason,
-        decoration: InputDecoration(labelText: 'repairs.cancel.reason'.tr),
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.cancel.title'.tr),
+          TextField(
+            controller: form.field('reason'),
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'repairs.cancel.reason'.tr,
+              errorText: form.error('reason'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('reason').isEmpty) {
+                      form.setError('reason', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.cancel(form.text('reason'));
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.confirm'.tr),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-        FilledButton(
-          onPressed: () async {
-            if (reason.text.trim().isEmpty) return;
-            Get.back();
-            await c.cancel(reason.text.trim());
-          },
-          child: Text('common.confirm'.tr),
-        ),
-      ],
     ),
   );
-  reason.dispose();
 }
 
 /// Tab "Biên bản": mở/chia sẻ PDF.

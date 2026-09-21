@@ -13,6 +13,7 @@ import '../../core/widgets/error_state.dart';
 import '../../core/widgets/large_title_scaffold.dart';
 import '../../core/widgets/list_item_card.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/segment_tabs.dart';
 import '../../core/widgets/status_badge.dart';
@@ -159,122 +160,123 @@ Future<void> _filters(BuildContext context, RepairsController c) async {
   var departmentId = c.departmentId.value;
   var overdue = c.overdue.value;
 
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: StatefulBuilder(
-          builder: (context, setState) => SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'repairs.filter'.tr,
-                  style: Theme.of(context).textTheme.titleMedium,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: StatefulBuilder(
+        builder: (context, setState) => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'repairs.filter'.tr,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'repairs.filter.status'.tr,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              Wrap(
+                spacing: AppSpacing.xs,
+                children: [
+                  for (final s in allStatuses)
+                    FilterChip(
+                      label: Text('status.repair.$s'.tr),
+                      selected: selected.contains(s),
+                      onSelected: (v) => setState(() {
+                        if (v) {
+                          selected.add(s);
+                        } else {
+                          selected.remove(s);
+                        }
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'repairs.filter.severity'.tr,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              Wrap(
+                spacing: AppSpacing.xs,
+                children: [
+                  for (final s in ['low', 'medium', 'high', 'critical'])
+                    ChoiceChip(
+                      label: Text('status.severity.$s'.tr),
+                      selected: severity == s,
+                      onSelected: (v) =>
+                          setState(() => severity = v ? s : null),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  departmentId == null
+                      ? 'repairs.filter.department'.tr
+                      : '${'repairs.filter.department'.tr} ✓',
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'repairs.filter.status'.tr,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                Wrap(
-                  spacing: AppSpacing.xs,
-                  children: [
-                    for (final s in allStatuses)
-                      FilterChip(
-                        label: Text('status.repair.$s'.tr),
-                        selected: selected.contains(s),
-                        onSelected: (v) => setState(() {
-                          if (v) {
-                            selected.add(s);
-                          } else {
-                            selected.remove(s);
-                          }
-                        }),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'repairs.filter.severity'.tr,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                Wrap(
-                  spacing: AppSpacing.xs,
-                  children: [
-                    for (final s in ['low', 'medium', 'high', 'critical'])
-                      ChoiceChip(
-                        label: Text('status.severity.$s'.tr),
-                        selected: severity == s,
-                        onSelected: (v) =>
-                            setState(() => severity = v ? s : null),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    departmentId == null
-                        ? 'repairs.filter.department'.tr
-                        : '${'repairs.filter.department'.tr} ✓',
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  final repo = Get.find<DepartmentsRepository>();
+                  final sel = await _pickDepartment(context, repo);
+                  if (sel != null) setState(() => departmentId = sel);
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text('repairs.filter.overdue'.tr),
+                value: overdue,
+                onChanged: (v) => setState(() => overdue = v),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        AppSheet.close(context);
+                        c.applyFilters(statuses: const {}, overdue: false);
+                      },
+                      child: Text('repairs.filter.clear'.tr),
+                    ),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    final repo = Get.find<DepartmentsRepository>();
-                    final sel = await _pickDepartment(repo);
-                    if (sel != null) setState(() => departmentId = sel);
-                  },
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text('repairs.filter.overdue'.tr),
-                  value: overdue,
-                  onChanged: (v) => setState(() => overdue = v),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Get.back();
-                          c.applyFilters(statuses: const {}, overdue: false);
-                        },
-                        child: Text('repairs.filter.clear'.tr),
-                      ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        AppSheet.close(context);
+                        c.applyFilters(
+                          statuses: selected,
+                          severity: severity,
+                          departmentId: departmentId,
+                          overdue: overdue,
+                        );
+                      },
+                      child: Text('repairs.filter.apply'.tr),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          Get.back();
-                          c.applyFilters(
-                            statuses: selected,
-                            severity: severity,
-                            departmentId: departmentId,
-                            overdue: overdue,
-                          );
-                        },
-                        child: Text('repairs.filter.apply'.tr),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
 }
 
-Future<String?> _pickDepartment(DepartmentsRepository repo) async {
+Future<String?> _pickDepartment(
+  BuildContext context,
+  DepartmentsRepository repo,
+) async {
   final selection = await PickerSheet.show<String>(
+    context,
     title: 'repairs.filter.department'.tr,
     showClear: true,
     loader: (q) async {

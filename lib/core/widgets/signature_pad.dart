@@ -5,34 +5,20 @@ import 'package:get/get.dart';
 import 'package:signature/signature.dart';
 
 import '../theme/tokens.dart';
+import 'app_sheet.dart';
+import 'app_snackbar.dart';
 
 /// Ký tay → PNG (Uint8List) để upload.
 class SignaturePad {
   SignaturePad._();
 
-  /// Mở sheet ký, trả PNG hoặc null nếu huỷ.
-  static Future<Uint8List?> show({String? title}) async {
-    final controller = SignatureController(
-      penStrokeWidth: 3,
-      penColor: Colors.black,
-      exportBackgroundColor: Colors.white,
+  /// Mở sheet ký, trả PNG hoặc null nếu huỷ. Controller do sheet sở hữu và
+  /// huỷ khi sheet unmount (không huỷ ngay sau `await`).
+  static Future<Uint8List?> show(BuildContext context, {String? title}) {
+    return AppSheet.show<Uint8List>(
+      context,
+      builder: (ctx) => _SignatureSheet(title: title),
     );
-    try {
-      return await Get.bottomSheet<Uint8List>(
-        SafeArea(
-          child: _SignatureSheet(controller: controller, title: title),
-        ),
-        isScrollControlled: true,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.lg * 2),
-          ),
-        ),
-      );
-    } finally {
-      controller.dispose();
-    }
   }
 
   /// PNG từ pad đang mở (dùng khi nhúng [SignaturePadPanel] trong form).
@@ -68,11 +54,27 @@ class SignaturePadPanel extends StatelessWidget {
   }
 }
 
-class _SignatureSheet extends StatelessWidget {
-  const _SignatureSheet({required this.controller, this.title});
+class _SignatureSheet extends StatefulWidget {
+  const _SignatureSheet({this.title});
 
-  final SignatureController controller;
   final String? title;
+
+  @override
+  State<_SignatureSheet> createState() => _SignatureSheetState();
+}
+
+class _SignatureSheetState extends State<_SignatureSheet> {
+  final SignatureController controller = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.white,
+  );
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +86,7 @@ class _SignatureSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            title ?? 'signature.title'.tr,
+            widget.title ?? 'signature.title'.tr,
             style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -105,14 +107,10 @@ class _SignatureSheet extends StatelessWidget {
                   onPressed: () async {
                     final png = await SignaturePad.toPng(controller);
                     if (png == null) {
-                      Get.snackbar(
-                        'signature.title'.tr,
-                        'signature.empty'.tr,
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      AppSnackbar.info('signature.empty'.tr);
                       return;
                     }
-                    Get.back(result: png);
+                    if (context.mounted) AppSheet.close(context, png);
                   },
                   icon: const Icon(Icons.check),
                   label: Text('signature.save'.tr),

@@ -10,6 +10,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../data/models/repair_detail.dart';
 import '../../../data/repositories/repairs_repository.dart';
@@ -135,94 +136,86 @@ class CostsTab extends GetView<CostsTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addCost',
         tooltip: 'repairs.costs.add'.tr,
-        onPressed: () => _addCost(controller),
+        onPressed: () => _addCost(context, controller),
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-Future<void> _addCost(CostsTabController c) async {
+Future<void> _addCost(BuildContext context, CostsTabController c) async {
   var category = 'parts';
-  final description = TextEditingController();
-  final amount = TextEditingController();
-  final invoiceNo = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'repairs.costs.add'.tr),
+          Wrap(
+            spacing: AppSpacing.xs,
             children: [
-              Text(
-                'repairs.costs.add'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.xs,
-                children: [
-                  for (final s in kCostCategories)
-                    ChoiceChip(
-                      label: Text('repairs.costs.category.$s'.tr),
-                      selected: category == s,
-                      onSelected: (v) {
-                        if (v) setState(() => category = s);
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: description,
-                decoration: InputDecoration(
-                  labelText: 'repairs.costs.description'.tr,
+              for (final s in kCostCategories)
+                ChoiceChip(
+                  label: Text('repairs.costs.category.$s'.tr),
+                  selected: category == s,
+                  onSelected: (v) {
+                    if (v) form.refresh(() => category = s);
+                  },
                 ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              MoneyField(controller: amount, label: 'repairs.costs.amount'.tr),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: invoiceNo,
-                decoration: InputDecoration(
-                  labelText: 'repairs.costs.invoiceNo'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  if (description.text.trim().isEmpty ||
-                      MoneyField.raw(amount.text).isEmpty) {
-                    return;
-                  }
-                  final ok = await c.add(
-                    category: category,
-                    description: description.text.trim(),
-                    amount: MoneyField.raw(amount.text),
-                    invoiceNo: invoiceNo.text.trim().isEmpty
-                        ? null
-                        : invoiceNo.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
             ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: form.field('description'),
+            decoration: InputDecoration(
+              labelText: 'repairs.costs.description'.tr,
+              errorText: form.error('description'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          MoneyField(
+            controller: form.field('amount'),
+            label: 'repairs.costs.amount'.tr,
+            errorText: form.error('amount'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: form.field('invoiceNo'),
+            decoration: InputDecoration(
+              labelText: 'repairs.costs.invoiceNo'.tr,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    final amount = MoneyField.raw(form.text('amount'));
+                    form.setErrors({
+                      if (form.text('description').isEmpty)
+                        'description': 'common.required'.tr,
+                      if (amount.isEmpty) 'amount': 'common.required'.tr,
+                    });
+                    if (form.error('description') != null ||
+                        form.error('amount') != null) {
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.add(
+                      category: category,
+                      description: form.text('description'),
+                      amount: amount,
+                      invoiceNo: form.textOrNull('invoiceNo'),
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.save'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  description.dispose();
-  amount.dispose();
-  invoiceNo.dispose();
 }

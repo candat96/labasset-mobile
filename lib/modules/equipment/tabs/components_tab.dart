@@ -7,6 +7,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/equipment_parts.dart';
@@ -92,7 +93,8 @@ class ComponentsTab extends GetView<ComponentsTabController> {
           separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (_, i) => _ComponentCard(
             component: controller.items[i],
-            onReplace: () => _replaceSheet(controller, controller.items[i]),
+            onReplace: () =>
+                _replaceSheet(context, controller, controller.items[i]),
           ),
         ),
       );
@@ -190,78 +192,65 @@ class _ComponentCard extends StatelessWidget {
 }
 
 Future<void> _replaceSheet(
+  BuildContext context,
   ComponentsTabController c,
   EquipmentComponent component,
 ) async {
-  final reason = TextEditingController();
-  final serial = TextEditingController();
-  final cost = TextEditingController();
-  await Get.bottomSheet(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'equipment.component.replace'.tr,
-                style: Get.theme.textTheme.titleMedium,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'equipment.component.replace'.tr),
+            Text(component.name),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: form.field('reason'),
+              decoration: InputDecoration(
+                labelText: 'equipment.component.reason'.tr,
+                errorText: form.error('reason'),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(component.name),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: reason,
-                decoration: InputDecoration(
-                  labelText: 'equipment.component.reason'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('serial'),
+              decoration: InputDecoration(
+                labelText: 'equipment.component.newSerial'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: serial,
-                decoration: InputDecoration(
-                  labelText: 'equipment.component.newSerial'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              MoneyField(
-                controller: cost,
-                label: 'equipment.component.cost'.tr,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  if (reason.text.trim().isEmpty) return;
-                  final ok = await c.replace(
-                    component,
-                    reason: reason.text.trim(),
-                    newSerial: serial.text.trim().isEmpty
-                        ? null
-                        : serial.text.trim(),
-                    cost: MoneyField.raw(cost.text).isEmpty
-                        ? null
-                        : MoneyField.raw(cost.text),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            MoneyField(
+              controller: form.field('cost'),
+              label: 'equipment.component.cost'.tr,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      if (form.text('reason').isEmpty) {
+                        form.setError('reason', 'common.required'.tr);
+                        return;
+                      }
+                      form.setBusy(true);
+                      final cost = MoneyField.raw(form.text('cost'));
+                      final ok = await c.replace(
+                        component,
+                        reason: form.text('reason'),
+                        newSerial: form.textOrNull('serial'),
+                        cost: cost.isEmpty ? null : cost,
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.save'.tr),
+            ),
+          ],
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  reason.dispose();
-  serial.dispose();
-  cost.dispose();
 }

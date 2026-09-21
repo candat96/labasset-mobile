@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -123,7 +124,7 @@ class TimelineTab extends GetView<TimelineTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addNote',
         tooltip: 'equipment.timeline.addNote'.tr,
-        onPressed: () => _addNote(controller),
+        onPressed: () => _addNote(context, controller),
         child: const Icon(Icons.note_add_outlined),
       ),
     );
@@ -139,28 +140,13 @@ class TimelineTab extends GetView<TimelineTabController> {
   };
 }
 
-Future<void> _addNote(TimelineTabController c) async {
-  final text = TextEditingController();
-  await Get.dialog<void>(
-    AlertDialog(
-      title: Text('equipment.note.title'.tr),
-      content: TextField(
-        controller: text,
-        maxLines: 3,
-        decoration: InputDecoration(hintText: 'equipment.note.hint'.tr),
-      ),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-        FilledButton(
-          onPressed: () async {
-            final v = text.text;
-            Get.back();
-            await c.addNote(v);
-          },
-          child: Text('common.save'.tr),
-        ),
-      ],
-    ),
+Future<void> _addNote(BuildContext context, TimelineTabController c) async {
+  final v = await AppDialog.prompt(
+    context,
+    title: 'equipment.note.title'.tr,
+    label: 'equipment.note.hint'.tr,
+    maxLines: 3,
   );
-  text.dispose();
+  if (v == null || v.isEmpty) return;
+  await c.addNote(v);
 }

@@ -76,9 +76,11 @@ class SuppliesTabController extends GetxController {
     return null;
   }
 
-  Future<void> add() async {
+  Future<void> add(BuildContext context) async {
     final selection = await PickerSheet.show<String>(
+      context,
       title: 'equipment.action.issueSupplies'.tr,
+      kind: PickerKind.supply,
       loader: (q) async {
         final page = await supplies.list(q: q, limit: 20);
         return [
@@ -186,7 +188,7 @@ class SuppliesTab extends GetView<SuppliesTabController> {
       }),
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addSupply',
-        onPressed: controller.add,
+        onPressed: () => controller.add(context),
         child: const Icon(Icons.add),
       ),
     );

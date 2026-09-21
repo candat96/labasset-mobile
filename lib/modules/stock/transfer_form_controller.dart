@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../core/network/connectivity.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/pick_ref.dart';
+import '../../core/widgets/picker_sheet.dart';
 import '../../data/models/department.dart';
 import '../../data/models/stock.dart';
 import '../../data/repositories/catalogs_repository.dart';
@@ -36,36 +38,13 @@ class TransferFormController extends GetxController {
       fromWarehouse.value!.id != toWarehouse.value!.id &&
       lines.isNotEmpty;
 
-  Future<DepartmentRef?> pickWarehouse(String title) async {
-    final list = await catalogs.list('warehouses', limit: 50);
-    if (list.isEmpty) return null;
-    return Get.bottomSheet<DepartmentRef>(
-      SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(title, style: Get.textTheme.titleMedium),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final d in list)
-                    ListTile(
-                      title: Text('${d.code} — ${d.name}'),
-                      onTap: () => Get.back(result: d),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: Get.theme.colorScheme.surface,
-    );
-  }
+  Future<DepartmentRef?> pickWarehouse(BuildContext context, String title) =>
+      pickRef(
+        context,
+        title: title,
+        kind: PickerKind.warehouse,
+        loader: () => catalogs.list('warehouses', limit: 50),
+      );
 
   void setFrom(DepartmentRef d) => fromWarehouse.value = d;
   void setTo(DepartmentRef d) => toWarehouse.value = d;

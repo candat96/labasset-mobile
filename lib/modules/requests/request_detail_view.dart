@@ -9,6 +9,7 @@ import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/qty_field.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/section_card.dart';
 import '../../core/widgets/status_badge.dart';
@@ -48,7 +49,7 @@ class RequestDetailView extends GetView<RequestDetailController> {
               IconButton(
                 tooltip: 'requests.reject'.tr,
                 icon: const Icon(LucideIcons.ban),
-                onPressed: () => _reject(controller),
+                onPressed: () => _reject(context, controller),
               ),
           ],
         ),
@@ -126,7 +127,7 @@ class RequestDetailView extends GetView<RequestDetailController> {
                       ),
                     ),
                   TextButton.icon(
-                    onPressed: () => _comment(controller),
+                    onPressed: () => _comment(context, controller),
                     icon: const Icon(LucideIcons.messageSquarePlus, size: 18),
                     label: Text('requests.addComment'.tr),
                   ),
@@ -142,7 +143,7 @@ class RequestDetailView extends GetView<RequestDetailController> {
                     label: 'requests.reject'.tr,
                     icon: LucideIcons.ban,
                     danger: true,
-                    onPressed: () => _reject(controller),
+                    onPressed: () => _reject(context, controller),
                   ),
                 ],
                 primary: GradientButton(
@@ -196,119 +197,84 @@ class RequestDetailView extends GetView<RequestDetailController> {
 
 Future<void> _approve(BuildContext context, RequestDetailController c) async {
   final d = c.item.value!;
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'requests.approve'.tr,
-                style: Get.theme.textTheme.titleMedium,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      initial: {
+        for (final i in d.items)
+          'qty:${i.id}': c.approvedQty[i.id] ?? i.qtyRequested,
+      },
+      builder: (context, form) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'requests.approve'.tr),
+            for (final i in d.items) ...[
+              Text(i.label, style: Theme.of(context).textTheme.labelLarge),
+              Row(
+                children: [
+                  Expanded(
+                    child: QtyField(
+                      controller: form.field('qty:${i.id}'),
+                      label: 'requests.qtyApproved'.tr,
+                      onChanged: (v) => c.setApprovedQty(i.id, v),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: TextField(
+                      controller: form.field('note:${i.id}'),
+                      decoration: InputDecoration(
+                        labelText: 'requests.approverNote'.tr,
+                      ),
+                      onChanged: (v) => c.setApproverNote(i.id, v),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.sm),
-              for (final i in d.items) ...[
-                Text(i.label, style: Get.theme.textTheme.labelLarge),
-                Row(
-                  children: [
-                    Expanded(
-                      child: QtyField(
-                        controller: TextEditingController(
-                          text: c.approvedQty[i.id] ?? i.qtyRequested,
-                        ),
-                        label: 'requests.qtyApproved'.tr,
-                        onChanged: (v) => c.setApprovedQty(i.id, v),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'requests.approverNote'.tr,
-                        ),
-                        onChanged: (v) => c.setApproverNote(i.id, v),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              FilledButton(
-                onPressed: () async {
-                  final ok = await c.approve();
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
             ],
-          ),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      form.setBusy(true);
+                      final ok = await c.approve();
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.confirm'.tr),
+            ),
+          ],
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
 }
 
-Future<void> _reject(RequestDetailController c) async {
-  final reason = TextEditingController();
-  await Get.dialog<void>(
-    AlertDialog(
-      title: Text('requests.reject'.tr),
-      content: TextField(
-        controller: reason,
-        decoration: InputDecoration(labelText: 'requests.rejectReason'.tr),
-      ),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-        FilledButton(
-          onPressed: () async {
-            if (reason.text.trim().isEmpty) return;
-            Get.back();
-            await c.reject(reason.text.trim());
-          },
-          child: Text('common.confirm'.tr),
-        ),
-      ],
-    ),
+Future<void> _reject(BuildContext context, RequestDetailController c) async {
+  final reason = await AppDialog.prompt(
+    context,
+    title: 'requests.reject'.tr,
+    label: 'requests.rejectReason'.tr,
+    confirmLabel: 'common.confirm'.tr,
   );
-  reason.dispose();
+  if (reason == null || reason.isEmpty) return;
+  await c.reject(reason);
 }
 
 Future<void> _issue(RequestDetailController c) async {
   await c.issue();
 }
 
-Future<void> _comment(RequestDetailController c) async {
-  final body = TextEditingController();
-  await Get.dialog<void>(
-    AlertDialog(
-      title: Text('requests.addComment'.tr),
-      content: TextField(
-        controller: body,
-        maxLines: 3,
-        decoration: InputDecoration(labelText: 'requests.comment'.tr),
-      ),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-        FilledButton(
-          onPressed: () async {
-            final v = body.text;
-            Get.back();
-            await c.addComment(v);
-          },
-          child: Text('common.save'.tr),
-        ),
-      ],
-    ),
+Future<void> _comment(BuildContext context, RequestDetailController c) async {
+  final body = await AppDialog.prompt(
+    context,
+    title: 'requests.addComment'.tr,
+    label: 'requests.comment'.tr,
+    maxLines: 3,
   );
-  body.dispose();
+  if (body == null || body.isEmpty) return;
+  await c.addComment(body);
 }

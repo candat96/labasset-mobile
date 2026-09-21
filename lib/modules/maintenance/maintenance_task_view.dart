@@ -11,7 +11,9 @@ import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -62,7 +64,7 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
               IconButton(
                 tooltip: 'maintenance.skip'.tr,
                 icon: const Icon(LucideIcons.skipForward),
-                onPressed: () => _skip(controller),
+                onPressed: () => _skip(context, controller),
               ),
           ],
         ),
@@ -335,13 +337,13 @@ class _BottomBar extends StatelessWidget {
           StickySecondaryButton(
             label: 'maintenance.sign'.tr,
             icon: LucideIcons.penLine,
-            onPressed: () => _sign(controller),
+            onPressed: () => _sign(context, controller),
           ),
         ],
         primary: GradientButton(
           label: 'maintenance.finish'.tr,
           icon: LucideIcons.check,
-          onPressed: () => _finish(controller),
+          onPressed: () => _finish(context, controller),
         ),
       );
     }
@@ -373,138 +375,117 @@ Future<void> _start(BuildContext context, MaintenanceTaskController c) async {
           as List<String>?;
   final token = qr?.firstOrNull;
   if (token == null) {
-    if (!c.isAdmin) return;
-    final skip = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('maintenance.start'.tr),
-        content: Text('maintenance.skipScanHint'.tr),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('maintenance.skipScan'.tr),
-          ),
-        ],
-      ),
+    if (!c.isAdmin || !context.mounted) return;
+    final skip = await ConfirmSheet.show(
+      context,
+      title: 'maintenance.start'.tr,
+      description: 'maintenance.skipScanHint'.tr,
+      confirmLabel: 'maintenance.skipScan'.tr,
     );
-    if (skip == true) await c.start();
+    if (skip) await c.start();
     return;
   }
   await c.start(qrToken: token);
 }
 
-Future<void> _skip(MaintenanceTaskController c) async {
-  final reason = TextEditingController();
-  await Get.dialog<void>(
-    AlertDialog(
-      title: Text('maintenance.skip'.tr),
-      content: TextField(
-        controller: reason,
-        decoration: InputDecoration(labelText: 'repairs.cancel.reason'.tr),
-      ),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-        FilledButton(
-          onPressed: () async {
-            if (reason.text.trim().isEmpty) return;
-            Get.back();
-            await c.skip(reason.text.trim());
-          },
-          child: Text('common.confirm'.tr),
-        ),
-      ],
-    ),
+Future<void> _skip(BuildContext context, MaintenanceTaskController c) async {
+  final reason = await AppDialog.prompt(
+    context,
+    title: 'maintenance.skip'.tr,
+    label: 'repairs.cancel.reason'.tr,
+    confirmLabel: 'common.confirm'.tr,
   );
-  reason.dispose();
+  if (reason == null || reason.isEmpty) return;
+  await c.skip(reason);
 }
 
-Future<void> _finish(MaintenanceTaskController c) async {
+Future<void> _finish(BuildContext context, MaintenanceTaskController c) async {
   var pass = true;
-  final notes = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'maintenance.finish'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('maintenance.overallPass'.tr),
-                value: pass,
-                onChanged: (v) => setState(() => pass = v),
-              ),
-              TextField(
-                controller: notes,
-                maxLines: 3,
-                decoration: InputDecoration(labelText: 'maintenance.notes'.tr),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final ok = await c.finish(
-                    overallPass: pass,
-                    notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
-  );
-  notes.dispose();
-}
-
-Future<void> _sign(MaintenanceTaskController c) async {
-  final name = TextEditingController();
-  final role = await Get.dialog<String>(
-    AlertDialog(
-      title: Text('maintenance.sign'.tr),
-      content: Column(
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SheetHeader(title: 'maintenance.finish'.tr),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('maintenance.overallPass'.tr),
+            value: pass,
+            onChanged: (v) => form.refresh(() => pass = v),
+          ),
           TextField(
-            controller: name,
-            decoration: InputDecoration(labelText: 'repairs.sign.signer'.tr),
+            controller: form.field('notes'),
+            maxLines: 3,
+            decoration: InputDecoration(labelText: 'maintenance.notes'.tr),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    form.setBusy(true);
+                    final ok = await c.finish(
+                      overallPass: pass,
+                      notes: form.textOrNull('notes'),
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.confirm'.tr),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(result: 'technician'),
-          child: Text('repairs.sign.technician'.tr),
-        ),
-        FilledButton(
-          onPressed: () => Get.back(result: 'department'),
-          child: Text('repairs.sign.department'.tr),
-        ),
-      ],
     ),
   );
-  if (role == null || name.text.trim().isEmpty) {
-    name.dispose();
-    return;
-  }
-  await c.sign(role: role, signerName: name.text.trim());
-  name.dispose();
+}
+
+Future<void> _sign(BuildContext context, MaintenanceTaskController c) async {
+  ({String role, String name})? picked;
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'maintenance.sign'.tr),
+          TextField(
+            controller: form.field('name'),
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'repairs.sign.signer'.tr,
+              errorText: form.error('name'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          for (final role in ['technician', 'department']) ...[
+            FilledButton(
+              style: role == 'technician'
+                  ? null
+                  : FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                    ),
+              onPressed: () {
+                if (form.text('name').isEmpty) {
+                  form.setError('name', 'common.required'.tr);
+                  return;
+                }
+                picked = (role: role, name: form.text('name'));
+                form.close();
+              },
+              child: Text('repairs.sign.$role'.tr),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ],
+      ),
+    ),
+  );
+  final p = picked;
+  if (p == null) return;
+  await c.sign(role: p.role, signerName: p.name);
 }
 
 /// Tải PDF biên bản bảo dưỡng rồi mở ngoài app hoặc chia sẻ.

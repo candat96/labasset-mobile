@@ -8,6 +8,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_list_tile.dart';
+import '../../core/widgets/app_sheet.dart';
+import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/large_title_scaffold.dart';
 import '../../core/widgets/section_card.dart';
 import '../../data/models/user_view.dart';
@@ -114,7 +116,7 @@ class AccountView extends GetView<AccountController> {
                     icon: LucideIcons.sunMoon,
                     title: 'account.theme'.tr,
                     value: 'account.theme.${store.themeMode.value.name}'.tr,
-                    onTap: () => _pickTheme(controller),
+                    onTap: () => _pickTheme(context, controller),
                   ),
                 ],
               ),
@@ -122,7 +124,7 @@ class AccountView extends GetView<AccountController> {
             const SizedBox(height: AppSpacing.md),
             AppCard(
               padding: EdgeInsets.zero,
-              onTap: controller.logout,
+              onTap: () => _logout(context, controller),
               child: SizedBox(
                 height: 52,
                 child: Center(
@@ -301,28 +303,38 @@ class _Stat extends StatelessWidget {
   );
 }
 
-Future<void> _pickTheme(AccountController controller) async {
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: RadioGroup<ThemeMode>(
-          groupValue: controller.store.themeMode.value,
-          onChanged: (value) async {
-            if (value == null) return;
-            await controller.setTheme(value);
-            Get.back();
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final mode in ThemeMode.values)
-                RadioListTile<ThemeMode>(
-                  value: mode,
-                  title: Text('account.theme.${mode.name}'.tr),
-                ),
-            ],
-          ),
+Future<void> _logout(BuildContext context, AccountController c) async {
+  final ok = await ConfirmSheet.show(
+    context,
+    title: 'auth.logoutConfirm'.tr,
+    confirmLabel: 'auth.logout'.tr,
+    destructive: true,
+  );
+  if (!ok) return;
+  await c.logout();
+}
+
+Future<void> _pickTheme(BuildContext context, AccountController c) async {
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: RadioGroup<ThemeMode>(
+        groupValue: c.store.themeMode.value,
+        onChanged: (value) async {
+          if (value == null) return;
+          await c.setTheme(value);
+          if (ctx.mounted) AppSheet.close(ctx);
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final mode in ThemeMode.values)
+              RadioListTile<ThemeMode>(
+                value: mode,
+                title: Text('account.theme.${mode.name}'.tr),
+              ),
+          ],
         ),
       ),
     ),

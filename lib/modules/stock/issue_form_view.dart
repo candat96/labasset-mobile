@@ -5,6 +5,7 @@ import '../../core/errors/api_error.dart';
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/qty_field.dart';
@@ -54,7 +55,7 @@ class IssueFormView extends GetView<IssueFormController> {
                     : controller.warehouse.value!.name,
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: controller.pickWarehouse,
+              onTap: () => controller.pickWarehouse(context),
             ),
           ),
           if (controller.type.value == 'to_department')
@@ -68,7 +69,7 @@ class IssueFormView extends GetView<IssueFormController> {
                       : controller.toDepartment.value!.name,
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: controller.pickToDepartment,
+                onTap: () => controller.pickToDepartment(context),
               ),
             ),
           Obx(
@@ -81,7 +82,7 @@ class IssueFormView extends GetView<IssueFormController> {
                     : controller.equipment.value!.name,
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _pickEquipment(controller),
+              onTap: () => _pickEquipment(context, controller),
             ),
           ),
           TextField(
@@ -159,10 +160,15 @@ class IssueFormView extends GetView<IssueFormController> {
     );
   }
 
-  Future<void> _pickEquipment(IssueFormController c) async {
+  Future<void> _pickEquipment(
+    BuildContext context,
+    IssueFormController c,
+  ) async {
     final repo = Get.find<EquipmentRepository>();
     final selection = await PickerSheet.show<String>(
+      context,
       title: 'stock.issue.equipment'.tr,
+      kind: PickerKind.equipment,
       loader: (q) async {
         final page = await repo.search(q, limit: 20);
         return [
@@ -200,62 +206,65 @@ class IssueFormView extends GetView<IssueFormController> {
       AppSnackbar.error(ApiError(404, 'LOT_NOT_FOUND', ''));
       return;
     }
-    await _lotSheet(c, lot);
+    if (!context.mounted) return;
+    await _lotSheet(context, c, lot);
   }
 
-  Future<void> _lotSheet(IssueFormController c, StockLotSummary lot) async {
-    final qty = TextEditingController(text: '1');
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                '${'scan.lot.lotNo'.tr}: ${lot.lotNo}'
-                '${lot.expiresAt == null ? '' : ' · ${formatDate(lot.expiresAt)}'}',
-                style: Get.theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              QtyField(controller: qty, label: 'repairs.parts.quantity'.tr),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final line = IssueLine(
-                    supplyId: lot.supplyId,
-                    label: lot.lotNo,
-                    lotId: lot.id,
-                    lotNo: lot.lotNo,
-                    quantity: qty.text.trim().isEmpty ? '1' : qty.text.trim(),
-                    available: lot.available,
-                  );
-                  await c.attachLot(line, lot.id, lot.lotNo);
-                  c.lines.add(line);
-                  Get.back();
-                },
-                child: Text('common.add'.tr),
-              ),
-            ],
-          ),
+  Future<void> _lotSheet(
+    BuildContext context,
+    IssueFormController c,
+    StockLotSummary lot,
+  ) async {
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        initial: const {'qty': '1'},
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(
+              title:
+                  '${'scan.lot.lotNo'.tr}: ${lot.lotNo}'
+                  '${lot.expiresAt == null ? '' : ' · ${formatDate(lot.expiresAt)}'}',
+            ),
+            QtyField(
+              controller: form.field('qty'),
+              label: 'repairs.parts.quantity'.tr,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      form.setBusy(true);
+                      final line = IssueLine(
+                        supplyId: lot.supplyId,
+                        label: lot.lotNo,
+                        lotId: lot.id,
+                        lotNo: lot.lotNo,
+                        quantity: form.text('qty').isEmpty
+                            ? '1'
+                            : form.text('qty'),
+                        available: lot.available,
+                      );
+                      await c.attachLot(line, lot.id, lot.lotNo);
+                      c.lines.add(line);
+                      form.close();
+                    },
+              child: Text('common.add'.tr),
+            ),
+          ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    qty.dispose();
   }
 
   Future<void> _pickSupply(BuildContext context, IssueFormController c) async {
     final selection = await PickerSheet.show<String>(
+      context,
       title: 'stock.receipt.pickSupply'.tr,
+      kind: PickerKind.supply,
       loader: (q) async {
         final page = await c.supplies.list(q: q, limit: 20);
         return [
@@ -265,27 +274,18 @@ class IssueFormView extends GetView<IssueFormController> {
       },
     );
     final o = selection?.option;
-    if (o == null) return;
-    final qty = TextEditingController(text: '1');
-    await Get.dialog<void>(
-      AlertDialog(
-        title: Text('${o.code} — ${o.name}'),
-        content: QtyField(controller: qty, label: 'repairs.parts.quantity'.tr),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () async {
-              Get.back();
-              await c.addSupplyLine(
-                SupplySummary(id: o.value, code: o.code, name: o.name),
-                qty.text.trim().isEmpty ? '1' : qty.text.trim(),
-              );
-            },
-            child: Text('common.add'.tr),
-          ),
-        ],
-      ),
+    if (o == null || !context.mounted) return;
+    final qty = await AppDialog.prompt(
+      context,
+      title: '${o.code} — ${o.name}',
+      label: 'repairs.parts.quantity'.tr,
+      initial: '1',
+      confirmLabel: 'common.add'.tr,
     );
-    qty.dispose();
+    if (qty == null) return;
+    await c.addSupplyLine(
+      SupplySummary(id: o.value, code: o.code, name: o.name),
+      qty.isEmpty ? '1' : qty,
+    );
   }
 }

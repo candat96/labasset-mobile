@@ -5,6 +5,7 @@ import '../../core/ai/ai_models.dart';
 import '../../core/format/format.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/section_card.dart';
 import 'ai_controller.dart';
@@ -143,22 +144,21 @@ class AiView extends GetView<AiController> {
 
   Future<void> _digest(BuildContext context, AiController c) async {
     final text = await c.weeklyDigest();
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('ai.digest'.tr, style: Get.theme.textTheme.titleMedium),
-              const SizedBox(height: AppSpacing.sm),
-              Text(text),
-            ],
-          ),
+    if (!context.mounted) return;
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('ai.digest'.tr, style: Theme.of(ctx).textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
+            Text(text),
+          ],
         ),
       ),
-      backgroundColor: Get.theme.colorScheme.surface,
     );
   }
 }

@@ -7,6 +7,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/picker_sheet.dart';
 import '../../../data/models/repair_detail.dart';
@@ -128,15 +129,16 @@ class VendorsTab extends GetView<VendorsTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addVendor',
         tooltip: 'repairs.vendors.add'.tr,
-        onPressed: () => _addVendor(controller),
+        onPressed: () => _addVendor(context, controller),
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-Future<void> _addVendor(VendorsTabController c) async {
+Future<void> _addVendor(BuildContext context, VendorsTabController c) async {
   final selection = await PickerSheet.show<String>(
+    context,
     title: 'repairs.vendors.supplier'.tr,
     loader: (q) async {
       final list = await c.catalogs.list('suppliers', q: q, limit: 20);
@@ -147,123 +149,95 @@ Future<void> _addVendor(VendorsTabController c) async {
     },
   );
   final supplier = selection?.option;
-  if (supplier == null) return;
+  if (supplier == null || !context.mounted) return;
 
-  final engineer = TextEditingController();
-  final phone = TextEditingController();
-  final quotation = TextEditingController();
-  final contract = TextEditingController();
-  final visitAt = TextEditingController();
-  final note = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'repairs.vendors.add'.tr,
-                style: Get.theme.textTheme.titleMedium,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      builder: (context, form) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: 'repairs.vendors.add'.tr),
+            Text(supplier.label),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: form.field('engineer'),
+              decoration: InputDecoration(
+                labelText: 'repairs.vendors.engineer'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(supplier.label),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: engineer,
-                decoration: InputDecoration(
-                  labelText: 'repairs.vendors.engineer'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('phone'),
+              decoration: InputDecoration(
+                labelText: 'repairs.vendors.phone'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: phone,
-                decoration: InputDecoration(
-                  labelText: 'repairs.vendors.phone'.tr,
-                ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            MoneyField(
+              controller: form.field('quotation'),
+              label: 'repairs.vendors.quotation'.tr,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('contract'),
+              decoration: InputDecoration(
+                labelText: 'repairs.vendors.contract'.tr,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              MoneyField(
-                controller: quotation,
-                label: 'repairs.vendors.quotation'.tr,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('visitAt'),
+              readOnly: true,
+              onTap: () async {
+                final d = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (d != null) form.field('visitAt').text = formatDate(d);
+              },
+              decoration: InputDecoration(
+                labelText: 'repairs.vendors.visitAt'.tr,
+                suffixIcon: const Icon(Icons.event_outlined),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: contract,
-                decoration: InputDecoration(
-                  labelText: 'repairs.vendors.contract'.tr,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: visitAt,
-                readOnly: true,
-                onTap: () async {
-                  final d = await showDatePicker(
-                    context: Get.context!,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (d != null) visitAt.text = formatDate(d);
-                },
-                decoration: InputDecoration(
-                  labelText: 'repairs.vendors.visitAt'.tr,
-                  suffixIcon: const Icon(Icons.event_outlined),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: note,
-                decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final ok = await c.add(
-                    supplierId: supplier.value,
-                    engineerName: engineer.text.trim().isEmpty
-                        ? null
-                        : engineer.text.trim(),
-                    engineerPhone: phone.text.trim().isEmpty
-                        ? null
-                        : phone.text.trim(),
-                    quotationAmount: MoneyField.raw(quotation.text).isEmpty
-                        ? null
-                        : MoneyField.raw(quotation.text),
-                    contractNo: contract.text.trim().isEmpty
-                        ? null
-                        : contract.text.trim(),
-                    visitAt: visitAt.text.trim().isEmpty
-                        ? null
-                        : _iso(visitAt.text),
-                    note: note.text.trim().isEmpty ? null : note.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.save'.tr),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('note'),
+              decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: form.busy
+                  ? null
+                  : () async {
+                      form.setBusy(true);
+                      final quotation = MoneyField.raw(form.text('quotation'));
+                      final ok = await c.add(
+                        supplierId: supplier.value,
+                        engineerName: form.textOrNull('engineer'),
+                        engineerPhone: form.textOrNull('phone'),
+                        quotationAmount: quotation.isEmpty ? null : quotation,
+                        contractNo: form.textOrNull('contract'),
+                        visitAt: form.text('visitAt').isEmpty
+                            ? null
+                            : _iso(form.text('visitAt')),
+                        note: form.textOrNull('note'),
+                      );
+                      form.setBusy(false);
+                      if (ok) form.close();
+                    },
+              child: Text('common.save'.tr),
+            ),
+          ],
         ),
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  engineer.dispose();
-  phone.dispose();
-  quotation.dispose();
-  contract.dispose();
-  visitAt.dispose();
-  note.dispose();
 }
 
 String? _iso(String display) {

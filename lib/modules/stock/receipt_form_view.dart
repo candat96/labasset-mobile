@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/money_field.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/qty_field.dart';
@@ -123,7 +124,7 @@ class _Step1 extends StatelessWidget {
                   : controller.warehouse.value!.name,
             ),
             trailing: const Icon(Icons.chevron_right),
-            onTap: controller.pickWarehouse,
+            onTap: () => controller.pickWarehouse(context),
           ),
         ),
         if (controller.type.value == 'purchase')
@@ -136,7 +137,7 @@ class _Step1 extends StatelessWidget {
                     : controller.supplier.value!.name,
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: controller.pickSupplier,
+              onTap: () => controller.pickSupplier(context),
             ),
           ),
         if (controller.type.value == 'return_from_dept')
@@ -149,7 +150,7 @@ class _Step1 extends StatelessWidget {
                     : controller.fromDepartment.value!.name,
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: controller.pickFromDepartment,
+              onTap: () => controller.pickFromDepartment(context),
             ),
           ),
         TextField(
@@ -231,8 +232,8 @@ class _Step2 extends StatelessWidget {
     final code = codes?.firstOrNull;
     if (code == null) return;
     final supply = await c.scanManufacturerCode(code);
-    if (supply == null) return;
-    await _lineSheet(c, supply);
+    if (supply == null || !context.mounted) return;
+    await _lineSheet(context, c, supply);
   }
 
   Future<void> _pickSupply(
@@ -240,7 +241,9 @@ class _Step2 extends StatelessWidget {
     ReceiptFormController c,
   ) async {
     final selection = await PickerSheet.show<String>(
+      context,
       title: 'stock.receipt.pickSupply'.tr,
+      kind: PickerKind.supply,
       loader: (q) async {
         final page = await c.supplies.list(q: q, limit: 20);
         return [
@@ -250,91 +253,82 @@ class _Step2 extends StatelessWidget {
       },
     );
     final o = selection?.option;
-    if (o == null) return;
-    await _lineSheet(c, SupplySummary(id: o.value, code: o.code, name: o.name));
+    if (o == null || !context.mounted) return;
+    await _lineSheet(
+      context,
+      c,
+      SupplySummary(id: o.value, code: o.code, name: o.name),
+    );
   }
 
-  Future<void> _lineSheet(ReceiptFormController c, SupplySummary supply) async {
-    final qty = TextEditingController(text: '1');
-    final lot = TextEditingController();
-    final expiry = TextEditingController();
-    final cost = TextEditingController();
-    await Get.bottomSheet<void>(
-      SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom:
-                MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                '${supply.code} — ${supply.name}',
-                style: Get.theme.textTheme.titleSmall,
+  Future<void> _lineSheet(
+    BuildContext context,
+    ReceiptFormController c,
+    SupplySummary supply,
+  ) async {
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => SheetForm(
+        initial: const {'qty': '1'},
+        builder: (context, form) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SheetHeader(title: '${supply.code} — ${supply.name}'),
+            TextField(
+              controller: form.field('lot'),
+              decoration: InputDecoration(labelText: 'scan.lot.lotNo'.tr),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: form.field('expiry'),
+              readOnly: true,
+              onTap: () async {
+                final d = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now().add(const Duration(days: 365)),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (d != null) form.field('expiry').text = formatDate(d);
+              },
+              decoration: InputDecoration(
+                labelText: 'scan.lot.expiry'.tr,
+                suffixIcon: const Icon(Icons.event_outlined),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: lot,
-                decoration: InputDecoration(labelText: 'scan.lot.lotNo'.tr),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: expiry,
-                readOnly: true,
-                onTap: () async {
-                  final d = await showDatePicker(
-                    context: Get.context!,
-                    initialDate: DateTime.now().add(const Duration(days: 365)),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (d != null) expiry.text = formatDate(d);
-                },
-                decoration: InputDecoration(
-                  labelText: 'scan.lot.expiry'.tr,
-                  suffixIcon: const Icon(Icons.event_outlined),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              QtyField(controller: qty, label: 'repairs.parts.quantity'.tr),
-              const SizedBox(height: AppSpacing.sm),
-              MoneyField(controller: cost, label: 'repairs.parts.unitCost'.tr),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () {
-                  final iso = _iso(expiry.text);
-                  c.addLine(
-                    ReceiptLine(
-                      supplyId: supply.id,
-                      label: '${supply.code} — ${supply.name}',
-                      lotNo: lot.text.trim().isEmpty ? null : lot.text.trim(),
-                      expiresAt: iso,
-                      quantity: qty.text.trim().isEmpty ? '1' : qty.text.trim(),
-                      unitCost: MoneyField.raw(cost.text).isEmpty
-                          ? '0'
-                          : MoneyField.raw(cost.text),
-                    ),
-                  );
-                  Get.back();
-                },
-                child: Text('common.add'.tr),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            QtyField(
+              controller: form.field('qty'),
+              label: 'repairs.parts.quantity'.tr,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            MoneyField(
+              controller: form.field('cost'),
+              label: 'repairs.parts.unitCost'.tr,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton(
+              onPressed: () {
+                final cost = MoneyField.raw(form.text('cost'));
+                c.addLine(
+                  ReceiptLine(
+                    supplyId: supply.id,
+                    label: '${supply.code} — ${supply.name}',
+                    lotNo: form.textOrNull('lot'),
+                    expiresAt: _iso(form.text('expiry')),
+                    quantity: form.text('qty').isEmpty ? '1' : form.text('qty'),
+                    unitCost: cost.isEmpty ? '0' : cost,
+                  ),
+                );
+                form.close();
+              },
+              child: Text('common.add'.tr),
+            ),
+          ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
     );
-    qty.dispose();
-    lot.dispose();
-    expiry.dispose();
-    cost.dispose();
   }
 }
 

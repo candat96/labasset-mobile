@@ -17,6 +17,7 @@ class MoneyField extends StatelessWidget {
     this.suffixText = '₫',
     this.textInputAction = TextInputAction.next,
     this.onChanged,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -28,6 +29,9 @@ class MoneyField extends StatelessWidget {
   final String? suffixText;
   final TextInputAction textInputAction;
   final ValueChanged<String>? onChanged;
+
+  /// Lỗi hiện dưới ô (ngoài validator của Form).
+  final String? errorText;
 
   /// Chuỗi gửi API từ text đang hiển thị (bỏ dấu nhóm).
   static String raw(String display) => digitsOnly(display);
@@ -47,6 +51,7 @@ class MoneyField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
+        errorText: errorText,
         suffixText: suffixText,
       ),
       validator: validator ?? defaultValidator,

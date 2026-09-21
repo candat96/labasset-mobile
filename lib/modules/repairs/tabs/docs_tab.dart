@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../../core/services/pdf_file_service.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/attachments_grid.dart';
 import '../../../core/widgets/signature_pad.dart';
@@ -93,26 +94,12 @@ class _DocsTabState extends State<DocsTab> {
   }
 
   Future<void> _sign(BuildContext context, String role) async {
-    final name = TextEditingController();
-    final png = await SignaturePad.show();
-    if (png == null) return;
-    final signerName = await Get.dialog<String>(
-      AlertDialog(
-        title: Text('repairs.sign.signer'.tr),
-        content: TextField(
-          controller: name,
-          decoration: InputDecoration(labelText: 'repairs.sign.signer'.tr),
-        ),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () => Get.back(result: name.text.trim()),
-            child: Text('common.save'.tr),
-          ),
-        ],
-      ),
+    final png = await SignaturePad.show(context);
+    if (png == null || !context.mounted) return;
+    final signerName = await AppDialog.prompt(
+      context,
+      title: 'repairs.sign.signer'.tr,
     );
-    name.dispose();
     if (signerName == null || signerName.isEmpty) return;
     try {
       final service = Get.find<AttachmentService>();

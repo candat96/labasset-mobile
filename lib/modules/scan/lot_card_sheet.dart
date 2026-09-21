@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock.dart';
 import '../../data/repositories/stock_repository.dart';
@@ -14,33 +15,44 @@ class LotCardSheet {
   LotCardSheet._();
 
   static Future<void> show(StockLotSummary lot) async {
-    final controller = LotCardController(
-      lot: lot,
-      supplies: Get.find<SuppliesRepository>(),
-      stock: Get.find<StockRepository>(),
+    final context = AppSheet.rootContext;
+    if (context == null) return;
+    // Controller đăng ký trước khi mở; xoá khi sheet unmount (sau animation
+    // đóng) trong [_LotCardViewState.dispose] — không xoá ngay sau `await`.
+    Get.put(
+      LotCardController(
+        lot: lot,
+        supplies: Get.find<SuppliesRepository>(),
+        stock: Get.find<StockRepository>(),
+      ),
+      tag: lot.id,
     );
-    Get.put(controller, tag: lot.id);
-    try {
-      await Get.bottomSheet(
-        SafeArea(child: _LotCardView(controller: controller)),
-        isScrollControlled: true,
-        backgroundColor: Get.theme.colorScheme.surface,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.lg * 2),
-          ),
-        ),
-      );
-    } finally {
-      await Get.delete<LotCardController>(tag: lot.id);
-    }
+    await AppSheet.show<void>(
+      context,
+      builder: (ctx) => _LotCardView(tag: lot.id),
+    );
   }
 }
 
-class _LotCardView extends StatelessWidget {
-  const _LotCardView({required this.controller});
+class _LotCardView extends StatefulWidget {
+  const _LotCardView({required this.tag});
 
-  final LotCardController controller;
+  final String tag;
+
+  @override
+  State<_LotCardView> createState() => _LotCardViewState();
+}
+
+class _LotCardViewState extends State<_LotCardView> {
+  late final LotCardController controller = Get.find<LotCardController>(
+    tag: widget.tag,
+  );
+
+  @override
+  void dispose() {
+    Get.delete<LotCardController>(tag: widget.tag);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

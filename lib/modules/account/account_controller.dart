@@ -5,7 +5,6 @@ import 'package:local_auth/local_auth.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
 import '../../core/widgets/app_snackbar.dart';
-import '../../core/widgets/confirm_sheet.dart';
 import '../../data/repositories/auth_repository.dart';
 
 class AccountController extends GetxController {
@@ -57,13 +56,8 @@ class AccountController extends GetxController {
   Future<void> setTextScale(bool large) =>
       store.setTextScale(large ? 1.15 : 1.0);
 
+  /// Đăng xuất (đã xác nhận ở view).
   Future<void> logout() async {
-    final ok = await ConfirmSheet.show(
-      title: 'auth.logoutConfirm'.tr,
-      confirmLabel: 'auth.logout'.tr,
-      destructive: true,
-    );
-    if (!ok) return;
     try {
       await auth.logout(all: false, refreshToken: store.refreshToken);
     } catch (_) {

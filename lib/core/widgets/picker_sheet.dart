@@ -4,9 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../theme/tokens.dart';
+import 'app_sheet.dart';
 import 'empty_state.dart';
 import 'error_state.dart';
 import 'loading_list.dart';
+
+/// Loại tham chiếu đang chọn → icon chip trong dòng.
+enum PickerKind {
+  generic,
+  supply,
+  equipment,
+  department,
+  user,
+  warehouse,
+  supplier,
+}
 
 /// Một dòng chọn tham chiếu: `code — name`.
 class PickerOption<T> {
@@ -39,27 +51,27 @@ class PickerSelection<T> {
 class PickerSheet {
   PickerSheet._();
 
-  static Future<PickerSelection<T>?> show<T>({
+  static Future<PickerSelection<T>?> show<T>(
+    BuildContext context, {
     required String title,
     required Future<List<PickerOption<T>>> Function(String query) loader,
     bool showClear = false,
     Future<String?> Function()? onScan,
     String? searchHint,
+    PickerKind kind = PickerKind.generic,
+    T? selected,
   }) {
-    return Get.bottomSheet<PickerSelection<T>>(
-      _PickerContent<T>(
+    return AppSheet.show<PickerSelection<T>>(
+      context,
+      showHandle: false,
+      builder: (ctx) => _PickerContent<T>(
         title: title,
         loader: loader,
         showClear: showClear,
         onScan: onScan,
         searchHint: searchHint,
-      ),
-      isScrollControlled: true,
-      backgroundColor: Get.theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppRadius.lg * 2),
-        ),
+        kind: kind,
+        selected: selected,
       ),
     );
   }
@@ -72,6 +84,8 @@ class _PickerContent<T> extends StatefulWidget {
     required this.showClear,
     required this.onScan,
     required this.searchHint,
+    required this.kind,
+    required this.selected,
   });
 
   final String title;
@@ -79,6 +93,8 @@ class _PickerContent<T> extends StatefulWidget {
   final bool showClear;
   final Future<String?> Function()? onScan;
   final String? searchHint;
+  final PickerKind kind;
+  final T? selected;
 
   @override
   State<_PickerContent<T>> createState() => _PickerContentState<T>();
@@ -143,7 +159,7 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
       (o) => o.code.toUpperCase() == code.toUpperCase(),
     );
     if (match.length == 1) {
-      Get.back(result: PickerSelection<T>(match.first));
+      AppSheet.close(context, PickerSelection<T>(match.first));
     }
   }
 
@@ -151,67 +167,53 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final height = MediaQuery.sizeOf(context).height * 0.75;
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: SizedBox(
-        height: height,
-        child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
+    return SizedBox(
+      height: height,
+      child: Column(
+        children: [
+          const SheetHandle(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.sm,
+              0,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.sm,
-                0,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.title,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                  if (widget.onScan != null)
-                    IconButton(
-                      tooltip: 'picker.scan'.tr,
-                      icon: const Icon(Icons.qr_code_scanner),
-                      onPressed: _scan,
-                    ),
-                  if (widget.showClear)
-                    TextButton(
-                      onPressed: () =>
-                          Get.back(result: PickerSelection<T>.cleared()),
-                      child: Text('common.clear'.tr),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: TextField(
-                controller: _query,
-                autofocus: widget.onScan == null,
-                onChanged: _onQueryChanged,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: widget.searchHint ?? 'picker.searchHint'.tr,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(widget.title, style: theme.textTheme.titleMedium),
                 ),
+                if (widget.onScan != null)
+                  IconButton(
+                    tooltip: 'picker.scan'.tr,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    onPressed: _scan,
+                  ),
+                if (widget.showClear)
+                  TextButton(
+                    onPressed: () =>
+                        AppSheet.close(context, PickerSelection<T>.cleared()),
+                    child: Text('common.clear'.tr),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: TextField(
+              controller: _query,
+              autofocus: widget.onScan == null,
+              onChanged: _onQueryChanged,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: widget.searchHint ?? 'picker.searchHint'.tr,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Expanded(child: _body()),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Expanded(child: _body()),
+        ],
       ),
     );
   }
@@ -232,7 +234,7 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
         return ListTile(
           title: Text(o.label),
           subtitle: o.subtitle == null ? null : Text(o.subtitle!),
-          onTap: () => Get.back(result: PickerSelection<T>(o)),
+          onTap: () => AppSheet.close(context, PickerSelection<T>(o)),
         );
       },
     );

@@ -5,6 +5,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -201,6 +202,7 @@ Future<void> _openVial(
   StockLotSummary lot,
 ) async {
   final ok = await ConfirmSheet.show(
+    context,
     title: 'scan.lot.open'.tr,
     description: 'stock.lot.openConfirm'.tr,
   );
@@ -212,60 +214,51 @@ Future<void> _adjust(
   SupplyDetailController c,
   StockLotSummary lot,
 ) async {
-  final qty = TextEditingController(text: lot.qtyOnHand);
-  final reason = TextEditingController();
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'stock.adjust.title'.tr,
-              style: Get.theme.textTheme.titleMedium,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      initial: {'qty': lot.qtyOnHand},
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'stock.adjust.title'.tr),
+          QtyField(
+            controller: form.field('qty'),
+            label: 'stock.adjust.newQty'.tr,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: form.field('reason'),
+            decoration: InputDecoration(
+              labelText: 'stock.adjust.reason'.tr,
+              errorText: form.error('reason'),
             ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: qty,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(labelText: 'stock.adjust.newQty'.tr),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: reason,
-              decoration: InputDecoration(labelText: 'stock.adjust.reason'.tr),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: () async {
-                if (reason.text.trim().isEmpty) return;
-                final ok = await c.adjustLot(
-                  lot,
-                  newQty: qty.text.trim(),
-                  reason: reason.text.trim(),
-                );
-                if (ok) Get.back();
-              },
-              child: Text('common.save'.tr),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    if (form.text('reason').isEmpty) {
+                      form.setError('reason', 'common.required'.tr);
+                      return;
+                    }
+                    form.setBusy(true);
+                    final ok = await c.adjustLot(
+                      lot,
+                      newQty: form.text('qty'),
+                      reason: form.text('reason'),
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.save'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  qty.dispose();
-  reason.dispose();
 }
 
 Future<void> _quickIssue(
@@ -273,70 +266,61 @@ Future<void> _quickIssue(
   SupplyDetailController c,
   StockLotSummary lot,
 ) async {
-  final qty = TextEditingController(text: '1');
   final departments = Get.find<DepartmentsRepository>();
   final list = await departments.list(limit: 50);
-  if (list.isEmpty) return;
+  if (list.isEmpty || !context.mounted) return;
   var dept = list.first;
-  await Get.bottomSheet<void>(
-    SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.viewInsetsOf(Get.context!).bottom + AppSpacing.lg,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'stock.issue.quick'.tr,
-                style: Get.theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<String>(
-                initialValue: dept.id,
-                decoration: InputDecoration(
-                  labelText: 'stock.issue.toDepartment'.tr,
+  await AppSheet.show<void>(
+    context,
+    builder: (ctx) => SheetForm(
+      initial: const {'qty': '1'},
+      builder: (context, form) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: 'stock.issue.quick'.tr),
+          DropdownButtonFormField<String>(
+            initialValue: dept.id,
+            decoration: InputDecoration(
+              labelText: 'stock.issue.toDepartment'.tr,
+            ),
+            items: [
+              for (final d in list)
+                DropdownMenuItem(
+                  value: d.id,
+                  child: Text('${d.code} — ${d.name}'),
                 ),
-                items: [
-                  for (final d in list)
-                    DropdownMenuItem(
-                      value: d.id,
-                      child: Text('${d.code} — ${d.name}'),
-                    ),
-                ],
-                onChanged: (v) => setState(
-                  () => dept = list.firstWhere(
-                    (d) => d.id == v,
-                    orElse: () => dept,
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              QtyField(controller: qty, label: 'repairs.parts.quantity'.tr),
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: () async {
-                  final ok = await c.quickIssue(
-                    lot: lot,
-                    toDepartmentId: dept.id,
-                    quantity: qty.text.trim().isEmpty ? '1' : qty.text.trim(),
-                  );
-                  if (ok) Get.back();
-                },
-                child: Text('common.confirm'.tr),
-              ),
             ],
+            onChanged: (v) => form.refresh(
+              () =>
+                  dept = list.firstWhere((d) => d.id == v, orElse: () => dept),
+            ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.sm),
+          QtyField(
+            controller: form.field('qty'),
+            label: 'repairs.parts.quantity'.tr,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: form.busy
+                ? null
+                : () async {
+                    form.setBusy(true);
+                    final ok = await c.quickIssue(
+                      lot: lot,
+                      toDepartmentId: dept.id,
+                      quantity: form.text('qty').isEmpty
+                          ? '1'
+                          : form.text('qty'),
+                    );
+                    form.setBusy(false);
+                    if (ok) form.close();
+                  },
+            child: Text('common.confirm'.tr),
+          ),
+        ],
       ),
     ),
-    isScrollControlled: true,
-    backgroundColor: Get.theme.colorScheme.surface,
   );
-  qty.dispose();
 }

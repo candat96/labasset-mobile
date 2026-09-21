@@ -40,8 +40,9 @@ class SessionsController extends GetxController {
     }
   }
 
-  Future<void> revoke(SessionView s) async {
+  Future<void> revoke(BuildContext context, SessionView s) async {
     final ok = await ConfirmSheet.show(
+      context,
       title: 'auth.sessions.revoke'.tr,
       description: s.deviceInfo ?? 'auth.sessions.unknownDevice'.tr,
       destructive: true,
@@ -55,8 +56,9 @@ class SessionsController extends GetxController {
     }
   }
 
-  Future<void> revokeAll() async {
+  Future<void> revokeAll(BuildContext context) async {
     final ok = await ConfirmSheet.show(
+      context,
       title: 'auth.sessions.revokeAll'.tr,
       description: 'auth.sessions.revokeAllDesc'.tr,
       destructive: true,
@@ -83,7 +85,7 @@ class SessionsView extends GetView<SessionsController> {
         title: Text('auth.sessions.title'.tr),
         actions: [
           TextButton(
-            onPressed: controller.revokeAll,
+            onPressed: () => controller.revokeAll(context),
             child: Text('auth.sessions.revokeAll'.tr),
           ),
         ],
@@ -123,7 +125,7 @@ class SessionsView extends GetView<SessionsController> {
                   trailing: IconButton(
                     tooltip: 'auth.sessions.revoke'.tr,
                     icon: Icon(Icons.logout, color: theme.colorScheme.error),
-                    onPressed: () => controller.revoke(s),
+                    onPressed: () => controller.revoke(context, s),
                   ),
                 ),
               );

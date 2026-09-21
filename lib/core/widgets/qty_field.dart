@@ -18,6 +18,7 @@ class QtyField extends StatelessWidget {
     this.suffix,
     this.textInputAction = TextInputAction.next,
     this.onChanged,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -29,6 +30,9 @@ class QtyField extends StatelessWidget {
   final Widget? suffix;
   final TextInputAction textInputAction;
   final ValueChanged<String>? onChanged;
+
+  /// Lỗi hiện dưới ô (ngoài validator của Form).
+  final String? errorText;
 
   /// Giá trị đã nhập (null nếu chưa hợp lệ).
   Decimal? get value => parseDecimalInput(controller.text);
@@ -45,6 +49,7 @@ class QtyField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
+        errorText: errorText,
         suffix: suffix,
       ),
       validator: validator ?? defaultValidator,

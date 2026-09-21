@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../core/network/connectivity.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/pick_ref.dart';
+import '../../core/widgets/picker_sheet.dart';
 import '../../data/models/department.dart';
 import '../../data/models/stock_issue.dart';
 import '../../data/models/supply.dart';
@@ -92,46 +94,23 @@ class IssueFormController extends GetxController {
     }
   }
 
-  Future<void> pickWarehouse() async {
-    final list = await catalogs.list('warehouses', limit: 50);
-    final d = await _pick(list, 'stock.receipt.warehouse'.tr);
+  Future<void> pickWarehouse(BuildContext context) async {
+    final d = await pickRef(
+      context,
+      title: 'stock.receipt.warehouse'.tr,
+      kind: PickerKind.warehouse,
+      loader: () => catalogs.list('warehouses', limit: 50),
+    );
     if (d != null) warehouse.value = d;
   }
 
-  Future<void> pickToDepartment() async {
-    final list = await departments.list(limit: 50);
-    final d = await _pick(list, 'stock.issue.toDepartment'.tr);
-    if (d != null) toDepartment.value = d;
-  }
-
-  Future<DepartmentRef?> _pick(List<DepartmentRef> list, String title) async {
-    if (list.isEmpty) return null;
-    return Get.bottomSheet<DepartmentRef>(
-      SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(title, style: Get.textTheme.titleMedium),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final d in list)
-                    ListTile(
-                      title: Text('${d.code} — ${d.name}'),
-                      onTap: () => Get.back(result: d),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: Get.theme.colorScheme.surface,
+  Future<void> pickToDepartment(BuildContext context) async {
+    final d = await pickRef(
+      context,
+      title: 'stock.issue.toDepartment'.tr,
+      loader: () => departments.list(limit: 50),
     );
+    if (d != null) toDepartment.value = d;
   }
 
   /// Thêm dòng theo vật tư: tự gợi ý lô FEFO nếu có kho nguồn.

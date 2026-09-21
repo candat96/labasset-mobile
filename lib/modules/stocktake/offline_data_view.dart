@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -49,7 +50,8 @@ class OfflineDataView extends GetView<OfflineDataController> {
                 trailing: IconButton(
                   tooltip: 'common.delete'.tr,
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _confirmDelete(controller, meta, pending),
+                  onPressed: () =>
+                      _confirmDelete(context, controller, meta, pending),
                 ),
               ),
             );
@@ -60,6 +62,7 @@ class OfflineDataView extends GetView<OfflineDataController> {
   }
 
   Future<void> _confirmDelete(
+    BuildContext context,
     OfflineDataController c,
     dynamic meta,
     int pending,
@@ -68,19 +71,13 @@ class OfflineDataView extends GetView<OfflineDataController> {
       await c.remove(meta);
       return;
     }
-    final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('offline.deleteConfirm'.tr),
-        content: Text(meta.name as String),
-        actions: [
-          TextButton(onPressed: Get.back, child: Text('common.cancel'.tr)),
-          FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('common.delete'.tr),
-          ),
-        ],
-      ),
+    final ok = await ConfirmSheet.show(
+      context,
+      title: 'offline.deleteConfirm'.tr,
+      description: meta.name as String,
+      confirmLabel: 'common.delete'.tr,
+      destructive: true,
     );
-    if (ok == true) await c.remove(meta);
+    if (ok) await c.remove(meta);
   }
 }
