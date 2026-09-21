@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'app_sheet.dart';
 import 'empty_state.dart';
@@ -64,6 +66,7 @@ class PickerSheet {
     return AppSheet.show<PickerSelection<T>>(
       context,
       showHandle: false,
+      maxHeightFraction: 0.85,
       builder: (ctx) => _PickerContent<T>(
         title: title,
         loader: loader,
@@ -165,29 +168,21 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final height = MediaQuery.sizeOf(context).height * 0.75;
+    final height = MediaQuery.sizeOf(context).height * 0.85;
     return SizedBox(
       height: height,
       child: Column(
         children: [
           const SheetHandle(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.sm,
-              AppSpacing.sm,
-              0,
-            ),
-            child: Row(
+          SheetHeader(
+            title: widget.title,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Text(widget.title, style: theme.textTheme.titleMedium),
-                ),
                 if (widget.onScan != null)
                   IconButton(
                     tooltip: 'picker.scan'.tr,
-                    icon: const Icon(Icons.qr_code_scanner),
+                    icon: const Icon(LucideIcons.scanLine, size: 20),
                     onPressed: _scan,
                   ),
                 if (widget.showClear)
@@ -206,8 +201,19 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
               autofocus: widget.onScan == null,
               onChanged: _onQueryChanged,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(LucideIcons.search, size: 20),
                 hintText: widget.searchHint ?? 'picker.searchHint'.tr,
+                filled: true,
+                fillColor: context.isDark
+                    ? AppColors.mutedDark
+                    : AppColors.muted,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                border: _searchBorder,
+                enabledBorder: _searchBorder,
+                focusedBorder: _searchBorder,
               ),
             ),
           ),
@@ -224,19 +230,107 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
       return ErrorState(error: _error!, onRetry: () => _load(_query.text));
     }
     if (_items.isEmpty) {
-      return EmptyState(icon: Icons.search_off, title: 'picker.empty'.tr);
+      return EmptyState(icon: LucideIcons.searchX, title: 'picker.empty'.tr);
     }
     return ListView.separated(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       itemCount: _items.length,
-      separatorBuilder: (_, _) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(
+        height: 1,
+        indent: AppSpacing.lg + 36 + AppSpacing.md,
+        endIndent: AppSpacing.lg,
+        color: AppColors.divider,
+      ),
       itemBuilder: (_, i) {
         final o = _items[i];
-        return ListTile(
-          title: Text(o.label),
-          subtitle: o.subtitle == null ? null : Text(o.subtitle!),
+        final selected = o.value == widget.selected;
+        final meta = [
+          if (o.code.isNotEmpty) o.code,
+          if (o.subtitle?.trim().isNotEmpty ?? false) o.subtitle!.trim(),
+        ].join(' · ');
+        return InkWell(
           onTap: () => AppSheet.close(context, PickerSelection<T>(o)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                _KindIcon(kind: widget.kind),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        o.name,
+                        style: context.appText.bodyStrong.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (meta.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          meta,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.appText.caption.copyWith(fontSize: 12),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (selected) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Icon(
+                    LucideIcons.check,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ],
+            ),
+          ),
         );
       },
     );
   }
+}
+
+const _searchBorder = OutlineInputBorder(
+  borderRadius: BorderRadius.all(Radius.circular(AppRadius.chip)),
+  borderSide: BorderSide.none,
+);
+
+class _KindIcon extends StatelessWidget {
+  const _KindIcon({required this.kind});
+
+  final PickerKind kind;
+
+  IconData get icon => switch (kind) {
+    PickerKind.supply => LucideIcons.package2,
+    PickerKind.equipment => LucideIcons.monitorCog,
+    PickerKind.department => LucideIcons.building2,
+    PickerKind.user => LucideIcons.userRound,
+    PickerKind.warehouse => LucideIcons.warehouse,
+    PickerKind.supplier => LucideIcons.truck,
+    PickerKind.generic => LucideIcons.listFilter,
+  };
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 36,
+    height: 36,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      borderRadius: BorderRadius.circular(AppRadius.tile),
+    ),
+    child: Icon(
+      icon,
+      size: 18,
+      color: Theme.of(context).colorScheme.onPrimaryContainer,
+    ),
+  );
 }

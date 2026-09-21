@@ -535,6 +535,7 @@ Future<void> _assign(
   final selection = await PickerSheet.show<String>(
     context,
     title: 'repairs.assign.title'.tr,
+    kind: PickerKind.user,
     loader: (q) async {
       final list = q.isEmpty
           ? suggest

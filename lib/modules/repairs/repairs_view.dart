@@ -278,6 +278,7 @@ Future<String?> _pickDepartment(
   final selection = await PickerSheet.show<String>(
     context,
     title: 'repairs.filter.department'.tr,
+    kind: PickerKind.department,
     showClear: true,
     loader: (q) async {
       final list = await repo.list(q: q, limit: 20);

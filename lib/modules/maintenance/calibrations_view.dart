@@ -171,6 +171,7 @@ Future<void> _completeSheet(
                     final selected = await PickerSheet.show<String>(
                       context,
                       title: 'calibration.agency'.tr,
+                      kind: PickerKind.supplier,
                       loader: c.loadAgencies,
                       showClear: true,
                     );

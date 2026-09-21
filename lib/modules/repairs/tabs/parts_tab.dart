@@ -259,6 +259,7 @@ class _StockFormState extends State<_StockForm> {
             final selection = await PickerSheet.show<String>(
               context,
               title: 'repairs.parts.pickSupply'.tr,
+              kind: PickerKind.supply,
               loader: (q) async {
                 final page = await widget.c.supplies.list(q: q, limit: 20);
                 return [

@@ -140,6 +140,7 @@ Future<void> _addVendor(BuildContext context, VendorsTabController c) async {
   final selection = await PickerSheet.show<String>(
     context,
     title: 'repairs.vendors.supplier'.tr,
+    kind: PickerKind.supplier,
     loader: (q) async {
       final list = await c.catalogs.list('suppliers', q: q, limit: 20);
       return [
