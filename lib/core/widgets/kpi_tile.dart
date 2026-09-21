@@ -81,11 +81,20 @@ class KpiTile extends StatelessWidget {
                           foreground: chipFg,
                         ),
                       const Spacer(),
-                      Text(
-                        value,
-                        style: context.appText.kpi.copyWith(
-                          fontSize: 24,
-                          color: zero ? scheme.onSurface : palette.foreground,
+                      // Thu nhỏ khi giá trị dài (tiền rút gọn) — không tràn.
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            value,
+                            style: context.appText.kpi.copyWith(
+                              fontSize: 24,
+                              color: zero
+                                  ? scheme.onSurface
+                                  : palette.foreground,
+                            ),
+                          ),
                         ),
                       ),
                     ],

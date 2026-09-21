@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/cache/kv_cache.dart';
 import 'package:labasset_mobile/core/errors/api_error.dart';
+import 'package:labasset_mobile/data/models/demand.dart';
 import 'package:labasset_mobile/data/models/my_tasks.dart';
 import 'package:labasset_mobile/data/repositories/me_repository.dart';
 import 'package:labasset_mobile/data/repositories/settings_repository.dart';
@@ -75,6 +76,38 @@ void main() {
     expect(controller.data.value, isNotNull);
     expect(controller.cachedAt.value, at);
     expect(controller.error.value, isNotNull);
+  });
+
+  test('đếm việc dự trù từ /v1/me/tasks', () async {
+    when(me.tasks).thenAnswer(
+      (_) async => const MyTasksResponse(
+        repairs: RepairTasks(assigned: 0, pendingResponse: 0, overdue: 0),
+        maintenance: MaintenanceTasks(due7d: 0, overdue: 0),
+        requests: RequestTasks(
+          pendingApproval: 0,
+          pendingIssue: 0,
+          pendingReceive: 0,
+        ),
+        stocktakes: StocktakeTasks(counting: 0),
+        alerts: TaskAlerts(
+          repairsNew: 0,
+          stock: StockAlertCounts(
+            lowStock: 0,
+            expiring: 0,
+            expired: 0,
+            openVialExpiring: 0,
+            stale: 0,
+          ),
+          calibrationOverdue: 0,
+        ),
+        demand: DemandTasks(toSubmit: 1, toApprove: 2, toAccept: 3),
+      ),
+    );
+    await controller.load();
+    expect(controller.demandToSubmit, 1);
+    expect(controller.demandToApprove, 2);
+    expect(controller.demandToAccept, 3);
+    expect(controller.hasWork, isTrue);
   });
 
   test('lỗi không có cache hiển thị error', () async {

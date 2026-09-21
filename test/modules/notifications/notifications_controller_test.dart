@@ -86,5 +86,40 @@ void main() {
         isNull,
       );
     });
+
+    test('demand.request_* ưu tiên mở phiếu dự trù (không nhầm C2)', () {
+      expect(
+        NotificationsController.mapData({
+          'requestId': 'dr1',
+          'periodId': 'p1',
+        }, type: 'demand.request_submitted'),
+        '/demand/requests/dr1',
+      );
+      expect(
+        NotificationsController.mapData({
+          'requestId': 'dr1',
+        }, type: 'demand.request_returned'),
+        '/demand/requests/dr1',
+      );
+    });
+
+    test('demand.period_* / deadline_soon → màn kỳ dự trù', () {
+      expect(
+        NotificationsController.mapData({
+          'periodId': 'p1',
+        }, type: 'demand.period_opened'),
+        '/demand/periods/p1',
+      );
+      expect(
+        NotificationsController.mapData({
+          'periodId': 'p1',
+        }, type: 'demand.period_closed'),
+        '/demand/periods/p1',
+      );
+      expect(
+        NotificationsController.mapData(const {}, type: 'demand.deadline_soon'),
+        '/demand',
+      );
+    });
   });
 }

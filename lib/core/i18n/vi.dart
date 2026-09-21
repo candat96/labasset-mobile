@@ -1090,7 +1090,7 @@ const Map<String, String> vi = {
   'demand.totalRequested': 'Tổng yêu cầu',
   'demand.totalApproved': 'Tổng duyệt',
   'demand.departmentsSubmitted': 'Khoa đã nộp',
-  'demand.progressText': '{submitted}/{total} khoa đã nộp',
+  'demand.progressText': '@submitted/@total khoa đã nộp',
   'demand.progressBar': 'Tiến độ nộp phiếu',
   'demand.lines': 'Dòng dự trù',
   'demand.line.qtyRequested': 'SL yêu cầu',
