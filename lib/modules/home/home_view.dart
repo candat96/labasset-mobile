@@ -29,15 +29,39 @@ class HomeView extends GetView<HomeController> {
   static const _searchOverlap = 22.0;
 
   static const _shortcuts = [
-    (key: 'reportFault', icon: LucideIcons.triangleAlert),
-    (key: 'stockIssue', icon: LucideIcons.packageMinus),
-    (key: 'stockReceipt', icon: LucideIcons.packagePlus),
-    (key: 'stocktake', icon: LucideIcons.clipboardCheck),
-    (key: 'calendar', icon: LucideIcons.calendarDays),
-    (key: 'equipmentList', icon: LucideIcons.microscope),
-    (key: 'equipmentNew', icon: LucideIcons.monitorUp),
-    (key: 'reports', icon: LucideIcons.chartPie),
-    (key: 'assistant', icon: LucideIcons.sparkles),
+    (
+      key: 'reportFault',
+      icon: LucideIcons.triangleAlert,
+      accent: AppAccent.red,
+    ),
+    (
+      key: 'stockIssue',
+      icon: LucideIcons.packageMinus,
+      accent: AppAccent.orange,
+    ),
+    (
+      key: 'stockReceipt',
+      icon: LucideIcons.packagePlus,
+      accent: AppAccent.green,
+    ),
+    (
+      key: 'stocktake',
+      icon: LucideIcons.clipboardCheck,
+      accent: AppAccent.purple,
+    ),
+    (key: 'calendar', icon: LucideIcons.calendarDays, accent: AppAccent.teal),
+    (
+      key: 'equipmentList',
+      icon: LucideIcons.microscope,
+      accent: AppAccent.brand,
+    ),
+    (
+      key: 'equipmentNew',
+      icon: LucideIcons.monitorUp,
+      accent: AppAccent.indigo,
+    ),
+    (key: 'reports', icon: LucideIcons.chartPie, accent: AppAccent.yellow),
+    (key: 'assistant', icon: LucideIcons.sparkles, accent: AppAccent.pink),
   ];
 
   @override
@@ -147,15 +171,18 @@ class HomeView extends GetView<HomeController> {
       mainAxisSpacing: AppSpacing.xs,
       crossAxisSpacing: AppSpacing.xs,
       childAspectRatio: 0.92,
-      children: [for (final s in _shortcuts) _shortcut(s.key, s.icon)],
+      children: [
+        for (final s in _shortcuts) _shortcut(s.key, s.icon, s.accent),
+      ],
     ),
   ];
 
   /// Lối tắt; riêng "Trợ lý AI" ẩn khi API tắt (`AiGate`).
-  Widget _shortcut(String key, IconData icon) {
+  Widget _shortcut(String key, IconData icon, AppAccent accent) {
     final tile = ShortcutTile(
       icon: icon,
       label: 'placeholder.$key'.tr,
+      accent: accent,
       onTap: () => Get.toNamed(switch (key) {
         'equipmentList' => Routes.equipmentList,
         'equipmentNew' => Routes.equipmentNew,

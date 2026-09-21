@@ -281,3 +281,65 @@ class AppText extends ThemeExtension<AppText> {
     );
   }
 }
+
+/// Cặp màu nhấn cho chip icon lối tắt: nền nhạt + icon đậm (light); dark suy
+/// ra từ màu icon (nền 20% alpha, icon sáng hơn) để dùng lại cho KPI/Badge.
+class AppAccent {
+  const AppAccent({required this.background, required this.foreground});
+
+  final Color background;
+  final Color foreground;
+
+  /// Nền dark = màu icon 20% alpha.
+  Color get darkBackground => foreground.withValues(alpha: 0.2);
+
+  /// Icon dark = màu icon pha trắng cho nổi trên nền tối.
+  Color get darkForeground => Color.lerp(foreground, Colors.white, 0.35)!;
+
+  Color backgroundFor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? darkBackground
+      : background;
+
+  Color foregroundFor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? darkForeground
+      : foreground;
+
+  static const red = AppAccent(
+    background: Color(0xFFFEE2E2),
+    foreground: Color(0xFFB91C1C),
+  );
+  static const orange = AppAccent(
+    background: Color(0xFFFFEDD5),
+    foreground: Color(0xFFC2410C),
+  );
+  static const green = AppAccent(
+    background: Color(0xFFDCFCE7),
+    foreground: Color(0xFF15803D),
+  );
+  static const purple = AppAccent(
+    background: Color(0xFFEDE9FE),
+    foreground: Color(0xFF6D28D9),
+  );
+  static const teal = AppAccent(
+    background: Color(0xFFCCFBF1),
+    foreground: Color(0xFF0F766E),
+  );
+  static const brand = AppAccent(
+    background: Color(0xFFE8F0FF),
+    foreground: Color(0xFF1747A6),
+  );
+  static const indigo = AppAccent(
+    background: Color(0xFFE0E7FF),
+    foreground: Color(0xFF4338CA),
+  );
+  static const yellow = AppAccent(
+    background: Color(0xFFFEF3C7),
+    foreground: Color(0xFFB45309),
+  );
+  static const pink = AppAccent(
+    background: Color(0xFFFCE7F3),
+    foreground: Color(0xFFBE185D),
+  );
+}
