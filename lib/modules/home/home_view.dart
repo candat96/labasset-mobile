@@ -33,6 +33,7 @@ class HomeView extends GetView<HomeController> {
     (key: 'stockReceipt', icon: LucideIcons.packagePlus),
     (key: 'stocktake', icon: LucideIcons.clipboardCheck),
     (key: 'calendar', icon: LucideIcons.calendarDays),
+    (key: 'equipmentList', icon: LucideIcons.microscope),
     (key: 'equipmentNew', icon: LucideIcons.monitorUp),
     (key: 'reports', icon: LucideIcons.chartPie),
     (key: 'assistant', icon: LucideIcons.sparkles),
@@ -151,6 +152,7 @@ class HomeView extends GetView<HomeController> {
             icon: s.icon,
             label: 'placeholder.${s.key}'.tr,
             onTap: () => Get.toNamed(switch (s.key) {
+              'equipmentList' => Routes.equipmentList,
               'equipmentNew' => Routes.equipmentNew,
               'calendar' => Routes.calendar,
               'stocktake' => Routes.stocktakes,

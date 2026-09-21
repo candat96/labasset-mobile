@@ -31,6 +31,8 @@ import 'ai/ai_view.dart';
 import 'calendar/calendar_controller.dart';
 import 'calendar/calendar_view.dart';
 import 'equipment/equipment_detail_controller.dart';
+import 'equipment/equipment_list_controller.dart';
+import 'equipment/equipment_list_view.dart';
 import 'equipment/new_equipment_controller.dart';
 import 'equipment/new_equipment_view.dart';
 import 'notifications/notifications_view.dart';
@@ -556,6 +558,22 @@ List<GetPage<dynamic>> featurePages() {
           tag: id,
         );
       }),
+    ),
+    GetPage(
+      name: Routes.equipmentList,
+      page: () => const EquipmentListView(),
+      middlewares: protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => EquipmentListController(
+            equipment: Get.find<EquipmentRepository>(),
+            departments: Get.find<DepartmentsRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
+            initialStatus: Get.parameters['status'],
+            initialDepartmentId: Get.parameters['departmentId'],
+          ),
+        ),
+      ),
     ),
     GetPage(
       name: Routes.equipmentNew,
