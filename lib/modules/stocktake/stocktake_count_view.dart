@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/segment_tabs.dart';
 import '../../core/widgets/qty_field.dart';
 import '../../core/stocktake/stocktake_local_store.dart';
 import 'stocktake_count_controller.dart';
@@ -88,29 +89,26 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
               ),
             ),
             Obx(
-              () => SegmentedButton<StocktakeTab>(
-                segments: [
-                  ButtonSegment(
+              () => SegmentTabs<StocktakeTab>(
+                tabs: [
+                  SegmentTab(
                     value: StocktakeTab.uncounted,
-                    label: Text(
-                      '${'stocktake.tab.uncounted'.tr} (${controller.uncounted.length})',
-                    ),
+                    label:
+                        '${'stocktake.tab.uncounted'.tr} (${controller.uncounted.length})',
                   ),
-                  ButtonSegment(
+                  SegmentTab(
                     value: StocktakeTab.counted,
-                    label: Text(
-                      '${'stocktake.tab.counted'.tr} (${controller.counted.length})',
-                    ),
+                    label:
+                        '${'stocktake.tab.counted'.tr} (${controller.counted.length})',
                   ),
-                  ButtonSegment(
+                  SegmentTab(
                     value: StocktakeTab.extras,
-                    label: Text(
-                      '${'stocktake.tab.extras'.tr} (${controller.extras.length})',
-                    ),
+                    label:
+                        '${'stocktake.tab.extras'.tr} (${controller.extras.length})',
                   ),
                 ],
-                selected: {controller.tab.value},
-                onSelectionChanged: (s) => controller.setTab(s.first),
+                selected: controller.tab.value,
+                onChanged: controller.setTab,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

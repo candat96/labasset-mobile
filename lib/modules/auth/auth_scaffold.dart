@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 
 /// Khung màn hình auth: logo + card giữa màn.
@@ -46,12 +48,12 @@ class AuthScaffold extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Icon(
-                          Icons.science_outlined,
+                          LucideIcons.flaskConical,
                           color: theme.colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Text('app.name'.tr, style: theme.textTheme.titleLarge),
+                      Text('app.name'.tr, style: context.appText.title),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xl),
@@ -61,9 +63,9 @@ class AuthScaffold extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(title, style: theme.textTheme.titleMedium),
+                          Text(title, style: context.appText.title),
                           if (subtitle != null)
-                            Text(subtitle!, style: theme.textTheme.bodySmall),
+                            Text(subtitle!, style: context.appText.caption),
                           const SizedBox(height: AppSpacing.lg),
                           child,
                         ],

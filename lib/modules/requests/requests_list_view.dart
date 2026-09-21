@@ -8,6 +8,7 @@ import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/segment_tabs.dart';
 import '../../core/widgets/status_badge.dart';
 import 'requests_list_controller.dart';
 
@@ -53,23 +54,23 @@ class RequestsListView extends GetView<RequestsListController> {
                 horizontal: AppSpacing.lg,
                 vertical: AppSpacing.sm,
               ),
-              child: SegmentedButton<RequestSegment>(
-                segments: [
-                  ButtonSegment(
+              child: SegmentTabs<RequestSegment>(
+                tabs: [
+                  SegmentTab(
                     value: RequestSegment.pending,
-                    label: Text('requests.segment.pending'.tr),
+                    label: 'requests.segment.pending'.tr,
                   ),
-                  ButtonSegment(
+                  SegmentTab(
                     value: RequestSegment.toIssue,
-                    label: Text('requests.segment.toIssue'.tr),
+                    label: 'requests.segment.toIssue'.tr,
                   ),
-                  ButtonSegment(
+                  SegmentTab(
                     value: RequestSegment.all,
-                    label: Text('requests.segment.all'.tr),
+                    label: 'requests.segment.all'.tr,
                   ),
                 ],
-                selected: {controller.segment.value},
-                onSelectionChanged: (s) => controller.setSegment(s.first),
+                selected: controller.segment.value,
+                onChanged: controller.setSegment,
               ),
             ),
           ),

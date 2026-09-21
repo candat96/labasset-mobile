@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import 'auth_scaffold.dart';
 import 'login_controller.dart';
 
@@ -78,16 +79,12 @@ class LoginView extends GetView<LoginController> {
                   ),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                FilledButton(
+                PrimaryButton(
+                  label: 'auth.login.submit'.tr,
                   onPressed: controller.submitting.value
                       ? null
                       : controller.submit,
-                  child: controller.submitting.value
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text('auth.login.submit'.tr),
+                  loading: controller.submitting.value,
                 ),
                 TextButton(
                   onPressed: () => Get.toNamed(Routes.forgotPassword),

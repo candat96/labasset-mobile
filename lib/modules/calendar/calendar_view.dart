@@ -15,7 +15,7 @@ class CalendarView extends GetView<CalendarController> {
 
   static Color colorFor(BuildContext context, String type) => switch (type) {
     'maintenance' => context.status.info,
-    'calibration' => const Color(0xFF7C3AED),
+    'calibration' => AppColors.primaryPressed,
     'repair' => context.status.danger,
     _ => context.status.warning,
   };

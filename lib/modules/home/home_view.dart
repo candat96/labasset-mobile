@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/app_list_tile.dart';
 import '../../core/widgets/kpi_tile.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/section_card.dart';
+import '../../core/widgets/shortcut_tile.dart';
 import '../../core/widgets/status_badge.dart';
 import '../notifications/notification_bell.dart';
 import 'home_controller.dart';
@@ -17,12 +20,12 @@ class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
   static const _shortcuts = [
-    (key: 'reportFault', icon: Icons.report_problem_outlined),
-    (key: 'stockIssue', icon: Icons.outbox_outlined),
-    (key: 'stockReceipt', icon: Icons.move_to_inbox_outlined),
-    (key: 'stocktake', icon: Icons.fact_check_outlined),
-    (key: 'calendar', icon: Icons.calendar_month_outlined),
-    (key: 'equipmentNew', icon: Icons.add_box_outlined),
+    (key: 'reportFault', icon: LucideIcons.triangleAlert),
+    (key: 'stockIssue', icon: LucideIcons.packageMinus),
+    (key: 'stockReceipt', icon: LucideIcons.packagePlus),
+    (key: 'stocktake', icon: LucideIcons.clipboardCheck),
+    (key: 'calendar', icon: LucideIcons.calendarDays),
+    (key: 'equipmentNew', icon: LucideIcons.monitorUp),
   ];
 
   @override
@@ -34,7 +37,7 @@ class HomeView extends GetView<HomeController> {
         actions: [
           IconButton(
             tooltip: 'search.title'.tr,
-            icon: const Icon(Icons.search),
+            icon: const Icon(LucideIcons.search),
             onPressed: () => Get.toNamed(Routes.search),
           ),
           const NotificationBell(),
@@ -68,46 +71,55 @@ class HomeView extends GetView<HomeController> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _WorkGroup(
+                      icon: LucideIcons.wrench,
                       title: 'home.task.repairsAssigned'.tr,
                       total: controller.repairsAssignedTotal,
                       route: '${Routes.repairs}?segment=mine',
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.messageCircleWarning,
                       title: 'home.task.repairsPendingResponse'.tr,
                       total: controller.repairsPendingResponse,
                       route: '${Routes.repairs}?segment=mine',
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.clockAlert,
                       title: 'home.task.repairsOverdue'.tr,
                       total: controller.repairsOverdue,
                       route: '${Routes.repairs}?segment=mine',
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.clipboardCheck,
                       title: 'home.task.stocktakesOpen'.tr,
                       total: controller.stocktakesOpenTotal,
                       route: Routes.stocktakes,
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.calendarClock,
                       title: 'home.task.maintenanceDue'.tr,
                       total: controller.tasksDueTotal,
                       route: Routes.maintenanceTasks,
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.clockAlert,
                       title: 'home.task.maintenanceOverdue'.tr,
                       total: controller.tasksOverdue,
                       route: Routes.maintenanceTasks,
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.fileCheck,
                       title: 'home.task.requestsPending'.tr,
                       total: controller.requestsPendingTotal,
                       route: '${Routes.requests}?segment=pending',
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.packageCheck,
                       title: 'home.task.requestsApproved'.tr,
                       total: controller.requestsApprovedTotal,
                       route: '${Routes.requests}?segment=toIssue',
                     ),
                     _WorkGroup(
+                      icon: LucideIcons.inbox,
                       title: 'home.task.requestsPendingReceive'.tr,
                       total: controller.requestsPendingReceive,
                       route: '${Routes.requests}?segment=mine',
@@ -134,7 +146,7 @@ class HomeView extends GetView<HomeController> {
                       child: KpiTile(
                         label: 'home.alert.brokenUnassigned'.tr,
                         value: '${controller.brokenUnassigned}',
-                        icon: Icons.report_problem_outlined,
+                        icon: LucideIcons.triangleAlert,
                         tone: controller.brokenUnassigned > 0
                             ? StatusTone.danger
                             : StatusTone.success,
@@ -147,7 +159,7 @@ class HomeView extends GetView<HomeController> {
                       child: KpiTile(
                         label: 'home.alert.suppliesLow'.tr,
                         value: '${controller.suppliesAlert}',
-                        icon: Icons.inventory_2_outlined,
+                        icon: LucideIcons.packageSearch,
                         tone: controller.suppliesAlert > 0
                             ? StatusTone.warning
                             : StatusTone.success,
@@ -159,7 +171,7 @@ class HomeView extends GetView<HomeController> {
                       child: KpiTile(
                         label: 'home.alert.calibrationOverdue'.tr,
                         value: '${controller.calibrationOverdue}',
-                        icon: Icons.verified_outlined,
+                        icon: LucideIcons.badgeCheck,
                         tone: controller.calibrationOverdue > 0
                             ? StatusTone.danger
                             : StatusTone.success,
@@ -169,21 +181,22 @@ class HomeView extends GetView<HomeController> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              Text('home.shortcuts'.tr, style: theme.textTheme.titleSmall),
-              const SizedBox(height: AppSpacing.sm),
-              GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: AppSpacing.sm,
-                crossAxisSpacing: AppSpacing.sm,
-                childAspectRatio: 1.3,
-                children: [
-                  for (final s in _shortcuts)
-                    Card(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
+              const SizedBox(height: AppSpacing.md),
+              SectionCard(
+                title: 'home.shortcuts'.tr,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: AppSpacing.sm,
+                  crossAxisSpacing: AppSpacing.sm,
+                  childAspectRatio: 1.05,
+                  children: [
+                    for (final s in _shortcuts)
+                      ShortcutTile(
+                        icon: s.icon,
+                        label: 'placeholder.${s.key}'.tr,
                         onTap: () => Get.toNamed(switch (s.key) {
                           'equipmentNew' => Routes.equipmentNew,
                           'calendar' => Routes.calendar,
@@ -195,25 +208,9 @@ class HomeView extends GetView<HomeController> {
                           'stockReceipt' => Routes.stockReceiptNew,
                           _ => Routes.stock,
                         }),
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(s.icon, color: theme.colorScheme.primary),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                'placeholder.${s.key}'.tr,
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.labelMedium,
-                                maxLines: 2,
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl * 2),
             ],
@@ -264,40 +261,26 @@ class _OfflineBanner extends StatelessWidget {
 
 class _WorkGroup extends StatelessWidget {
   const _WorkGroup({
+    required this.icon,
     required this.title,
     required this.total,
     required this.route,
   });
 
+  final IconData icon;
   final String title;
   final int total;
   final String route;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (total == 0) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '$title ($total)',
-                  style: theme.textTheme.labelLarge,
-                ),
-              ),
-              TextButton(
-                onPressed: () => Get.toNamed(route),
-                child: Text('home.viewAll'.tr),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return AppListTile(
+      icon: icon,
+      title: title,
+      trailing: StatusBadge(tone: StatusTone.info, label: '$total'),
+      onTap: () => Get.toNamed(route),
+      showDivider: true,
     );
   }
 }

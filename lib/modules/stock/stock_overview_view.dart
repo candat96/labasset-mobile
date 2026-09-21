@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/kpi_tile.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/section_card.dart';
+import '../../core/widgets/shortcut_tile.dart';
 import '../../core/widgets/status_badge.dart';
 import 'stock_overview_controller.dart';
 
@@ -14,17 +17,16 @@ class StockOverviewView extends GetView<StockOverviewController> {
   const StockOverviewView({super.key});
 
   static const _actions = [
-    (key: 'lookup', icon: Icons.search),
-    (key: 'receipt', icon: Icons.move_to_inbox_outlined),
-    (key: 'issue', icon: Icons.outbox_outlined),
-    (key: 'transfer', icon: Icons.swap_horiz_outlined),
-    (key: 'pending', icon: Icons.pending_actions_outlined),
-    (key: 'alerts', icon: Icons.notification_important_outlined),
+    (key: 'lookup', icon: LucideIcons.search),
+    (key: 'receipt', icon: LucideIcons.packagePlus),
+    (key: 'issue', icon: LucideIcons.packageMinus),
+    (key: 'transfer', icon: LucideIcons.arrowLeftRight),
+    (key: 'pending', icon: LucideIcons.clock3),
+    (key: 'alerts', icon: LucideIcons.bellRing),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text('stock.title'.tr)),
       body: Obx(() {
@@ -50,80 +52,59 @@ class StockOverviewView extends GetView<StockOverviewController> {
                 onSubmitted: (q) =>
                     Get.toNamed(Routes.stockLookup, arguments: {'q': q}),
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const Icon(LucideIcons.search),
                   hintText: 'stock.searchHint'.tr,
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Text('stock.alerts'.tr, style: theme.textTheme.titleSmall),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  for (final t in StockOverviewController.alertTypes)
-                    SizedBox(
-                      width: (MediaQuery.sizeOf(context).width - 44) / 2,
-                      child: KpiTile(
-                        label: 'stock.alert.$t'.tr,
-                        value: '${controller.totalOf(t)}',
-                        icon: Icons.warning_amber_outlined,
-                        tone: controller.totalOf(t) > 0
-                            ? switch (t) {
-                                'expired' => StatusTone.danger,
-                                'low_stock' => StatusTone.warning,
-                                _ => StatusTone.info,
-                              }
-                            : StatusTone.success,
-                        onTap: () => Get.toNamed(
-                          Routes.stockAlerts,
-                          arguments: {'type': t},
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text('stock.shortcuts'.tr, style: theme.textTheme.titleSmall),
-              const SizedBox(height: AppSpacing.sm),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: AppSpacing.sm,
-                crossAxisSpacing: AppSpacing.sm,
-                childAspectRatio: 2.4,
-                children: [
-                  for (final a in _actions)
-                    Card(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        onTap: () => _open(context, a.key),
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Row(
-                            children: [
-                              Icon(a.icon, color: theme.colorScheme.primary),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: Text(
-                                  'stock.action.${a.key}'.tr,
-                                  style: theme.textTheme.labelLarge,
-                                ),
-                              ),
-                              if (a.key == 'pending' &&
-                                  controller.pendingIssue.value > 0)
-                                Badge(
-                                  label: Text(
-                                    '${controller.pendingIssue.value}',
-                                  ),
-                                ),
-                            ],
+              SectionCard(
+                title: 'stock.alerts'.tr,
+                child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    for (final t in StockOverviewController.alertTypes)
+                      SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - 76) / 2,
+                        child: KpiTile(
+                          label: 'stock.alert.$t'.tr,
+                          value: '${controller.totalOf(t)}',
+                          icon: LucideIcons.triangleAlert,
+                          tone: controller.totalOf(t) > 0
+                              ? switch (t) {
+                                  'expired' => StatusTone.danger,
+                                  'low_stock' => StatusTone.warning,
+                                  _ => StatusTone.info,
+                                }
+                              : StatusTone.success,
+                          onTap: () => Get.toNamed(
+                            Routes.stockAlerts,
+                            arguments: {'type': t},
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SectionCard(
+                title: 'stock.shortcuts'.tr,
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: AppSpacing.sm,
+                  crossAxisSpacing: AppSpacing.sm,
+                  childAspectRatio: 1.05,
+                  children: [
+                    for (final action in _actions)
+                      ShortcutTile(
+                        icon: action.icon,
+                        label: 'stock.action.${action.key}'.tr,
+                        onTap: () => _open(context, action.key),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

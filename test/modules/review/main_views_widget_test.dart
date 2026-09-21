@@ -207,7 +207,8 @@ void main() {
       NotificationsController(repo: _NotificationsRepo(), store: fakeStore()),
     );
     await tester.pumpWidget(wrap(const HomeView()));
-    expect(find.text('Sửa chữa được giao (2)'), findsOneWidget);
+    expect(find.text('Sửa chữa được giao'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
   });
 
   testWidgets('repairs_list_view render empty', (tester) async {

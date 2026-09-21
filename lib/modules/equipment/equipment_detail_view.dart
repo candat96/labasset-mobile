@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/errors/api_error.dart';
 import '../../core/format/decimal_input.dart';
@@ -167,68 +168,98 @@ class _SummaryCard extends StatelessWidget {
         AppSpacing.lg,
         0,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: Text(e.name, style: theme.textTheme.titleMedium)),
-              StatusBadge(
-                tone: toneForEquipmentStatus(e.status),
-                label: 'status.${e.status}'.tr,
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.tile),
+                    ),
+                    child: Icon(
+                      LucideIcons.monitorCog,
+                      size: 24,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(e.name, style: context.appText.title),
+                        Text(e.code, style: context.appText.caption),
+                      ],
+                    ),
+                  ),
+                  StatusBadge(
+                    tone: toneForEquipmentStatus(e.status),
+                    label: 'status.${e.status}'.tr,
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            [
-              e.model,
-              e.serial == null ? null : 'SN ${e.serial}',
-              [e.department?.name, e.location].whereType<String>().join(' · '),
-            ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
-            style: theme.textTheme.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(
-            spacing: AppSpacing.md,
-            children: [
-              _due(
-                context,
-                'equipment.nextMaintenance'.tr,
-                e.nextMaintenanceAt,
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                [
+                  e.model,
+                  e.serial == null ? null : 'SN ${e.serial}',
+                  [
+                    e.department?.name,
+                    e.location,
+                  ].whereType<String>().join(' · '),
+                ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+                style: theme.textTheme.bodySmall,
               ),
-              _due(
-                context,
-                'equipment.nextCalibration'.tr,
-                e.nextCalibrationAt,
-                force: overdue,
+              const SizedBox(height: AppSpacing.xs),
+              Wrap(
+                spacing: AppSpacing.md,
+                children: [
+                  _due(
+                    context,
+                    'equipment.nextMaintenance'.tr,
+                    e.nextMaintenanceAt,
+                  ),
+                  _due(
+                    context,
+                    'equipment.nextCalibration'.tr,
+                    e.nextCalibrationAt,
+                    force: overdue,
+                  ),
+                  _due(context, 'equipment.warranty'.tr, e.warrantyUntil),
+                ],
               ),
-              _due(context, 'equipment.warranty'.tr, e.warrantyUntil),
-            ],
-          ),
-          if (e.counts != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Row(
-              children: [
-                _count(
-                  context,
-                  'equipment.counts.accessories'.tr,
-                  e.counts!.accessories,
-                ),
-                _count(
-                  context,
-                  'equipment.counts.componentsDue'.tr,
-                  e.counts!.componentsDue,
-                ),
-                _count(
-                  context,
-                  'equipment.counts.openRepairs'.tr,
-                  e.counts!.openRepairs,
+              if (e.counts != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    _count(
+                      context,
+                      'equipment.counts.accessories'.tr,
+                      e.counts!.accessories,
+                    ),
+                    _count(
+                      context,
+                      'equipment.counts.componentsDue'.tr,
+                      e.counts!.componentsDue,
+                    ),
+                    _count(
+                      context,
+                      'equipment.counts.openRepairs'.tr,
+                      e.counts!.openRepairs,
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

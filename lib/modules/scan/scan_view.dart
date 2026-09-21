@@ -77,7 +77,7 @@ class _ScanViewState extends State<ScanView> {
                     width: 240,
                     height: 240,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: AppColors.onPrimary, width: 2),
                       borderRadius: BorderRadius.circular(AppRadius.lg * 2),
                     ),
                   ),
@@ -90,7 +90,7 @@ class _ScanViewState extends State<ScanView> {
                     'scan.hint'.tr,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                     ),
                   ),
                 ),

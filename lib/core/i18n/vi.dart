@@ -470,6 +470,9 @@ const Map<String, String> vi = {
 
   // account
   'account.title': 'Cá nhân',
+  'account.security': 'Bảo mật',
+  'account.data': 'Dữ liệu',
+  'account.options': 'Tuỳ chọn',
   'account.profile': 'Hồ sơ cá nhân',
   'account.changePassword': 'Đổi mật khẩu',
   'account.sessions': 'Phiên đăng nhập',
