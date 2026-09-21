@@ -374,6 +374,13 @@ const Map<String, String> vi = {
   'equipment.transfer.pendingExists':
       'Máy đang có yêu cầu điều chuyển chờ duyệt',
   'equipment.tab.specs': 'Thông số',
+  'equipment.tab.repairs': 'Sửa chữa',
+  'equipment.tab.maintenance': 'Bảo dưỡng',
+  'equipment.repairs.report': 'Báo hỏng máy này',
+  'equipment.repairs.empty': 'Máy chưa có phiếu sửa chữa nào',
+  'equipment.maintenance.empty': 'Máy chưa có công việc bảo dưỡng / kiểm định',
+  'maintenance.type.periodic': 'Bảo dưỡng định kỳ',
+  'maintenance.type.adhoc': 'Bảo dưỡng đột xuất',
   'equipment.tab.network': 'Kết nối',
   'equipment.tab.accessories': 'Phụ kiện',
   'equipment.tab.software': 'Phần mềm',

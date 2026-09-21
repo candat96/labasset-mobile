@@ -80,7 +80,9 @@ import 'stock/transfer_form_controller.dart';
 import 'stock/transfer_form_view.dart';
 import 'equipment/tabs/accessories_tab.dart';
 import 'equipment/tabs/components_tab.dart';
+import 'equipment/tabs/maintenance_tab.dart';
 import 'equipment/tabs/network_tab.dart';
+import 'equipment/tabs/repairs_tab.dart';
 import 'equipment/tabs/software_tab.dart';
 import 'equipment/tabs/supplies_tab.dart';
 import 'equipment/tabs/timeline_tab.dart';
@@ -553,6 +555,19 @@ List<GetPage<dynamic>> featurePages() {
             userId: Get.find<SessionStore>().user.value?.id ?? '',
           ),
           tag: id,
+        );
+        Get.lazyPut(
+          () => EquipmentRepairsTabController(
+            repairs: Get.find<RepairsRepository>(),
+            equipmentId: id,
+          ),
+        );
+        Get.lazyPut(
+          () => EquipmentMaintenanceTabController(
+            tasks: Get.find<TasksRepository>(),
+            calibrations: Get.find<CalibrationsRepository>(),
+            equipmentId: id,
+          ),
         );
         Get.lazyPut(
           () => NetworkTabController(

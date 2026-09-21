@@ -26,7 +26,9 @@ import 'equipment_detail_controller.dart';
 import 'tabs/accessories_tab.dart';
 import 'tabs/components_tab.dart';
 import 'tabs/faults_tab.dart';
+import 'tabs/maintenance_tab.dart';
 import 'tabs/network_tab.dart';
+import 'tabs/repairs_tab.dart';
 import 'tabs/software_tab.dart';
 import 'tabs/specs_tab.dart';
 import 'tabs/supplies_tab.dart';
@@ -80,7 +82,7 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
       }
       final e = controller.item.value!;
       return DefaultTabController(
-        length: 9,
+        length: 11,
         child: Scaffold(
           appBar: AppBar(title: Text(e.code)),
           body: Column(
@@ -90,6 +92,8 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
               PillTabBar(
                 tabs: [
                   'equipment.tab.specs'.tr,
+                  'equipment.tab.repairs'.tr,
+                  'equipment.tab.maintenance'.tr,
                   'equipment.tab.network'.tr,
                   'equipment.tab.accessories'.tr,
                   'equipment.tab.software'.tr,
@@ -104,6 +108,8 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
                 child: TabBarView(
                   children: [
                     SpecsTab(e: e),
+                    const RepairsTab(),
+                    const MaintenanceTab(),
                     const NetworkTab(),
                     const AccessoriesTab(),
                     const SoftwareTab(),
