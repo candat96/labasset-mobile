@@ -25,7 +25,7 @@ void main() {
       return;
     }
     await bootstrap();
-    await tester.pumpWidget(const LabAssetApp());
+    await tester.pumpWidget(const MedOneApp());
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     final hospital = find.widgetWithText(TextFormField, 'Mã bệnh viện');

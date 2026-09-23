@@ -6,5 +6,5 @@ import 'core/bootstrap.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await bootstrap();
-  runApp(const LabAssetApp());
+  runApp(const MedOneApp());
 }

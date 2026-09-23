@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -8,7 +7,7 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_card.dart';
 
 /// Khung màn auth: nửa trên hero gradient bo dưới 32 (logo trong tròn trắng
-/// 96 + "LabAsset" 28/800), form card nổi đè lên hero (offset -32).
+/// 96 + "MedOne" 28/800), form card nổi đè lên hero (offset -32).
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
     super.key,
@@ -73,11 +72,11 @@ class AuthScaffold extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Container(
-                      width: 112,
-                      height: 112,
+                      width: 200,
+                      height: 150,
                       decoration: BoxDecoration(
                         color: white,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x33000000),
@@ -89,16 +88,10 @@ class AuthScaffold extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: Image.asset(
-                        'assets/brand/logo-512.png',
-                        width: 96,
-                        height: 96,
+                        'assets/brand/medone-logo.png',
+                        width: 200,
+                        height: 150,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      'app.name'.tr,
-                      style: context.appText.display.copyWith(color: white),
-                      textAlign: TextAlign.center,
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: AppSpacing.xs),

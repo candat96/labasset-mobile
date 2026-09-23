@@ -39,9 +39,12 @@ void main() {
   testWidgets('multi mode shows hospital code field', (tester) async {
     await pump(tester, 'multi');
     final logo = tester.widget<Image>(find.byType(Image));
-    expect(logo.width, 96);
-    expect(logo.height, 96);
-    expect(find.text('LabAsset'), findsOneWidget);
+    expect(logo.width, 200);
+    expect(logo.height, 150);
+    expect(
+      (logo.image as AssetImage).assetName,
+      'assets/brand/medone-logo.png',
+    );
     expect(find.text('Quản lý thiết bị & vật tư xét nghiệm'), findsOneWidget);
     expect(find.text('Mã bệnh viện'), findsOneWidget);
     expect(find.text('Tài khoản'), findsOneWidget);

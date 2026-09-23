@@ -1,4 +1,4 @@
-# LabAsset Mobile
+# MedOne Mobile
 
 App Flutter cho **nhân viên phòng Vật tư – TBYT** và **Admin viện** (dự án con 5). Phục vụ thao tác
 tại chỗ: quét QR, sửa chữa, bảo dưỡng, kho, kiểm kê. Hợp đồng với backend là OpenAPI của

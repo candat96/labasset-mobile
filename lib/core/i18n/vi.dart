@@ -1,6 +1,6 @@
 /// Chuỗi giao diện tiếng Việt (khoá phẳng, nhóm theo module).
 const Map<String, String> vi = {
-  'app.name': 'LabAsset',
+  'app.name': 'MedOne',
   'app.tagline': 'Quản lý thiết bị & vật tư xét nghiệm',
 
   // common
@@ -248,7 +248,7 @@ const Map<String, String> vi = {
   // lock
   'lock.title': 'Mở khoá',
   'lock.desc': 'Xác thực bằng vân tay / Face ID để tiếp tục.',
-  'lock.reason': 'Mở khoá LabAsset',
+  'lock.reason': 'Mở khoá MedOne',
   'lock.unlock': 'Mở khoá',
   'lock.useLogin': 'Đăng nhập lại',
 
