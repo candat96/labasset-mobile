@@ -6,8 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_card.dart';
 
-/// Khung màn auth: nửa trên hero gradient bo dưới 32 (logo trong tròn trắng
-/// 96 + "MedOne" 28/800), form card nổi đè lên hero (offset -32).
+/// Khung auth với biểu tượng bo góc và tên MedOne trên nền gradient.
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
     super.key,
@@ -72,11 +71,11 @@ class AuthScaffold extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Container(
-                      width: 200,
-                      height: 150,
+                      width: 96,
+                      height: 96,
                       decoration: BoxDecoration(
                         color: white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x33000000),
@@ -87,10 +86,26 @@ class AuthScaffold extends StatelessWidget {
                         ],
                       ),
                       alignment: Alignment.center,
-                      child: Image.asset(
-                        'assets/brand/medone-logo.png',
-                        width: 200,
-                        height: 150,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.asset(
+                          'assets/brand/medone-icon.png',
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                          excludeFromSemantics: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    const Text(
+                      'MedOne',
+                      style: TextStyle(
+                        color: AppColors.onPrimary,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        height: 1.1,
                       ),
                     ),
                     if (subtitle != null) ...[

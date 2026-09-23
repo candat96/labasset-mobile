@@ -39,11 +39,16 @@ void main() {
   testWidgets('multi mode shows hospital code field', (tester) async {
     await pump(tester, 'multi');
     final logo = tester.widget<Image>(find.byType(Image));
-    expect(logo.width, 200);
-    expect(logo.height, 150);
+    expect(logo.width, 96);
+    expect(logo.height, 96);
     expect(
       (logo.image as AssetImage).assetName,
-      'assets/brand/medone-logo.png',
+      'assets/brand/medone-icon.png',
+    );
+    expect(find.text('MedOne'), findsOneWidget);
+    expect(
+      find.ancestor(of: find.byType(Image), matching: find.byType(ClipRRect)),
+      findsOneWidget,
     );
     expect(find.text('Quản lý thiết bị & vật tư xét nghiệm'), findsOneWidget);
     expect(find.text('Mã bệnh viện'), findsOneWidget);
