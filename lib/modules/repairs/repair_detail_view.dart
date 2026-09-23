@@ -157,6 +157,21 @@ class _Overview extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        AttachmentsGrid(
+          key: ValueKey('repair-photos-${d.id}'),
+          entityType: 'repair_ticket',
+          entityId: d.id,
+          photosOnly: true,
+          title: '${'attachment.conditionTitle'.tr} — ${d.code}',
+          canEdit:
+              !['closed', 'cancelled'].contains(d.status) &&
+              (d.reportedBy == controller.userId ||
+                  controller.isAdmin ||
+                  controller.isAssignee ||
+                  controller.roles.contains('DEPT_HEAD') ||
+                  controller.roles.contains('DEPT_USER')),
+        ),
+        const SizedBox(height: AppSpacing.md),
         SectionCard(
           title: 'repairs.tab.overview'.tr,
           child: Column(

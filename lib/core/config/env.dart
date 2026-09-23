@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 class Env {
   Env._();
 
-  static const _apiUrl = String.fromEnvironment('API_URL');
+  static const _apiUrl = 'https://api-labasset.vattu.site';
   static const _tenantMode = String.fromEnvironment('TENANT_MODE');
 
   /// Emulator Android trỏ về máy host qua 10.0.2.2; iOS simulator dùng localhost.

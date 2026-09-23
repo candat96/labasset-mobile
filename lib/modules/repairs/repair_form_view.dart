@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
@@ -171,18 +172,67 @@ class RepairFormView extends GetView<RepairFormController> {
                   spacing: AppSpacing.sm,
                   children: [
                     for (final p in controller.photos)
-                      Chip(
-                        avatar: const Icon(Icons.photo_outlined, size: 16),
-                        label: Text(p.name),
+                      SizedBox(
+                        width: 96,
+                        height: 96,
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.memory(
+                                p.bytes,
+                                width: 96,
+                                height: 96,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton.filledTonal(
+                                iconSize: 16,
+                                onPressed: controller.submitting.value
+                                    ? null
+                                    : () => controller.photos.remove(p),
+                                icon: const Icon(Icons.close),
+                                tooltip: 'Bỏ ảnh',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                   ],
                 ),
               );
             }),
-            OutlinedButton.icon(
-              onPressed: controller.addPhoto,
-              icon: const Icon(Icons.add_a_photo_outlined),
-              label: Text('repairs.form.addPhoto'.tr),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Ảnh tình trạng khi báo hỏng (không bắt buộc)',
+              style: theme.textTheme.titleSmall,
+            ),
+            const Text(
+              'Ảnh được lưu trong phiếu sửa chữa của lần báo hỏng này.',
+            ),
+            Obx(
+              () => Wrap(
+                spacing: AppSpacing.sm,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: controller.submitting.value
+                        ? null
+                        : () => controller.addPhoto(),
+                    icon: const Icon(Icons.add_a_photo_outlined),
+                    label: Text('repairs.form.addPhoto'.tr),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: controller.submitting.value
+                        ? null
+                        : () => controller.addPhoto(source: ImageSource.camera),
+                    icon: const Icon(Icons.photo_camera_outlined),
+                    label: const Text('Chụp ảnh'),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Obx(
@@ -193,23 +243,25 @@ class RepairFormView extends GetView<RepairFormController> {
                       style: TextStyle(color: theme.colorScheme.error),
                     ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Obx(
-              () => FilledButton.icon(
-                onPressed: controller.submitting.value
-                    ? null
-                    : controller.submit,
-                icon: controller.submitting.value
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.send_outlined),
-                label: Text('common.confirm'.tr),
-              ),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Obx(
+            () => FilledButton.icon(
+              onPressed: controller.submitting.value ? null : controller.submit,
+              icon: controller.submitting.value
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send_outlined),
+              label: Text('common.confirm'.tr),
+            ),
+          ),
         ),
       ),
     );

@@ -59,6 +59,9 @@ const Map<String, String> vi = {
   'signature.save': 'Lưu chữ ký',
   'signature.empty': 'Vui lòng ký trước khi lưu',
   'attachment.title': 'Tệp đính kèm',
+  'attachment.conditionTitle': 'Ảnh tình trạng (không bắt buộc)',
+  'attachment.conditionHint':
+      'Ảnh chỉ thuộc lần xử lý này, được lưu riêng với ảnh hồ sơ thiết bị.',
   'attachment.empty': 'Chưa có tệp',
   'attachment.add': 'Thêm tệp',
   'attachment.deleteConfirm': 'Xoá tệp này?',

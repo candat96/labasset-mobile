@@ -1,4 +1,4 @@
-package vn.labasset.labasset_mobile
+package com.labasset.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

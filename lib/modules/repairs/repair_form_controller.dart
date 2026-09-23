@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/errors/api_error.dart';
 import '../../core/services/attachment_service.dart';
@@ -53,6 +54,8 @@ class RepairFormController extends GetxController {
   final RxMap<String, int> sla = <String, int>{}.obs;
 
   Timer? _debounce;
+  String? _createdId;
+  final Set<Object> _attachedPhotos = {};
 
   @override
   void onInit() {
@@ -117,13 +120,14 @@ class RepairFormController extends GetxController {
     }
   }
 
-  Future<void> addPhoto() async {
-    final picked = await attachments.pickImageBytes();
+  Future<void> addPhoto({ImageSource source = ImageSource.gallery}) async {
+    final picked = await attachments.pickImageBytes(source: source);
     if (picked == null) return;
     photos.add(picked);
   }
 
   Future<bool> submit() async {
+    if (submitting.value) return false;
     final e = equipmentRef.value;
     if (e == null) {
       error.value = 'repairs.form.equipmentRequired'.tr;
@@ -136,33 +140,39 @@ class RepairFormController extends GetxController {
     error.value = '';
     submitting.value = true;
     try {
-      final created = await repairs.create(
-        equipmentId: e.id,
-        description: description.text.trim(),
-        errorCode: errorCode.text.trim().isEmpty ? null : errorCode.text.trim(),
-        severity: severity.value,
-        equipmentDown: equipmentDown.value,
-        faultId: selectedFaultId.value,
-      );
+      if (_createdId == null) {
+        final created = await repairs.create(
+          equipmentId: e.id,
+          description: description.text.trim(),
+          errorCode: errorCode.text.trim().isEmpty
+              ? null
+              : errorCode.text.trim(),
+          severity: severity.value,
+          equipmentDown: equipmentDown.value,
+          faultId: selectedFaultId.value,
+        );
+        _createdId = created.id;
+      }
       for (final p in photos) {
-        try {
-          await attachments.uploadBytes(
-            entityType: 'repair_ticket',
-            entityId: created.id,
-            kind: 'photo',
-            name: p.name,
-            mime: p.mime,
-            bytes: p.bytes,
-          );
-        } catch (_) {
-          // ảnh lỗi không chặn phiếu
-        }
+        if (_attachedPhotos.contains(p)) continue;
+        await attachments.uploadBytes(
+          entityType: 'repair_ticket',
+          entityId: _createdId!,
+          kind: 'photo',
+          name: p.name,
+          mime: p.mime,
+          bytes: p.bytes,
+          label: 'Báo hỏng — ${p.name}',
+        );
+        _attachedPhotos.add(p);
       }
       AppSnackbar.success('repairs.form.created'.tr);
-      _popWithId(created.id);
+      _popWithId(_createdId!);
       return true;
     } catch (err) {
-      error.value = ApiError.messageFor(err);
+      error.value = _createdId == null
+          ? ApiError.messageFor(err)
+          : 'Đã tạo phiếu, nhưng chưa tải đủ ảnh. Gửi lại để tiếp tục vào cùng phiếu.';
       AppSnackbar.error(err);
       return false;
     } finally {

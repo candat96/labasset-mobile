@@ -13,6 +13,7 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/attachments_grid.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/detail_widgets.dart';
 import '../../core/widgets/error_state.dart';
@@ -84,6 +85,18 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
                 ),
                 child: Column(
                   children: [
+                    AttachmentsGrid(
+                      key: ValueKey('maintenance-photos-${t.id}'),
+                      entityType: 'maintenance_task',
+                      entityId: t.id,
+                      photosOnly: true,
+                      title: '${'attachment.conditionTitle'.tr} — ${t.code}',
+                      canEdit:
+                          !['done', 'skipped'].contains(t.status) &&
+                          (controller.isAdmin ||
+                              controller.roles.contains('EQUIPMENT_STAFF')),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     for (final item in t.templateItems)
                       _ChecklistCard(item: item, controller: controller),
                   ],

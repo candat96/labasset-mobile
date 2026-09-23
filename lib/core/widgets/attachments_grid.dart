@@ -29,6 +29,8 @@ class AttachmentsGrid extends StatefulWidget {
     this.kinds = const ['photo'],
     this.canEdit = true,
     this.downloadable = false,
+    this.photosOnly = false,
+    this.title,
   });
 
   final String entityType;
@@ -37,6 +39,8 @@ class AttachmentsGrid extends StatefulWidget {
   /// Các kind cho phép thêm; kind đầu là mặc định.
   final List<String> kinds;
   final bool canEdit;
+  final bool photosOnly;
+  final String? title;
 
   /// Hiện nút "Tải về" trong hộp xem (lưu offline bằng path_provider).
   final bool downloadable;
@@ -52,6 +56,18 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
   final Map<String, String> _urls = {};
   bool _loading = true;
   Object? _error;
+  bool _uploading = false;
+
+  @override
+  void didUpdateWidget(covariant AttachmentsGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.entityType != widget.entityType ||
+        oldWidget.entityId != widget.entityId) {
+      _items = const [];
+      _urls.clear();
+      _load();
+    }
+  }
 
   @override
   void initState() {
@@ -60,23 +76,33 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
   }
 
   Future<void> _load() async {
+    final entityType = widget.entityType;
+    final entityId = widget.entityId;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
       final items = await _service.attachments.list(
-        entityType: widget.entityType,
-        entityId: widget.entityId,
+        entityType: entityType,
+        entityId: entityId,
       );
-      if (!mounted) return;
+      if (!mounted ||
+          entityType != widget.entityType ||
+          entityId != widget.entityId) {
+        return;
+      }
       setState(() {
         _items = items;
         _loading = false;
       });
       _loadUrls(items).ignore();
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted ||
+          entityType != widget.entityType ||
+          entityId != widget.entityId) {
+        return;
+      }
       setState(() {
         _error = e;
         _loading = false;
@@ -97,9 +123,10 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
     }
   }
 
-  Future<void> _add() async {
+  Future<void> _add({ImageSource? imageSource}) async {
+    if (_uploading) return;
     var kind = widget.kinds.first;
-    if (widget.kinds.length > 1) {
+    if (!widget.photosOnly && widget.kinds.length > 1) {
       final picked = await AppSheet.show<String>(
         context,
         builder: (ctx) => Column(
@@ -117,8 +144,10 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
       if (picked == null) return;
       kind = picked;
     }
-    final source = await _pickSource();
+    final source = imageSource ?? await _pickSource();
     if (source == null) return;
+    if (!mounted) return;
+    setState(() => _uploading = true);
     try {
       final result = await _service.addImage(
         entityType: widget.entityType,
@@ -137,6 +166,8 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
       }
     } catch (e) {
       AppSnackbar.error(e);
+    } finally {
+      if (mounted) setState(() => _uploading = false);
     }
   }
 
@@ -286,6 +317,9 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final visibleItems = widget.photosOnly
+        ? _items.where((a) => a.kind == 'photo').toList()
+        : _items;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -293,23 +327,47 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
           children: [
             Expanded(
               child: Text(
-                'attachment.title'.tr,
+                widget.title ?? 'attachment.title'.tr,
                 style: theme.textTheme.titleSmall,
               ),
             ),
-            if (widget.canEdit)
+            if (widget.canEdit && !widget.photosOnly)
               IconButton(
                 tooltip: 'attachment.add'.tr,
                 icon: const Icon(Icons.add_circle_outline),
-                onPressed: _add,
+                onPressed: _uploading ? null : () => _add(),
               ),
           ],
         ),
+        if (widget.photosOnly) ...[
+          Text('attachment.conditionHint'.tr),
+          if (widget.canEdit)
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _uploading
+                      ? null
+                      : () => _add(imageSource: ImageSource.camera),
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  label: Text('common.fromCamera'.tr),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _uploading
+                      ? null
+                      : () => _add(imageSource: ImageSource.gallery),
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: Text('common.fromGallery'.tr),
+                ),
+              ],
+            ),
+        ],
+        if (_uploading) const LinearProgressIndicator(),
         if (_loading)
           const SizedBox(height: 120, child: LoadingList(rows: 1, height: 100))
         else if (_error != null)
           ErrorState(error: _error!, onRetry: _load)
-        else if (_items.isEmpty)
+        else if (visibleItems.isEmpty)
           EmptyState(
             icon: Icons.attach_file_outlined,
             title: 'attachment.empty'.tr,
@@ -318,7 +376,7 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
-            children: [for (final a in _items) _tile(a)],
+            children: [for (final a in visibleItems) _tile(a)],
           ),
       ],
     );

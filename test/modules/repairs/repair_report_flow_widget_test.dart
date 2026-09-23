@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:labasset_mobile/core/cache/kv_cache.dart';
 import 'package:labasset_mobile/core/services/attachment_service.dart';
 import 'package:labasset_mobile/core/sync/outbox_service.dart';
@@ -121,6 +123,75 @@ MockRepairs registerFakes() {
 
 void main() {
   tearDown(Get.reset);
+
+  test('ảnh chụp lúc báo hỏng được gắn vào cùng phiếu khi thử lại', () async {
+    final repairs = MockRepairs();
+    final attachments = MockAttachments();
+    final bytes = Uint8List.fromList([1, 2, 3]);
+    when(
+      () => attachments.pickImageBytes(source: ImageSource.camera),
+    ).thenAnswer(
+      (_) async => (bytes: bytes, name: 'hong.jpg', mime: 'image/jpeg'),
+    );
+    when(
+      () => repairs.create(
+        equipmentId: 'e1',
+        description: 'Máy hỏng',
+        errorCode: null,
+        severity: 'medium',
+        equipmentDown: false,
+        faultId: null,
+      ),
+    ).thenAnswer((_) async => _created);
+    var attempts = 0;
+    when(
+      () => attachments.uploadBytes(
+        entityType: 'repair_ticket',
+        entityId: 'r-new',
+        kind: 'photo',
+        name: 'hong.jpg',
+        mime: 'image/jpeg',
+        bytes: bytes,
+        label: 'Báo hỏng — hong.jpg',
+      ),
+    ).thenAnswer((_) async {
+      if (++attempts == 1) throw Exception('upload failed');
+      return const AttachmentUploadResult(AttachmentUploadStatus.uploaded);
+    });
+    String? opened;
+    final c = RepairFormController(
+      repairs: repairs,
+      equipment: MockEquipment(),
+      faults: MockFaults(),
+      attachments: attachments,
+      popWithId: (id) async {
+        opened = id;
+      },
+    );
+    c.equipmentRef.value = const EquipmentRef(
+      id: 'e1',
+      code: 'TB-01',
+      name: 'Máy',
+    );
+    c.description.text = 'Máy hỏng';
+    await c.addPhoto(source: ImageSource.camera);
+    expect(c.photos.length, 1);
+    expect(await c.submit(), false);
+    expect(await c.submit(), true);
+    expect(attempts, 2);
+    expect(opened, 'r-new');
+    verify(
+      () => repairs.create(
+        equipmentId: 'e1',
+        description: 'Máy hỏng',
+        errorCode: null,
+        severity: 'medium',
+        equipmentDown: false,
+        faultId: null,
+      ),
+    ).called(1);
+    c.onClose();
+  });
 
   test('RepairFormController điền sẵn máy từ equipmentId', () async {
     final equipment = MockEquipment();

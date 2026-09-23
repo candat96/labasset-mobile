@@ -67,7 +67,9 @@
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>NSCameraUsageDescription</key>
-		<string>Quét mã QR / barcode của thiết bị và vật tư.</string>
+		<string>Quét mã QR / barcode và chụp ảnh tình trạng trong từng lần sửa chữa, bảo dưỡng.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Chọn ảnh để đính kèm vào hồ sơ hoặc từng phiếu sửa chữa, bảo dưỡng.</string>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Mở khoá ứng dụng bằng Face ID.</string>
 		<key>NSAppTransportSecurity</key>

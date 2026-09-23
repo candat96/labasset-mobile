@@ -8,6 +8,7 @@ import 'package:labasset_mobile/data/models/attachment.dart';
 import 'package:labasset_mobile/data/repositories/attachments_repository.dart';
 import 'package:labasset_mobile/data/repositories/files_repository.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../helpers/test_helpers.dart';
 
@@ -25,6 +26,80 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  for (final entityType in ['repair_ticket', 'maintenance_task']) {
+    testWidgets('$entityType chụp ảnh theo từng lệnh, không gắn vào thiết bị', (
+      tester,
+    ) async {
+      final service = _MockService();
+      final attachments = _MockAttachments();
+      when(() => service.attachments).thenReturn(attachments);
+      when(
+        () => attachments.list(
+          entityType: entityType,
+          entityId: any(named: 'entityId'),
+        ),
+      ).thenAnswer((_) async => const []);
+      when(
+        () => service.addImage(
+          entityType: entityType,
+          entityId: 'order-1',
+          kind: 'photo',
+          source: ImageSource.camera,
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const AttachmentUploadResult(AttachmentUploadStatus.cancelled),
+      );
+      Get.put<AttachmentService>(service);
+      await tester.pumpWidget(
+        wrap(
+          Scaffold(
+            body: AttachmentsGrid(
+              entityType: entityType,
+              entityId: 'order-1',
+              photosOnly: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+      await tester.pumpAndSettle();
+      verify(
+        () => service.addImage(
+          entityType: entityType,
+          entityId: 'order-1',
+          kind: 'photo',
+          source: ImageSource.camera,
+        ),
+      ).called(1);
+      await tester.pumpWidget(
+        wrap(
+          Scaffold(
+            body: AttachmentsGrid(
+              entityType: entityType,
+              entityId: 'order-2',
+              photosOnly: true,
+              canEdit: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      verify(
+        () => attachments.list(entityType: entityType, entityId: 'order-2'),
+      ).called(1);
+      expect(find.byIcon(Icons.photo_camera_outlined), findsNothing);
+      expect(find.byIcon(Icons.photo_library_outlined), findsNothing);
+      verifyNever(
+        () => attachments.list(
+          entityType: 'equipment',
+          entityId: any(named: 'entityId'),
+        ),
+      );
+    });
+  }
 
   testWidgets('hiện danh sách tệp, nút thêm khi canEdit', (tester) async {
     final service = _MockService();
