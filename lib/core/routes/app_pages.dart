@@ -4,6 +4,7 @@ import '../../modules/auth/auth_pages.dart';
 import '../../modules/feature_pages.dart';
 import '../../modules/account/account_controller.dart';
 import '../../modules/account/my_stats_controller.dart';
+import '../../modules/demand/demand_controller.dart';
 import '../../modules/home/home_controller.dart';
 import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/repairs/repairs_controller.dart';
@@ -11,6 +12,7 @@ import '../../modules/stock/stock_overview_controller.dart';
 import '../../modules/shell/shell_controller.dart';
 import '../../modules/shell/shell_view.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/demand_repository.dart';
 import '../../data/repositories/me_repository.dart';
 import '../../data/repositories/repairs_repository.dart';
 import '../../data/repositories/requests_repository.dart';
@@ -39,6 +41,16 @@ class AppPages {
       middlewares: _protected,
       binding: BindingsBuilder(() {
         Get.lazyPut(ShellController.new);
+        // Tab Dự trù thay tab Kho với vai trò khoa.
+        Get.lazyPut(
+          () => DemandController(
+            demand: Get.find<DemandRepository>(),
+            canSeePeriods: Get.find<SessionStore>().hasRole(
+              Routes.warehouseRoles,
+            ),
+            isDept: Get.find<SessionStore>().hasRole(Routes.deptRoles),
+          ),
+        );
         Get.lazyPut(
           () => AccountController(
             store: Get.find<SessionStore>(),

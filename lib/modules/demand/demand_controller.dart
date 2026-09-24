@@ -11,6 +11,7 @@ class DemandController extends GetxController {
   DemandController({
     required this.demand,
     this.canSeePeriods = true,
+    this.isDept = false,
     DemandSegment initialSegment = DemandSegment.mine,
   }) : segment = initialSegment.obs;
 
@@ -18,6 +19,10 @@ class DemandController extends GetxController {
 
   /// STAFF/ADM thấy tab "Kỳ"; khoa chỉ thấy phiếu của mình.
   final bool canSeePeriods;
+
+  /// Trưởng khoa/nhân viên khoa: "Của tôi" luôn hiện phiếu khoa mình kể cả
+  /// 0 dòng (phiếu do API tạo) — họ không lập phiếu trên app.
+  final bool isDept;
 
   final Rx<DemandSegment> segment;
   final RxList<DemandRequest> mine = <DemandRequest>[].obs;
@@ -43,7 +48,9 @@ class DemandController extends GetxController {
     try {
       if (segment.value == DemandSegment.mine) {
         final page = await demand.my(limit: 50);
-        mine.assignAll(page.items.where(_isActionable));
+        // Khoa: luôn hiện phiếu khoa mình (kể cả 0 dòng). VT/ADM: ẩn phiếu
+        // rỗng do API tự tạo.
+        mine.assignAll(isDept ? page.items : page.items.where(_isActionable));
       } else {
         final page = await demand.periods(limit: 50);
         periods.assignAll(page.items);

@@ -93,6 +93,25 @@ void main() {
     expect(c.periods.single.progress!.submitted, 8);
   });
 
+  test('DEPT_HEAD: giữ phiếu khoa kể cả 0 dòng', () async {
+    when(() => repo.my(limit: 50)).thenAnswer(
+      (_) async => DemandRequestPage(
+        items: [
+          _request(id: 'r1', status: 'submitted', lines: 2),
+          _request(id: 'r2', status: 'draft', lines: 0),
+        ],
+        total: 2,
+      ),
+    );
+    final c = DemandController(
+      demand: repo,
+      canSeePeriods: false,
+      isDept: true,
+    );
+    await c.load();
+    expect(c.mine.map((r) => r.id), ['r1', 'r2']);
+  });
+
   test('load lỗi ghi error và giữ danh sách rỗng', () async {
     when(
       () => repo.my(limit: 50),

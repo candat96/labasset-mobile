@@ -450,10 +450,10 @@ List<GetPage<dynamic>> featurePages() {
         Get.lazyPut(
           () => DemandController(
             demand: Get.find<DemandRepository>(),
-            canSeePeriods: Get.find<SessionStore>().hasRole(const [
-              'HOSPITAL_ADMIN',
-              'EQUIPMENT_STAFF',
-            ]),
+            canSeePeriods: Get.find<SessionStore>().hasRole(
+              Routes.warehouseRoles,
+            ),
+            isDept: Get.find<SessionStore>().hasRole(Routes.deptRoles),
             initialSegment: initial,
           ),
         );

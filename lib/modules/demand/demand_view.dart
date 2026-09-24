@@ -67,55 +67,111 @@ class _MineList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (controller.mine.isEmpty) {
-      return EmptyState(
-        icon: LucideIcons.clipboardList,
-        title: 'demand.myEmpty'.tr,
+      return Column(
+        children: [
+          if (controller.isDept) const _CreateOnWebNote(),
+          Expanded(
+            child: EmptyState(
+              icon: LucideIcons.clipboardList,
+              title: 'demand.myEmpty'.tr,
+            ),
+          ),
+        ],
       );
     }
-    return RefreshIndicator(
-      onRefresh: controller.load,
-      child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.xxl * 2,
-        ),
-        itemCount: controller.mine.length,
-        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-        itemBuilder: (_, i) {
-          final r = controller.mine[i];
-          return ListItemCard(
-            code: r.period?.code,
-            badge: StatusBadge(
-              tone: toneForDemandRequestStatus(r.status),
-              label: 'status.demandRequest.${r.status}'.tr,
-            ),
-            title: r.period?.name ?? r.department?.name ?? 'demand.title'.tr,
-            accentColor: paletteForTone(
-              context,
-              toneForDemandRequestStatus(r.status),
-            ).color,
-            metas: [
-              if (r.department?.name != null)
-                ListMeta(LucideIcons.building2, r.department!.name),
-              ListMeta(
-                LucideIcons.listChecks,
-                '${r.lines.length} ${'demand.lines'.tr}',
+    return Column(
+      children: [
+        if (controller.isDept) const _CreateOnWebNote(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: controller.load,
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.xxl * 2,
               ),
-              if (r.totalEstimated != '0')
-                ListMeta(
-                  LucideIcons.wallet,
-                  '${'demand.totalEstimated'.tr}: '
-                  '${formatVnd(r.totalEstimated)}',
-                ),
-            ],
-            onTap: () async {
-              await Get.toNamed(Routes.demandRequest(r.id));
-              await controller.load();
-            },
-          );
-        },
+              itemCount: controller.mine.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (_, i) {
+                final r = controller.mine[i];
+                return ListItemCard(
+                  code: r.period?.code,
+                  badge: StatusBadge(
+                    tone: toneForDemandRequestStatus(r.status),
+                    label: 'status.demandRequest.${r.status}'.tr,
+                  ),
+                  title:
+                      r.period?.name ?? r.department?.name ?? 'demand.title'.tr,
+                  accentColor: paletteForTone(
+                    context,
+                    toneForDemandRequestStatus(r.status),
+                  ).color,
+                  metas: [
+                    if (r.department?.name != null)
+                      ListMeta(LucideIcons.building2, r.department!.name),
+                    ListMeta(
+                      LucideIcons.listChecks,
+                      '${r.lines.length} ${'demand.lines'.tr}',
+                    ),
+                    if (r.totalEstimated != '0')
+                      ListMeta(
+                        LucideIcons.wallet,
+                        '${'demand.totalEstimated'.tr}: '
+                        '${formatVnd(r.totalEstimated)}',
+                      ),
+                  ],
+                  onTap: () async {
+                    await Get.toNamed(Routes.demandRequest(r.id));
+                    await controller.load();
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Ghi chú cho vai trò khoa: app chỉ xem/duyệt, lập phiếu trên web.
+class _CreateOnWebNote extends StatelessWidget {
+  const _CreateOnWebNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.info, size: 18, color: scheme.onPrimaryContainer),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'demand.createOnWeb'.tr,
+              style: context.appText.label.copyWith(
+                color: scheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

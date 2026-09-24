@@ -28,42 +28,89 @@ class HomeView extends GetView<HomeController> {
   static const _heroHeight = 132.0;
   static const _searchOverlap = 22.0;
 
-  static const _shortcuts = [
-    (
-      key: 'reportFault',
-      icon: LucideIcons.triangleAlert,
-      accent: AppAccent.red,
+  static const _shortcuts = <_Shortcut>[
+    _Shortcut(
+      'reportFault',
+      LucideIcons.triangleAlert,
+      AppAccent.red,
+      dept: true,
+      warehouse: true,
     ),
-    (
-      key: 'stockIssue',
-      icon: LucideIcons.packageMinus,
-      accent: AppAccent.orange,
+    _Shortcut(
+      'stockIssue',
+      LucideIcons.packageMinus,
+      AppAccent.orange,
+      dept: false,
+      warehouse: true,
     ),
-    (
-      key: 'stockReceipt',
-      icon: LucideIcons.packagePlus,
-      accent: AppAccent.green,
+    _Shortcut(
+      'stockReceipt',
+      LucideIcons.packagePlus,
+      AppAccent.green,
+      dept: false,
+      warehouse: true,
     ),
-    (
-      key: 'stocktake',
-      icon: LucideIcons.clipboardCheck,
-      accent: AppAccent.purple,
+    _Shortcut(
+      'stocktake',
+      LucideIcons.clipboardCheck,
+      AppAccent.purple,
+      dept: false,
+      warehouse: true,
     ),
-    (key: 'calendar', icon: LucideIcons.calendarDays, accent: AppAccent.teal),
-    (
-      key: 'equipmentList',
-      icon: LucideIcons.microscope,
-      accent: AppAccent.brand,
+    _Shortcut(
+      'calendar',
+      LucideIcons.calendarDays,
+      AppAccent.teal,
+      dept: true,
+      warehouse: true,
     ),
-    (
-      key: 'equipmentNew',
-      icon: LucideIcons.monitorUp,
-      accent: AppAccent.indigo,
+    _Shortcut(
+      'equipmentList',
+      LucideIcons.microscope,
+      AppAccent.brand,
+      dept: true,
+      warehouse: true,
     ),
-    (key: 'reports', icon: LucideIcons.chartPie, accent: AppAccent.yellow),
-    (key: 'demand', icon: LucideIcons.clipboardList, accent: AppAccent.indigo),
-    (key: 'assistant', icon: LucideIcons.sparkles, accent: AppAccent.pink),
+    // "Phiếu yêu cầu" chỉ hữu ích cho khoa (kho/VT đã có tab riêng).
+    _Shortcut(
+      'requests',
+      LucideIcons.fileCheck,
+      AppAccent.indigo,
+      dept: true,
+      warehouse: false,
+    ),
+    _Shortcut(
+      'equipmentNew',
+      LucideIcons.monitorUp,
+      AppAccent.indigo,
+      dept: false,
+      warehouse: true,
+    ),
+    _Shortcut(
+      'reports',
+      LucideIcons.chartPie,
+      AppAccent.yellow,
+      dept: false,
+      warehouse: true,
+    ),
+    _Shortcut(
+      'demand',
+      LucideIcons.clipboardList,
+      AppAccent.indigo,
+      dept: true,
+      warehouse: true,
+    ),
+    _Shortcut(
+      'assistant',
+      LucideIcons.sparkles,
+      AppAccent.pink,
+      dept: true,
+      warehouse: true,
+    ),
   ];
+
+  /// Khoa (DEPT_*) không thấy nghiệp vụ kho trong lối tắt.
+  bool get _isDept => !Get.find<SessionStore>().hasRole(Routes.warehouseRoles);
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +229,9 @@ class HomeView extends GetView<HomeController> {
       crossAxisSpacing: AppSpacing.xs,
       childAspectRatio: 0.92,
       children: [
-        for (final s in _shortcuts) _shortcut(s.key, s.icon, s.accent),
+        for (final s in _shortcuts)
+          if (_isDept ? s.dept : s.warehouse)
+            _shortcut(s.key, s.icon, s.accent),
       ],
     ),
   ];
@@ -199,6 +248,7 @@ class HomeView extends GetView<HomeController> {
         'calendar' => Routes.calendar,
         'stocktake' => Routes.stocktakes,
         'reports' => Routes.reports,
+        'requests' => Routes.requests,
         'demand' => Routes.demand,
         'assistant' => Routes.aiConversations,
         'reportFault' => Routes.repairNew,
@@ -405,92 +455,99 @@ class _WorkGroups extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groups = [
-      (
-        icon: LucideIcons.wrench,
-        accent: AppAccent.brand,
-        title: 'home.task.repairsAssigned'.tr,
-        total: controller.repairsAssignedTotal,
-        route: '${Routes.repairs}?segment=mine',
-      ),
-      (
-        icon: LucideIcons.messageCircleWarning,
-        accent: AppAccent.yellow,
-        title: 'home.task.repairsPendingResponse'.tr,
-        total: controller.repairsPendingResponse,
-        route: '${Routes.repairs}?segment=mine',
-      ),
-      (
-        icon: LucideIcons.clockAlert,
-        accent: AppAccent.red,
-        title: 'home.task.repairsOverdue'.tr,
-        total: controller.repairsOverdue,
-        route: '${Routes.repairs}?segment=mine',
-      ),
-      (
-        icon: LucideIcons.clipboardCheck,
-        accent: AppAccent.purple,
-        title: 'home.task.stocktakesOpen'.tr,
-        total: controller.stocktakesOpenTotal,
-        route: Routes.stocktakes,
-      ),
-      (
-        icon: LucideIcons.calendarClock,
-        accent: AppAccent.teal,
-        title: 'home.task.maintenanceDue'.tr,
-        total: controller.tasksDueTotal,
-        route: Routes.maintenanceTasks,
-      ),
-      (
-        icon: LucideIcons.clockAlert,
-        accent: AppAccent.orange,
-        title: 'home.task.maintenanceOverdue'.tr,
-        total: controller.tasksOverdue,
-        route: Routes.maintenanceTasks,
-      ),
-      (
-        icon: LucideIcons.fileCheck,
-        accent: AppAccent.indigo,
-        title: 'home.task.requestsPending'.tr,
-        total: controller.requestsPendingTotal,
-        route: '${Routes.requests}?segment=pending',
-      ),
-      (
-        icon: LucideIcons.packageCheck,
-        accent: AppAccent.green,
-        title: 'home.task.requestsApproved'.tr,
-        total: controller.requestsApprovedTotal,
-        route: '${Routes.requests}?segment=toIssue',
-      ),
-      (
-        icon: LucideIcons.inbox,
-        accent: AppAccent.pink,
-        title: 'home.task.requestsPendingReceive'.tr,
-        total: controller.requestsPendingReceive,
-        route: '${Routes.requests}?segment=mine',
-      ),
-      (
-        icon: LucideIcons.clipboardList,
-        accent: AppAccent.indigo,
-        title: 'home.task.demandToApprove'.tr,
-        total: controller.demandToApprove,
-        route: Routes.demand,
-      ),
-      (
-        icon: LucideIcons.packageCheck,
-        accent: AppAccent.green,
-        title: 'home.task.demandToAccept'.tr,
-        total: controller.demandToAccept,
-        route: Routes.demand,
-      ),
-      (
-        icon: LucideIcons.filePlus2,
-        accent: AppAccent.brand,
-        title: 'home.task.demandToSubmit'.tr,
-        total: controller.demandToSubmit,
-        route: Routes.demand,
-      ),
-    ].where((g) => g.total > 0).toList();
+    // Khoa không thấy dòng kiểm kê (nghiệp vụ kho, số vốn dĩ = 0).
+    final isDept = !Get.find<SessionStore>().hasRole(Routes.warehouseRoles);
+    final groups =
+        [
+              (
+                icon: LucideIcons.wrench,
+                accent: AppAccent.brand,
+                title: 'home.task.repairsAssigned'.tr,
+                total: controller.repairsAssignedTotal,
+                route: '${Routes.repairs}?segment=mine',
+              ),
+              (
+                icon: LucideIcons.messageCircleWarning,
+                accent: AppAccent.yellow,
+                title: 'home.task.repairsPendingResponse'.tr,
+                total: controller.repairsPendingResponse,
+                route: '${Routes.repairs}?segment=mine',
+              ),
+              (
+                icon: LucideIcons.clockAlert,
+                accent: AppAccent.red,
+                title: 'home.task.repairsOverdue'.tr,
+                total: controller.repairsOverdue,
+                route: '${Routes.repairs}?segment=mine',
+              ),
+              (
+                icon: LucideIcons.clipboardCheck,
+                accent: AppAccent.purple,
+                title: 'home.task.stocktakesOpen'.tr,
+                total: controller.stocktakesOpenTotal,
+                route: Routes.stocktakes,
+              ),
+              (
+                icon: LucideIcons.calendarClock,
+                accent: AppAccent.teal,
+                title: 'home.task.maintenanceDue'.tr,
+                total: controller.tasksDueTotal,
+                route: Routes.maintenanceTasks,
+              ),
+              (
+                icon: LucideIcons.clockAlert,
+                accent: AppAccent.orange,
+                title: 'home.task.maintenanceOverdue'.tr,
+                total: controller.tasksOverdue,
+                route: Routes.maintenanceTasks,
+              ),
+              (
+                icon: LucideIcons.fileCheck,
+                accent: AppAccent.indigo,
+                title: 'home.task.requestsPending'.tr,
+                total: controller.requestsPendingTotal,
+                route: '${Routes.requests}?segment=pending',
+              ),
+              (
+                icon: LucideIcons.packageCheck,
+                accent: AppAccent.green,
+                title: 'home.task.requestsApproved'.tr,
+                total: controller.requestsApprovedTotal,
+                route: '${Routes.requests}?segment=toIssue',
+              ),
+              (
+                icon: LucideIcons.inbox,
+                accent: AppAccent.pink,
+                title: 'home.task.requestsPendingReceive'.tr,
+                total: controller.requestsPendingReceive,
+                route: '${Routes.requests}?segment=mine',
+              ),
+              (
+                icon: LucideIcons.clipboardList,
+                accent: AppAccent.indigo,
+                title: 'home.task.demandToApprove'.tr,
+                total: controller.demandToApprove,
+                route: Routes.demand,
+              ),
+              (
+                icon: LucideIcons.packageCheck,
+                accent: AppAccent.green,
+                title: 'home.task.demandToAccept'.tr,
+                total: controller.demandToAccept,
+                route: Routes.demand,
+              ),
+              (
+                icon: LucideIcons.filePlus2,
+                accent: AppAccent.brand,
+                title: 'home.task.demandToSubmit'.tr,
+                total: controller.demandToSubmit,
+                route: Routes.demand,
+              ),
+            ]
+            .where(
+              (g) => g.total > 0 && !(isDept && g.route == Routes.stocktakes),
+            )
+            .toList();
     if (groups.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -523,6 +580,25 @@ class _WorkGroups extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Một lối tắt trang chủ: khoá i18n + icon + màu, kèm cờ hiển thị theo vai trò.
+class _Shortcut {
+  const _Shortcut(
+    this.key,
+    this.icon,
+    this.accent, {
+    required this.dept,
+    required this.warehouse,
+  });
+
+  final String key;
+  final IconData icon;
+  final AppAccent accent;
+
+  /// Hiện với vai trò khoa (DEPT_*) / với vai trò kho-VT (ADM, VT).
+  final bool dept;
+  final bool warehouse;
 }
 
 /// Số lượng trong pill primary-soft, chữ 13/700 on-primary-container.

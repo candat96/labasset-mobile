@@ -192,6 +192,20 @@ void main() {
     expect(find.text('Mua mới'), findsOneWidget);
     expect(find.text('Chỉnh số duyệt trên web'), findsOneWidget);
   });
+
+  testWidgets('DemandView: khoa thấy ghi chú lập phiếu trên web', (
+    tester,
+  ) async {
+    when(
+      () => repo.my(limit: 50),
+    ).thenAnswer((_) async => DemandRequestPage(items: [_request()], total: 1));
+    Get.put(DemandController(demand: repo, canSeePeriods: false, isDept: true));
+    await tester.pumpWidget(wrap(const DemandView()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lập phiếu trên web'), findsOneWidget);
+    expect(find.text('DT-2027'), findsOneWidget);
+  });
 }
 
 extension on DemandRequest {

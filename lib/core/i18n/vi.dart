@@ -197,6 +197,7 @@ const Map<String, String> vi = {
   'tab.home': 'Trang chủ',
   'tab.repairs': 'Sửa chữa',
   'tab.stock': 'Kho',
+  'tab.demand': 'Dự trù',
   'tab.account': 'Cá nhân',
   'tab.scan': 'Quét',
 
@@ -242,9 +243,9 @@ const Map<String, String> vi = {
   'auth.sessions.unknownDevice': 'Không rõ thiết bị',
   'auth.sessions.lastUsed': 'Dùng lần cuối',
   'auth.sessions.expires': 'Hết hạn',
-  'auth.noAccess.title': 'Ứng dụng dành cho phòng Vật tư – TBYT',
+  'auth.noAccess.title': 'Tài khoản chưa được dùng ứng dụng',
   'auth.noAccess.desc':
-      'Tài khoản của bạn thuộc khoa/phòng khác. Vui lòng dùng phiên bản web hoặc liên hệ quản trị viện.',
+      'Ứng dụng dành cho nhân viên phòng Vật tư – TBYT và khoa. Tài khoản của bạn chưa được cấp quyền — vui lòng liên hệ quản trị viên.',
   'auth.logout': 'Đăng xuất',
   'auth.logoutConfirm': 'Đăng xuất khỏi thiết bị này?',
   'auth.roles.HOSPITAL_ADMIN': 'Quản trị viện',
@@ -1146,6 +1147,7 @@ const Map<String, String> vi = {
   'demand.accepted': 'Đã tiếp nhận phiếu dự trù',
   'demand.returned': 'Đã trả lại phiếu dự trù',
   'demand.webOnly': 'Lập phiếu và chỉnh số duyệt trên web',
+  'demand.createOnWeb': 'Lập phiếu trên web',
   'demand.consolidationNote': 'Chỉnh số duyệt trên web',
   'demand.breakdown': 'Phân bổ theo khoa',
   'demand.breakdown.dept': 'Khoa',

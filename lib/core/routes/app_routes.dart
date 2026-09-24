@@ -64,6 +64,13 @@ class Routes {
   static const placeholder = '/placeholder/:key';
   static String placeholderFor(String key) => '/placeholder/$key';
 
-  /// Vai trò được dùng app (tinh-nang-mobile.md: VT và ADM).
-  static const allowedRoles = ['HOSPITAL_ADMIN', 'EQUIPMENT_STAFF'];
+  /// Vai trò dùng nghiệp vụ kho/VT (thấy tab Kho + thao tác nhập/xuất).
+  static const warehouseRoles = ['HOSPITAL_ADMIN', 'EQUIPMENT_STAFF'];
+
+  /// Vai trò khoa (trưởng khoa duyệt/trả lại dự trù, nhân viên khoa xem phiếu).
+  static const deptRoles = ['DEPT_HEAD', 'DEPT_USER'];
+
+  /// Vai trò được dùng app: VT/ADM + trưởng khoa/nhân viên khoa.
+  /// UI gác theo vai trò, API vẫn là nơi chặn cuối cùng.
+  static const allowedRoles = [...warehouseRoles, ...deptRoles];
 }
