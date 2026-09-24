@@ -209,6 +209,7 @@ Future<void> _replaceSheet(
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: form.field('reason'),
+              focusNode: form.focusNode('reason'),
               decoration: InputDecoration(
                 labelText: 'equipment.component.reason'.tr,
                 errorText: form.error('reason'),

@@ -169,6 +169,7 @@ Future<void> _addCost(BuildContext context, CostsTabController c) async {
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: form.field('description'),
+            focusNode: form.focusNode('description'),
             decoration: InputDecoration(
               labelText: 'repairs.costs.description'.tr,
               errorText: form.error('description'),
@@ -177,6 +178,7 @@ Future<void> _addCost(BuildContext context, CostsTabController c) async {
           const SizedBox(height: AppSpacing.sm),
           MoneyField(
             controller: form.field('amount'),
+            focusNode: form.focusNode('amount'),
             label: 'repairs.costs.amount'.tr,
             errorText: form.error('amount'),
           ),

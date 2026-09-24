@@ -1,22 +1,23 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../data/models/login_result.dart';
 import '../../data/models/user_view.dart';
 
 /// Phiên đăng nhập: token trong secure storage, user/cờ trong Rx để UI phản ứng.
+///
+/// Mở app lần sau chỉ cần token còn hạn là vào thẳng (kiểm tra bằng
+/// `GET /auth/me` — xem `core/network/session_check.dart`), không cần đăng nhập
+/// lại. iOS giữ Keychain sau khi gỡ app nên cài lại mà token cũ vẫn còn hạn thì
+/// app vẫn vào thẳng (chỉ tin token, không phân biệt cài mới/cài lại).
 class SessionStore extends GetxService {
-  SessionStore({FlutterSecureStorage? storage, bool checkFreshInstall = true})
-    : _storage = storage ?? const FlutterSecureStorage(),
-      _checkFreshInstall = checkFreshInstall;
+  SessionStore({FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
-  final bool _checkFreshInstall;
 
   static const _kAccess = 'accessToken';
   static const _kRefresh = 'refreshToken';
@@ -49,7 +50,6 @@ class SessionStore extends GetxService {
   }
 
   Future<SessionStore> load() async {
-    if (_checkFreshInstall) await _clearKeychainIfFreshInstall();
     accessToken = await _storage.read(key: _kAccess);
     refreshToken = await _storage.read(key: _kRefresh);
     tenantId = await _storage.read(key: _kTenant);
@@ -71,20 +71,6 @@ class SessionStore extends GetxService {
       _ => ThemeMode.system,
     };
     return this;
-  }
-
-  /// iOS giữ Keychain sau khi gỡ app → cài lại vẫn còn phiên cũ. Đánh dấu bằng
-  /// file trong sandbox (mất khi gỡ app): không thấy dấu ⇒ cài mới ⇒ xoá sạch.
-  Future<void> _clearKeychainIfFreshInstall() async {
-    try {
-      final dir = await getApplicationSupportDirectory();
-      final marker = File('${dir.path}/.installed');
-      if (await marker.exists()) return;
-      await _storage.deleteAll();
-      await marker.create(recursive: true);
-    } catch (_) {
-      // Không chặn khởi động nếu không truy cập được sandbox.
-    }
   }
 
   Future<void> saveSession(LoginResult r) async {

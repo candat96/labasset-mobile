@@ -9,6 +9,7 @@ class MoneyField extends StatelessWidget {
   const MoneyField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hintText,
     this.validator,
@@ -21,6 +22,9 @@ class MoneyField extends StatelessWidget {
   });
 
   final TextEditingController controller;
+
+  /// Node do `SheetForm.focusNode(key)` cấp — để focus + cuộn tới ô khi lỗi.
+  final FocusNode? focusNode;
   final String? label;
   final String? hintText;
   final String? Function(String?)? validator;
@@ -43,6 +47,7 @@ class MoneyField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       enabled: enabled,
       keyboardType: TextInputType.number,
       inputFormatters: const [_VndInputFormatter()],

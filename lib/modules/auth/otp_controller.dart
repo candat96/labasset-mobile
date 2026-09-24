@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../data/repositories/auth_repository.dart';
 
 class OtpController extends GetxController {
@@ -14,6 +15,7 @@ class OtpController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
   final code = TextEditingController();
+  final codeFocus = FocusNode();
   final RxBool submitting = false.obs;
   final RxnString error = RxnString();
 
@@ -33,7 +35,11 @@ class OtpController extends GetxController {
 
   Future<void> submit() async {
     final token = otpToken;
-    if (token == null || !(formKey.currentState?.validate() ?? false)) return;
+    if (token == null) return;
+    if (!(formKey.currentState?.validate() ?? false)) {
+      FormFocus.firstError([codeFocus]);
+      return;
+    }
     submitting.value = true;
     error.value = null;
     try {
@@ -50,6 +56,7 @@ class OtpController extends GetxController {
   @override
   void onClose() {
     code.dispose();
+    codeFocus.dispose();
     super.onClose();
   }
 }

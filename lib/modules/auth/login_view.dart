@@ -40,6 +40,7 @@ class LoginView extends GetView<LoginController> {
                 if (controller.isMulti) ...[
                   TextFormField(
                     controller: controller.hospitalCode,
+                    focusNode: controller.hospitalCodeFocus,
                     decoration: InputDecoration(
                       labelText: 'auth.login.hospitalCode'.tr,
                     ),
@@ -52,6 +53,7 @@ class LoginView extends GetView<LoginController> {
                 ],
                 TextFormField(
                   controller: controller.username,
+                  focusNode: controller.usernameFocus,
                   decoration: InputDecoration(
                     labelText: 'auth.login.username'.tr,
                   ),
@@ -63,6 +65,7 @@ class LoginView extends GetView<LoginController> {
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: controller.password,
+                  focusNode: controller.passwordFocus,
                   decoration: InputDecoration(
                     labelText: 'auth.login.password'.tr,
                   ),

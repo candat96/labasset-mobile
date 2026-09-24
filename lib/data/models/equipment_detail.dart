@@ -79,6 +79,7 @@ class EquipmentDetail {
     this.countryOfOrigin,
     this.purchaseContractNo,
     this.decisionNo,
+    this.circulationNo,
     this.location,
     this.manufactureYear,
     this.receivedAt,
@@ -123,6 +124,7 @@ class EquipmentDetail {
   final String? countryOfOrigin;
   final String? purchaseContractNo;
   final String? decisionNo;
+  final String? circulationNo;
   final String? location;
   final num? manufactureYear;
   final String? receivedAt;

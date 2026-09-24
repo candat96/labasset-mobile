@@ -291,6 +291,7 @@ Future<void> _formSheet(
             ),
             TextField(
               controller: form.field('name'),
+              focusNode: form.focusNode('name'),
               decoration: InputDecoration(
                 labelText: 'equipment.software.name'.tr,
                 errorText: form.error('name'),
@@ -405,6 +406,7 @@ Future<void> _upgradeDialog(
           SheetHeader(title: 'equipment.software.upgrade'.tr),
           TextField(
             controller: form.field('version'),
+            focusNode: form.focusNode('version'),
             autofocus: true,
             decoration: InputDecoration(
               labelText: 'equipment.software.upgradeTo'.tr,

@@ -149,6 +149,71 @@ void main() {
     expect(c.room.value, isNull);
   });
 
+  test('initialRoom: lọc sẵn theo phòng + khoa của phòng đó', () async {
+    final roomIds = <String?>[];
+    when(
+      () => equipment.list(
+        q: any(named: 'q'),
+        status: any(named: 'status'),
+        departmentId: any(named: 'departmentId'),
+        roomId: any(named: 'roomId'),
+        page: any(named: 'page'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((inv) async {
+      roomIds.add(inv.namedArguments[#roomId] as String?);
+      return EquipmentPage(items: [_eq('1')], total: 1);
+    });
+    when(
+      () => departments.list(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => [_dept]);
+
+    final c = EquipmentListController(
+      equipment: equipment,
+      departments: departments,
+      catalogs: catalogs,
+      initialRoom: _room,
+    )..onInit();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(c.room.value?.id, 'r1');
+    expect(c.department.value?.id, 'd1');
+    expect(roomIds, ['r1']);
+  });
+
+  test('mode theo phòng: bật/tắt và mở máy của phòng (kèm khoa)', () async {
+    final roomIds = <String?>[];
+    when(
+      () => equipment.list(
+        q: any(named: 'q'),
+        status: any(named: 'status'),
+        departmentId: any(named: 'departmentId'),
+        roomId: any(named: 'roomId'),
+        page: any(named: 'page'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((inv) async {
+      roomIds.add(inv.namedArguments[#roomId] as String?);
+      return EquipmentPage(items: [_eq('1')], total: 1);
+    });
+    when(
+      () => departments.list(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => [_dept]);
+
+    final c = make()..onInit();
+    await Future<void>.delayed(Duration.zero);
+
+    c.setRoomMode(true);
+    expect(c.roomMode.value, isTrue);
+    expect(roomIds, [null]); // chưa gọi thêm API khi chỉ bật mode
+
+    await c.openRoom(_room);
+    expect(c.roomMode.value, isFalse);
+    expect(c.room.value?.id, 'r1');
+    expect(c.department.value?.id, 'd1');
+    expect(roomIds.last, 'r1');
+  });
+
   test('lỗi API → ghi error, giữ danh sách rỗng', () async {
     stubList(() async => throw Exception('boom'));
     final c = make()..onInit();

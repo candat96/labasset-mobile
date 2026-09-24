@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../core/routes/app_routes.dart';
+import '../../core/services/attachment_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/photo_grid.dart';
+import '../../core/widgets/photo_picker.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/equipment.dart';
@@ -85,6 +87,7 @@ class RepairFormView extends GetView<RepairFormController> {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: controller.description,
+              focusNode: controller.descriptionFocus,
               maxLines: 3,
               decoration: InputDecoration(
                 labelText: 'repairs.form.description'.tr,
@@ -165,75 +168,40 @@ class RepairFormView extends GetView<RepairFormController> {
               );
             }),
             Obx(() {
-              if (controller.photos.isEmpty) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.sm),
-                child: Wrap(
-                  spacing: AppSpacing.sm,
-                  children: [
-                    for (final p in controller.photos)
-                      SizedBox(
-                        width: 96,
-                        height: 96,
-                        child: Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.memory(
-                                p.bytes,
-                                width: 96,
-                                height: 96,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: IconButton.filledTonal(
-                                iconSize: 16,
-                                onPressed: controller.submitting.value
-                                    ? null
-                                    : () => controller.photos.remove(p),
-                                icon: const Icon(Icons.close),
-                                tooltip: 'Bỏ ảnh',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            }),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Ảnh tình trạng khi báo hỏng (không bắt buộc)',
-              style: theme.textTheme.titleSmall,
-            ),
-            const Text(
-              'Ảnh được lưu trong phiếu sửa chữa của lần báo hỏng này.',
-            ),
-            Obx(
-              () => Wrap(
-                spacing: AppSpacing.sm,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  OutlinedButton.icon(
-                    onPressed: controller.submitting.value
-                        ? null
-                        : () => controller.addPhoto(),
-                    icon: const Icon(Icons.add_a_photo_outlined),
-                    label: Text('repairs.form.addPhoto'.tr),
+                  Text(
+                    'repairs.form.photoTitle'.tr,
+                    style: theme.textTheme.titleSmall,
                   ),
-                  OutlinedButton.icon(
-                    onPressed: controller.submitting.value
+                  Text('repairs.form.photoHint'.tr),
+                  const SizedBox(height: AppSpacing.sm),
+                  PhotoGrid(
+                    tiles: [
+                      for (final p in controller.photos)
+                        PhotoGridTile(
+                          image: MemoryImage(p.bytes),
+                          onTap: () => _previewPhoto(context, p),
+                          onRemove: controller.submitting.value
+                              ? null
+                              : () => controller.removePhoto(p),
+                          removeTooltip: 'attachment.removePhoto'.tr,
+                        ),
+                    ],
+                    onAdd: controller.submitting.value
                         ? null
-                        : () => controller.addPhoto(source: ImageSource.camera),
-                    icon: const Icon(Icons.photo_camera_outlined),
-                    label: const Text('Chụp ảnh'),
+                        : () async {
+                            final picked = await PhotoPicker.pickWithSource(
+                              context,
+                            );
+                            controller.addPhotos(picked);
+                          },
+                    addLabel: 'attachment.addPhotos'.tr,
                   ),
                 ],
-              ),
-            ),
+              );
+            }),
             const SizedBox(height: AppSpacing.sm),
             Obx(
               () => controller.error.value.isEmpty
@@ -267,3 +235,30 @@ class RepairFormView extends GetView<RepairFormController> {
     );
   }
 }
+
+/// Xem ảnh đã chọn ở dạng toàn màn (zoom được) trước khi gửi.
+Future<void> _previewPhoto(BuildContext context, PickedImage photo) =>
+    showDialog<void>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InteractiveViewer(
+              maxScale: 4,
+              child: Image.memory(photo.bytes, fit: BoxFit.contain),
+            ),
+            OverflowBar(
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text('common.close'.tr),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );

@@ -203,6 +203,7 @@ class DemandRequestView extends GetView<DemandRequestController> {
             SheetHeader(title: 'demand.returnTitle'.tr),
             TextField(
               controller: form.field('reason'),
+              focusNode: form.focusNode('reason'),
               autofocus: true,
               maxLines: 3,
               decoration: InputDecoration(

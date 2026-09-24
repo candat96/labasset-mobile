@@ -7,6 +7,7 @@ import '../../core/config/env.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../data/models/login_result.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/settings_repository.dart';
@@ -31,6 +32,11 @@ class LoginController extends GetxController {
   final hospitalCode = TextEditingController();
   final username = TextEditingController();
   final password = TextEditingController();
+
+  /// Node từng ô — validate xong focus + cuộn tới ô lỗi đầu tiên.
+  final hospitalCodeFocus = FocusNode();
+  final usernameFocus = FocusNode();
+  final passwordFocus = FocusNode();
 
   final RxnString tenantMode = RxnString();
   final RxBool submitting = false.obs;
@@ -67,6 +73,9 @@ class LoginController extends GetxController {
     hospitalCode.dispose();
     username.dispose();
     password.dispose();
+    hospitalCodeFocus.dispose();
+    usernameFocus.dispose();
+    passwordFocus.dispose();
     super.onClose();
   }
 
@@ -77,7 +86,10 @@ class LoginController extends GetxController {
   String? lastOtpToken;
 
   Future<void> submit() async {
-    if (!(formKey.currentState?.validate() ?? false)) return;
+    if (!(formKey.currentState?.validate() ?? false)) {
+      FormFocus.firstError([hospitalCodeFocus, usernameFocus, passwordFocus]);
+      return;
+    }
     await submitUnchecked();
   }
 

@@ -8,6 +8,7 @@ import '../../core/services/attachment_service.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../data/models/department.dart';
 import '../../data/models/equipment_detail.dart';
@@ -40,7 +41,11 @@ class NewEquipmentController extends GetxController {
   final name = TextEditingController();
   final model = TextEditingController();
   final serial = TextEditingController();
+  final circulationNo = TextEditingController();
   final location = TextEditingController();
+
+  /// Focus ô tên khi thiếu (bàn phím không che ô lỗi).
+  final nameFocus = FocusNode();
 
   final Rxn<DepartmentRef> department = Rxn<DepartmentRef>();
   final Rxn<RoomRef> room = Rxn<RoomRef>();
@@ -179,6 +184,7 @@ class NewEquipmentController extends GetxController {
                 children: [
                   TextField(
                     controller: form.field('name'),
+                    focusNode: form.focusNode('name'),
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(
                       labelText: 'equipment.room.nameLabel'.tr,
@@ -263,6 +269,7 @@ class NewEquipmentController extends GetxController {
     if (n.isEmpty) {
       fieldErrors['name'] = 'equipment.new.nameRequired'.tr;
       error.value = 'equipment.new.nameRequired'.tr;
+      FormFocus.reveal(nameFocus);
       return false;
     }
     if (department.value == null) {
@@ -282,6 +289,8 @@ class NewEquipmentController extends GetxController {
         'name': n,
         if (model.text.trim().isNotEmpty) 'model': model.text.trim(),
         if (serial.text.trim().isNotEmpty) 'serial': serial.text.trim(),
+        if (circulationNo.text.trim().isNotEmpty)
+          'circulationNo': circulationNo.text.trim(),
         'departmentId': department.value!.id,
         'roomId': room.value!.id,
         if (group.value != null) 'groupId': group.value!.id,
@@ -352,7 +361,9 @@ class NewEquipmentController extends GetxController {
     name.dispose();
     model.dispose();
     serial.dispose();
+    circulationNo.dispose();
     location.dispose();
+    nameFocus.dispose();
     super.onClose();
   }
 }

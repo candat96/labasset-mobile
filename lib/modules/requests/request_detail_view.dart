@@ -279,6 +279,7 @@ Future<void> _comment(BuildContext context, RequestDetailController c) async {
           SheetHeader(title: 'requests.addComment'.tr),
           TextField(
             controller: form.field('body'),
+            focusNode: form.focusNode('body'),
             autofocus: true,
             maxLines: 3,
             decoration: InputDecoration(

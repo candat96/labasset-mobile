@@ -10,27 +10,27 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
 import '../../../core/widgets/status_badge.dart';
-import '../../../data/models/equipment_extras.dart';
+import '../../../data/models/repair_detail.dart';
 import '../../../data/repositories/faults_repository.dart';
 
-/// Tab "Thư viện lỗi": lọc theo model máy + tìm mã lỗi/triệu chứng,
-/// cache 24 giờ theo model để tra offline.
+/// Tab "Thư viện lỗi": lỗi thường gặp của **máy đang xem** (theo model/nhóm/hãng
+/// qua `/v1/faults/suggest`), tìm mã lỗi/triệu chứng, cache 24 giờ để tra offline.
 class FaultsTabController extends GetxController {
   FaultsTabController({
     required this.faults,
-    required this.model,
+    required this.equipmentId,
     this.cache,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   final FaultsRepository faults;
-  final String? model;
+  final String equipmentId;
   final KvCache? cache;
   final DateTime Function() _now;
 
   static const cacheTtl = Duration(hours: 24);
 
-  final RxList<FaultItem> items = <FaultItem>[].obs;
+  final RxList<FaultSuggestionMatch> items = <FaultSuggestionMatch>[].obs;
   final RxBool loading = true.obs;
   final Rxn<Object> error = Rxn<Object>();
   final RxBool fromCache = false.obs;
@@ -38,7 +38,7 @@ class FaultsTabController extends GetxController {
   final search = TextEditingController();
   Timer? _debounce;
 
-  String get cacheKey => 'faults.${model ?? 'all'}';
+  String get cacheKey => 'faults.eq.$equipmentId';
 
   @override
   void onInit() {
@@ -56,13 +56,12 @@ class FaultsTabController extends GetxController {
     error.value = null;
     fromCache.value = false;
     try {
-      final page = await faults.list(
-        model: model,
+      final list = await faults.suggest(
+        equipmentId: equipmentId,
         q: search.text.trim(),
-        limit: 50,
       );
-      items.assignAll(page.items);
-      await _saveCache(page.items);
+      items.assignAll(list);
+      await _saveCache(list);
     } catch (e) {
       final cached = await _readCache();
       if (cached != null && cached.isNotEmpty) {
@@ -76,17 +75,26 @@ class FaultsTabController extends GetxController {
     }
   }
 
-  Future<void> _saveCache(List<FaultItem> list) async {
+  Future<void> _saveCache(List<FaultSuggestionMatch> list) async {
     try {
       await cache?.put(cacheKey, {
-        'items': list.map((f) => f.toJson()).toList(),
+        'items': [
+          for (final m in list)
+            {
+              'fault': m.fault.toJson(),
+              'occurrences': {
+                'onEquipment': m.onEquipment,
+                'sameModel': m.sameModel,
+              },
+            },
+        ],
       });
     } catch (_) {
       // best-effort
     }
   }
 
-  Future<List<FaultItem>?> _readCache() async {
+  Future<List<FaultSuggestionMatch>?> _readCache() async {
     try {
       final cached = await cache?.get(cacheKey);
       if (cached == null) return null;
@@ -95,7 +103,9 @@ class FaultsTabController extends GetxController {
       if (raw is! List) return null;
       return raw
           .whereType<Map>()
-          .map((m) => FaultItem.fromJson(Map<String, dynamic>.from(m)))
+          .map(
+            (m) => FaultSuggestionMatch.fromJson(Map<String, dynamic>.from(m)),
+          )
           .toList();
     } catch (_) {
       return null;
@@ -111,9 +121,9 @@ class FaultsTabController extends GetxController {
 }
 
 class FaultsTab extends StatefulWidget {
-  const FaultsTab({super.key, this.model});
+  const FaultsTab({super.key, required this.equipmentId});
 
-  final String? model;
+  final String equipmentId;
 
   @override
   State<FaultsTab> createState() => _FaultsTabState();
@@ -126,10 +136,10 @@ class _FaultsTabState extends State<FaultsTab> {
   @override
   void initState() {
     super.initState();
-    _tag = widget.model ?? 'all';
+    _tag = widget.equipmentId;
     controller = FaultsTabController(
       faults: Get.find<FaultsRepository>(),
-      model: widget.model,
+      equipmentId: widget.equipmentId,
       cache: Get.find(),
     );
     Get.put(controller, tag: _tag);
@@ -199,7 +209,8 @@ class _FaultsTabState extends State<FaultsTab> {
               itemCount: controller.items.length,
               separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (_, i) {
-                final f = controller.items[i];
+                final m = controller.items[i];
+                final f = m.fault;
                 return ListTile(
                   title: Text(
                     [
@@ -207,7 +218,12 @@ class _FaultsTabState extends State<FaultsTab> {
                       f.title,
                     ].where((s) => s.isNotEmpty).join(' — '),
                   ),
-                  subtitle: Text(f.model),
+                  subtitle: Text(
+                    'equipment.faults.times'.trParams({
+                      'on': '${m.onEquipment}',
+                      'model': '${m.sameModel}',
+                    }),
+                  ),
                   trailing: StatusBadge(
                     tone: switch (f.severity) {
                       'critical' || 'high' => StatusTone.danger,

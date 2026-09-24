@@ -6,6 +6,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../data/repositories/auth_repository.dart';
 
 class ChangePasswordController extends GetxController {
@@ -16,6 +17,9 @@ class ChangePasswordController extends GetxController {
   final current = TextEditingController();
   final next = TextEditingController();
   final confirm = TextEditingController();
+  final currentFocus = FocusNode();
+  final nextFocus = FocusNode();
+  final confirmFocus = FocusNode();
   final RxBool submitting = false.obs;
   final RxnString error = RxnString();
 
@@ -29,7 +33,10 @@ class ChangePasswordController extends GetxController {
       v == next.text ? null : 'auth.change.mismatch'.tr;
 
   Future<void> submit() async {
-    if (!(formKey.currentState?.validate() ?? false)) return;
+    if (!(formKey.currentState?.validate() ?? false)) {
+      FormFocus.firstError([currentFocus, nextFocus, confirmFocus]);
+      return;
+    }
     submitting.value = true;
     error.value = null;
     try {
@@ -53,6 +60,9 @@ class ChangePasswordController extends GetxController {
     current.dispose();
     next.dispose();
     confirm.dispose();
+    currentFocus.dispose();
+    nextFocus.dispose();
+    confirmFocus.dispose();
     super.onClose();
   }
 }
@@ -90,6 +100,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 ],
                 TextFormField(
                   controller: controller.current,
+                  focusNode: controller.currentFocus,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'auth.change.current'.tr,
@@ -99,6 +110,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: controller.next,
+                  focusNode: controller.nextFocus,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'auth.change.next'.tr,
@@ -109,6 +121,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: controller.confirm,
+                  focusNode: controller.confirmFocus,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'auth.change.confirm'.tr,

@@ -186,6 +186,7 @@ Future<void> _showForm(
             ),
             TextField(
               controller: form.field('name'),
+              focusNode: form.focusNode('name'),
               decoration: InputDecoration(
                 labelText: 'equipment.accessory.name'.tr,
                 errorText: form.error('name'),

@@ -17,6 +17,8 @@ import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/segment_tabs.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/equipment.dart';
+import '../rooms/rooms_controller.dart';
+import '../rooms/rooms_list.dart';
 import 'equipment_list_controller.dart';
 
 /// Danh sách máy `/equipment`: tìm + segment trạng thái + lọc khoa/phòng.
@@ -25,6 +27,7 @@ class EquipmentListView extends GetView<EquipmentListController> {
 
   @override
   Widget build(BuildContext context) {
+    final rooms = Get.find<RoomsController>(tag: RoomsController.tagEquipment);
     return LargeTitleScaffold(
       title: 'equipment.list.title'.tr,
       floatingActionButton: GradientFab(
@@ -37,68 +40,111 @@ class EquipmentListView extends GetView<EquipmentListController> {
       ),
       header: Column(
         children: [
-          TextField(
-            controller: controller.searchController,
-            onChanged: controller.setQuery,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.search, size: 20),
-              hintText: 'equipment.list.search'.tr,
-              filled: true,
-              fillColor: context.isDark ? AppColors.mutedDark : AppColors.muted,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              border: _searchBorder,
-              enabledBorder: _searchBorder,
-              focusedBorder: _searchBorder,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
+          // Mode: danh sách máy ↔ theo phòng (bấm phòng xem máy của phòng đó).
           Obx(
-            () => SegmentTabs<String>(
+            () => SegmentTabs<bool>(
               tabs: [
-                SegmentTab(value: '', label: 'equipment.list.status.all'.tr),
-                SegmentTab(value: 'active', label: 'status.active'.tr),
-                SegmentTab(value: 'broken', label: 'status.broken'.tr),
-                SegmentTab(
-                  value: 'awaiting_parts',
-                  label: 'status.awaiting_parts'.tr,
-                ),
-                SegmentTab(value: 'suspended', label: 'status.suspended'.tr),
+                SegmentTab(value: false, label: 'rooms.mode.machines'.tr),
+                SegmentTab(value: true, label: 'rooms.mode.rooms'.tr),
               ],
-              selected: controller.status.value,
-              onChanged: controller.setStatus,
+              selected: controller.roomMode.value,
+              onChanged: (on) {
+                controller.setRoomMode(on);
+                if (on && rooms.rooms.isEmpty && !rooms.loading.value) {
+                  unawaited(rooms.load());
+                }
+              },
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Obx(
-            () => Row(
+            () => TextField(
+              controller: controller.roomMode.value
+                  ? rooms.searchController
+                  : controller.searchController,
+              onChanged: controller.roomMode.value
+                  ? rooms.setQuery
+                  : controller.setQuery,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(LucideIcons.search, size: 20),
+                hintText: controller.roomMode.value
+                    ? 'rooms.search'.tr
+                    : 'equipment.list.search'.tr,
+                filled: true,
+                fillColor: context.isDark
+                    ? AppColors.mutedDark
+                    : AppColors.muted,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                border: _searchBorder,
+                enabledBorder: _searchBorder,
+                focusedBorder: _searchBorder,
+              ),
+            ),
+          ),
+          Obx(() {
+            if (controller.roomMode.value) return const SizedBox.shrink();
+            return Column(
               children: [
-                Expanded(
-                  child: _FilterChip(
-                    label: 'equipment.list.filterDepartment'.tr,
-                    value: controller.department.value?.name,
-                    onTap: () => controller.pickDepartment(context),
-                    onClear: controller.clearDepartment,
+                const SizedBox(height: AppSpacing.sm),
+                Obx(
+                  () => SegmentTabs<String>(
+                    tabs: [
+                      SegmentTab(
+                        value: '',
+                        label: 'equipment.list.status.all'.tr,
+                      ),
+                      SegmentTab(value: 'active', label: 'status.active'.tr),
+                      SegmentTab(value: 'broken', label: 'status.broken'.tr),
+                      SegmentTab(
+                        value: 'awaiting_parts',
+                        label: 'status.awaiting_parts'.tr,
+                      ),
+                      SegmentTab(
+                        value: 'suspended',
+                        label: 'status.suspended'.tr,
+                      ),
+                    ],
+                    selected: controller.status.value,
+                    onChanged: controller.setStatus,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _FilterChip(
-                    label: 'equipment.list.filterRoom'.tr,
-                    value: controller.room.value?.name,
-                    onTap: () => controller.pickRoom(context),
-                    onClear: controller.clearRoom,
+                const SizedBox(height: AppSpacing.sm),
+                Obx(
+                  () => Row(
+                    children: [
+                      Expanded(
+                        child: _FilterChip(
+                          label: 'equipment.list.filterDepartment'.tr,
+                          value: controller.department.value?.name,
+                          onTap: () => controller.pickDepartment(context),
+                          onClear: controller.clearDepartment,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: _FilterChip(
+                          label: 'equipment.list.filterRoom'.tr,
+                          value: controller.room.value?.name,
+                          onTap: () => controller.pickRoom(context),
+                          onClear: controller.clearRoom,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+          }),
         ],
       ),
       body: Obx(() {
+        if (controller.roomMode.value) {
+          return RoomsList(controller: rooms, onOpen: controller.openRoom);
+        }
         if (controller.loading.value && controller.items.isEmpty) {
           return const LoadingList();
         }

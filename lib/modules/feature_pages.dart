@@ -7,6 +7,7 @@ import '../core/services/attachment_service.dart';
 import '../core/stocktake/stocktake_local_store.dart';
 import '../core/storage/session_store.dart';
 import '../core/sync/outbox_service.dart';
+import '../data/models/room.dart';
 import '../data/repositories/calendar_repository.dart';
 import '../data/repositories/calibrations_repository.dart';
 import '../data/repositories/catalogs_repository.dart';
@@ -103,6 +104,7 @@ import 'equipment/tabs/timeline_tab.dart';
 import 'scan/lot_card_sheet.dart';
 import 'scan/scan_controller.dart';
 import 'scan/scan_view.dart';
+import 'rooms/rooms_controller.dart';
 import 'search/search_controller.dart';
 import 'search/search_view.dart';
 import 'sync/sync_controller.dart';
@@ -660,17 +662,31 @@ List<GetPage<dynamic>> featurePages() {
       name: Routes.equipmentList,
       page: () => const EquipmentListView(),
       middlewares: protected,
-      binding: BindingsBuilder(
-        () => Get.lazyPut(
+      binding: BindingsBuilder(() {
+        Get.lazyPut(
           () => EquipmentListController(
             equipment: Get.find<EquipmentRepository>(),
             departments: Get.find<DepartmentsRepository>(),
             catalogs: Get.find<CatalogsRepository>(),
             initialStatus: Get.parameters['status'],
             initialDepartmentId: Get.parameters['departmentId'],
+            initialRoom: switch (Get.arguments) {
+              {'room': final RoomRef room} => room,
+              _ => null,
+            },
           ),
-        ),
-      ),
+        );
+        // Mode "Theo phòng" của trang hồ sơ thiết bị.
+        Get.lazyPut(
+          () => RoomsController(
+            catalogs: Get.find<CatalogsRepository>(),
+            departments: Get.find<DepartmentsRepository>(),
+            reports: Get.find<ReportsRepository>(),
+            autoLoad: false,
+          ),
+          tag: RoomsController.tagEquipment,
+        );
+      }),
     ),
     GetPage(
       name: Routes.equipmentNew,

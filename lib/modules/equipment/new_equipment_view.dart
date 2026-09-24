@@ -30,6 +30,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
             Obx(
               () => TextField(
                 controller: controller.name,
+                focusNode: controller.nameFocus,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   labelText: 'equipment.new.name'.tr,
@@ -69,6 +70,13 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                   },
                 ),
               ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: controller.circulationNo,
+              decoration: InputDecoration(
+                labelText: 'equipment.circulationNo'.tr,
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             // Nhóm máy.

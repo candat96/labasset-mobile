@@ -10,6 +10,7 @@ class QtyField extends StatelessWidget {
   const QtyField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hintText,
     this.validator,
@@ -22,6 +23,9 @@ class QtyField extends StatelessWidget {
   });
 
   final TextEditingController controller;
+
+  /// Node do `SheetForm.focusNode(key)` cấp — để focus + cuộn tới ô khi lỗi.
+  final FocusNode? focusNode;
   final String? label;
   final String? hintText;
   final String? Function(String?)? validator;
@@ -41,6 +45,7 @@ class QtyField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       enabled: enabled,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],

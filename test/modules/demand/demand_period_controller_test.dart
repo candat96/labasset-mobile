@@ -96,7 +96,7 @@ void main() {
     expect(c.showConsolidation, isTrue);
     expect(c.consolidation.single.itemName, 'Thuốc thử ALT');
     expect(c.deptName('d1'), 'Khoa Xét nghiệm');
-    expect(c.deptName('missing'), 'Khoa/Phòng ban');
+    expect(c.deptName('missing'), 'Khoa');
   });
 
   test('kỳ collecting: không gọi tổng hợp', () async {

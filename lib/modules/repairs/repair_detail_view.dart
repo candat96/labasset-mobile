@@ -281,7 +281,9 @@ class _Overview extends StatelessWidget {
           child: AttachmentsGrid(
             entityType: 'repair_ticket',
             entityId: d.id,
-            kinds: const ['photo', 'video', 'other'],
+            // Ảnh đã có mục "Ảnh tình trạng" ở tab Tổng quan → không hiện lặp.
+            hidePhotos: true,
+            kinds: const ['video', 'other'],
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
@@ -353,6 +355,7 @@ Future<void> _addLog(BuildContext context, RepairDetailController c) async {
           SheetHeader(title: 'repairs.logs.add'.tr),
           TextField(
             controller: form.field('action'),
+            focusNode: form.focusNode('action'),
             autofocus: true,
             decoration: InputDecoration(
               labelText: 'repairs.logs.action'.tr,
@@ -596,6 +599,7 @@ Future<void> _diagnose(
           SheetHeader(title: 'repairs.diagnose.title'.tr),
           TextField(
             controller: form.field('text'),
+            focusNode: form.focusNode('text'),
             maxLines: 3,
             decoration: InputDecoration(
               labelText: 'repairs.diagnose.text'.tr,
@@ -704,6 +708,7 @@ Future<void> _complete(BuildContext context, RepairDetailController c) async {
           SheetHeader(title: 'repairs.complete.title'.tr),
           TextField(
             controller: form.field('summary'),
+            focusNode: form.focusNode('summary'),
             maxLines: 3,
             decoration: InputDecoration(
               labelText: 'repairs.complete.summary'.tr,
@@ -813,6 +818,7 @@ Future<void> _cancel(BuildContext context, RepairDetailController c) async {
           SheetHeader(title: 'repairs.cancel.title'.tr),
           TextField(
             controller: form.field('reason'),
+            focusNode: form.focusNode('reason'),
             autofocus: true,
             decoration: InputDecoration(
               labelText: 'repairs.cancel.reason'.tr,

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/config/env.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../data/repositories/auth_repository.dart';
 import 'auth_scaffold.dart';
 
@@ -13,12 +14,17 @@ class ForgotPasswordController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final hospitalCode = TextEditingController();
   final username = TextEditingController();
+  final hospitalCodeFocus = FocusNode();
+  final usernameFocus = FocusNode();
   final RxBool submitting = false.obs;
   final RxBool sent = false.obs;
   final RxnString error = RxnString();
 
   Future<void> submit() async {
-    if (!(formKey.currentState?.validate() ?? false)) return;
+    if (!(formKey.currentState?.validate() ?? false)) {
+      FormFocus.firstError([hospitalCodeFocus, usernameFocus]);
+      return;
+    }
     submitting.value = true;
     error.value = null;
     try {
@@ -40,6 +46,8 @@ class ForgotPasswordController extends GetxController {
   void onClose() {
     hospitalCode.dispose();
     username.dispose();
+    hospitalCodeFocus.dispose();
+    usernameFocus.dispose();
     super.onClose();
   }
 }
@@ -67,6 +75,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
               if (Env.isMulti) ...[
                 TextFormField(
                   controller: controller.hospitalCode,
+                  focusNode: controller.hospitalCodeFocus,
                   decoration: InputDecoration(
                     labelText: 'auth.login.hospitalCode'.tr,
                   ),
@@ -77,6 +86,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
               ],
               TextFormField(
                 controller: controller.username,
+                focusNode: controller.usernameFocus,
                 decoration: InputDecoration(
                   labelText: 'auth.login.username'.tr,
                 ),

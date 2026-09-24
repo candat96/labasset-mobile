@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/core/i18n/app_translations.dart';
-import 'package:labasset_mobile/data/models/equipment_extras.dart';
 import 'package:labasset_mobile/data/models/equipment_parts.dart';
+import 'package:labasset_mobile/data/models/repair_detail.dart';
 import 'package:labasset_mobile/data/repositories/faults_repository.dart';
 import 'package:labasset_mobile/modules/equipment/tabs/faults_tab.dart';
 import 'package:mocktail/mocktail.dart';
@@ -65,85 +65,86 @@ void main() {
   });
 
   group('FaultsTabController', () {
-    test('load theo model + lưu cache 24h', () async {
+    test('load lỗi thường gặp theo máy + lưu cache 24h', () async {
       final faults = _MockFaults();
       final cache = FakeKvCache();
       when(
-        () => faults.list(
-          model: 'Eppendorf',
+        () => faults.suggest(
+          equipmentId: 'e1',
           q: any(named: 'q'),
-          limit: 50,
         ),
       ).thenAnswer(
-        (_) async => const FaultPage(
-          items: [
-            FaultItem(
+        (_) async => const [
+          FaultSuggestionMatch(
+            fault: SuggestedFault(
               id: 'f1',
               title: 'Lỗi cảm biến',
-              model: 'Eppendorf',
               errorCode: 'E-01',
+              severity: 'high',
             ),
-          ],
-          total: 1,
-        ),
+            onEquipment: 2,
+            sameModel: 3,
+          ),
+        ],
       );
       final c = FaultsTabController(
         faults: faults,
-        model: 'Eppendorf',
+        equipmentId: 'e1',
         cache: cache,
       );
       await c.load();
-      expect(c.items.single.errorCode, 'E-01');
+      expect(c.items.single.fault.errorCode, 'E-01');
+      expect(c.items.single.onEquipment, 2);
       expect(c.fromCache.value, isFalse);
-      expect(cache.store.containsKey('faults.Eppendorf'), isTrue);
+      expect(cache.store.containsKey('faults.eq.e1'), isTrue);
     });
 
     test('mất mạng → dùng cache trong 24h', () async {
       final faults = _MockFaults();
       final cache = FakeKvCache();
-      await cache.put('faults.Eppendorf', {
+      await cache.put('faults.eq.e1', {
         'items': [
           {
-            'id': 'f1',
-            'title': 'Lỗi cảm biến',
-            'model': 'Eppendorf',
-            'errorCode': 'E-01',
-            'severity': 'high',
+            'fault': {
+              'id': 'f1',
+              'title': 'Lỗi cảm biến',
+              'errorCode': 'E-01',
+              'severity': 'high',
+            },
+            'occurrences': {'onEquipment': 1, 'sameModel': 0},
           },
         ],
       });
       when(
-        () => faults.list(
-          model: any(named: 'model'),
+        () => faults.suggest(
+          equipmentId: any(named: 'equipmentId'),
           q: any(named: 'q'),
-          limit: 50,
         ),
       ).thenThrow(Exception('offline'));
       final c = FaultsTabController(
         faults: faults,
-        model: 'Eppendorf',
+        equipmentId: 'e1',
         cache: cache,
       );
       await c.load();
       expect(c.fromCache.value, isTrue);
-      expect(c.items.single.errorCode, 'E-01');
+      expect(c.items.single.fault.errorCode, 'E-01');
       expect(c.error.value, isNull);
     });
 
     test('cache quá 24h → báo lỗi', () async {
       final faults = _MockFaults();
       final cache = FakeKvCache();
-      await cache.put('faults.Eppendorf', {'items': <dynamic>[]});
+      await cache.put('faults.eq.e1', {'items': <dynamic>[]});
       when(
-        () => faults.list(
-          model: any(named: 'model'),
+        () => faults.suggest(
+          equipmentId: any(named: 'equipmentId'),
           q: any(named: 'q'),
-          limit: 50,
         ),
       ).thenThrow(Exception('offline'));
       final c = FaultsTabController(
         faults: faults,
-        model: 'Eppendorf',
+        equipmentId: 'e1',
         cache: cache,
         now: () => DateTime.now().add(const Duration(hours: 25)),
       );

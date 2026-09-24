@@ -138,7 +138,7 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
             ],
           ),
           const TimelineTab(),
-          FaultsTab(model: e.model),
+          FaultsTab(equipmentId: e.id),
         ],
       );
     });
@@ -555,6 +555,7 @@ class _QuickActions extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: form.field('reason'),
+              focusNode: form.focusNode('reason'),
               decoration: InputDecoration(
                 labelText: 'equipment.status.reason'.tr,
                 hintText: 'equipment.status.reasonHint'.tr,
@@ -748,6 +749,7 @@ class _QuickActions extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: form.field('reason'),
+              focusNode: form.focusNode('reason'),
               decoration: InputDecoration(
                 labelText: 'equipment.transfer.reason'.tr,
                 errorText: form.error('reason'),

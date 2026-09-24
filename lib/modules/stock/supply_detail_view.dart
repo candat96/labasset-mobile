@@ -232,6 +232,7 @@ Future<void> _adjust(
           const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: form.field('reason'),
+            focusNode: form.focusNode('reason'),
             decoration: InputDecoration(
               labelText: 'stock.adjust.reason'.tr,
               errorText: form.error('reason'),

@@ -12,6 +12,8 @@ import 'confirm_sheet.dart';
 import 'empty_state.dart';
 import 'error_state.dart';
 import 'loading_list.dart';
+import 'photo_grid.dart';
+import 'photo_picker.dart';
 
 /// Nhãn loại tệp theo i18n, fallback chính mã kind.
 String attachmentKindLabel(String kind) {
@@ -30,6 +32,7 @@ class AttachmentsGrid extends StatefulWidget {
     this.canEdit = true,
     this.downloadable = false,
     this.photosOnly = false,
+    this.hidePhotos = false,
     this.title,
   });
 
@@ -41,6 +44,10 @@ class AttachmentsGrid extends StatefulWidget {
   final bool canEdit;
   final bool photosOnly;
   final String? title;
+
+  /// Ẩn ảnh (kind `photo`) — dùng cho mục "Tệp đính kèm" khi màn đã có mục
+  /// "Ảnh tình trạng" riêng (tránh một ảnh hiện ở hai chỗ).
+  final bool hidePhotos;
 
   /// Hiện nút "Tải về" trong hộp xem (lưu offline bằng path_provider).
   final bool downloadable;
@@ -144,51 +151,48 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
       if (picked == null) return;
       kind = picked;
     }
-    final source = imageSource ?? await _pickSource();
-    if (source == null) return;
     if (!mounted) return;
+    final images = imageSource == null
+        ? await PhotoPicker.pickWithSource(context)
+        : await PhotoPicker.pick(context, imageSource);
+    if (images.isEmpty || !mounted) return;
     setState(() => _uploading = true);
+    var uploaded = 0;
+    var queued = 0;
     try {
-      final result = await _service.addImage(
-        entityType: widget.entityType,
-        entityId: widget.entityId,
-        kind: kind,
-        source: source,
-      );
-      switch (result.status) {
-        case AttachmentUploadStatus.uploaded:
-          AppSnackbar.success('attachment.uploaded'.tr);
-          await _load();
-        case AttachmentUploadStatus.queued:
-          AppSnackbar.info('attachment.queued'.tr);
-        case AttachmentUploadStatus.cancelled:
-          break;
+      for (final image in images) {
+        try {
+          final result = await _service.uploadPicked(
+            entityType: widget.entityType,
+            entityId: widget.entityId,
+            kind: kind,
+            picked: image,
+          );
+          switch (result.status) {
+            case AttachmentUploadStatus.uploaded:
+              uploaded++;
+            case AttachmentUploadStatus.queued:
+              queued++;
+            case AttachmentUploadStatus.cancelled:
+              break;
+          }
+        } catch (e) {
+          AppSnackbar.error(e);
+        }
       }
-    } catch (e) {
-      AppSnackbar.error(e);
+      if (uploaded > 0) {
+        AppSnackbar.success(
+          'attachment.uploadedCount'.trParams({'n': '$uploaded'}),
+        );
+        await _load();
+      }
+      if (queued > 0) {
+        AppSnackbar.info('attachment.queuedCount'.trParams({'n': '$queued'}));
+      }
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
   }
-
-  Future<ImageSource?> _pickSource() => AppSheet.show<ImageSource>(
-    context,
-    builder: (ctx) => Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ListTile(
-          leading: const Icon(Icons.photo_camera_outlined),
-          title: Text('common.fromCamera'.tr),
-          onTap: () => AppSheet.close(ctx, ImageSource.camera),
-        ),
-        ListTile(
-          leading: const Icon(Icons.photo_library_outlined),
-          title: Text('common.fromGallery'.tr),
-          onTap: () => AppSheet.close(ctx, ImageSource.gallery),
-        ),
-      ],
-    ),
-  );
 
   Future<void> _download(String url, AttachmentView a) async {
     try {
@@ -317,9 +321,10 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final visibleItems = widget.photosOnly
-        ? _items.where((a) => a.kind == 'photo').toList()
-        : _items;
+    final visibleItems = _items
+        .where((a) => !widget.photosOnly || a.kind == 'photo')
+        .where((a) => !widget.hidePhotos || a.kind != 'photo')
+        .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -341,88 +346,38 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
         ),
         if (widget.photosOnly) ...[
           Text('attachment.conditionHint'.tr),
-          if (widget.canEdit)
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _uploading
-                      ? null
-                      : () => _add(imageSource: ImageSource.camera),
-                  icon: const Icon(Icons.photo_camera_outlined),
-                  label: Text('common.fromCamera'.tr),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _uploading
-                      ? null
-                      : () => _add(imageSource: ImageSource.gallery),
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: Text('common.fromGallery'.tr),
-                ),
-              ],
-            ),
+          const SizedBox(height: AppSpacing.sm),
         ],
         if (_uploading) const LinearProgressIndicator(),
         if (_loading)
           const SizedBox(height: 120, child: LoadingList(rows: 1, height: 100))
         else if (_error != null)
           ErrorState(error: _error!, onRetry: _load)
-        else if (visibleItems.isEmpty)
+        else if (visibleItems.isEmpty && !widget.canEdit)
           EmptyState(
             icon: Icons.attach_file_outlined,
             title: 'attachment.empty'.tr,
           )
         else
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [for (final a in visibleItems) _tile(a)],
+          PhotoGrid(
+            tiles: [for (final a in visibleItems) _tile(a)],
+            onAdd: widget.canEdit ? () => _add() : null,
+            addLabel: 'attachment.addPhotos'.tr,
           ),
       ],
     );
   }
 
-  Widget _tile(AttachmentView a) {
-    final theme = Theme.of(context);
+  PhotoGridTile _tile(AttachmentView a) {
     final url = _urls[a.fileId];
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
+    return PhotoGridTile(
+      image: a.isImage && url != null ? NetworkImage(url) : null,
+      fileLabel: a.displayName.isNotEmpty
+          ? a.displayName
+          : attachmentKindLabel(a.kind),
       onTap: () => _open(a),
-      onLongPress: widget.canEdit ? () => _delete(a) : null,
-      child: SizedBox(
-        width: 96,
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              child: SizedBox(
-                width: 96,
-                height: 96,
-                child: a.isImage && url != null
-                    ? Image.network(
-                        url,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            const Icon(Icons.broken_image_outlined, size: 32),
-                      )
-                    : Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: const Icon(Icons.insert_drive_file_outlined),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              a.displayName.isNotEmpty
-                  ? a.displayName
-                  : attachmentKindLabel(a.kind),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall,
-            ),
-          ],
-        ),
-      ),
+      onRemove: widget.canEdit ? () => _delete(a) : null,
+      removeTooltip: 'attachment.deleteConfirm'.tr,
     );
   }
 }

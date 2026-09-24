@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../core/errors/api_error.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../data/models/equipment.dart';
 import '../../data/models/repair_detail.dart';
 import '../../data/repositories/equipment_repository.dart';
@@ -41,12 +40,14 @@ class RepairFormController extends GetxController {
   final Rxn<EquipmentRef> equipmentRef = Rxn<EquipmentRef>();
   final description = TextEditingController();
   final errorCode = TextEditingController();
+
+  /// Focus ô mô tả khi thiếu (bàn phím không che ô lỗi).
+  final descriptionFocus = FocusNode();
   final RxString severity = 'medium'.obs;
   final RxBool equipmentDown = false.obs;
   final RxnString selectedFaultId = RxnString();
   final RxList<FaultSuggestionMatch> suggestions = <FaultSuggestionMatch>[].obs;
-  final RxList<({Uint8List bytes, String name, String mime})> photos =
-      <({Uint8List bytes, String name, String mime})>[].obs;
+  final RxList<PickedImage> photos = <PickedImage>[].obs;
   final RxBool submitting = false.obs;
   final RxString error = ''.obs;
 
@@ -120,10 +121,24 @@ class RepairFormController extends GetxController {
     }
   }
 
-  Future<void> addPhoto({ImageSource source = ImageSource.gallery}) async {
-    final picked = await attachments.pickImageBytes(source: source);
-    if (picked == null) return;
-    photos.add(picked);
+  /// Thêm ảnh đã chọn; bỏ ảnh trùng hoàn toàn (chọn lại đúng ảnh cũ).
+  void addPhotos(List<PickedImage> picked) {
+    for (final p in picked) {
+      if (photos.any((x) => _sameImage(x, p))) continue;
+      photos.add(p);
+    }
+  }
+
+  void removePhoto(PickedImage p) => photos.remove(p);
+
+  /// Cùng tên + cùng kích thước + cùng nội dung (chọn lại đúng ảnh cũ).
+  static bool _sameImage(PickedImage a, PickedImage b) {
+    if (identical(a.bytes, b.bytes)) return true;
+    if (a.name != b.name || a.bytes.length != b.bytes.length) return false;
+    for (var i = 0; i < a.bytes.length; i++) {
+      if (a.bytes[i] != b.bytes[i]) return false;
+    }
+    return true;
   }
 
   Future<bool> submit() async {
@@ -135,6 +150,7 @@ class RepairFormController extends GetxController {
     }
     if (description.text.trim().isEmpty) {
       error.value = 'repairs.form.descriptionRequired'.tr;
+      FormFocus.reveal(descriptionFocus);
       return false;
     }
     error.value = '';
@@ -187,6 +203,7 @@ class RepairFormController extends GetxController {
     description.removeListener(_onInputChanged);
     description.dispose();
     errorCode.dispose();
+    descriptionFocus.dispose();
     super.onClose();
   }
 }

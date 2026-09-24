@@ -8,6 +8,7 @@ class DateField extends StatelessWidget {
   const DateField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hintText,
     this.validator,
@@ -19,6 +20,9 @@ class DateField extends StatelessWidget {
   });
 
   final TextEditingController controller;
+
+  /// Node do `SheetForm.focusNode(key)` cấp — để cuộn tới ô khi lỗi.
+  final FocusNode? focusNode;
   final String? label;
   final String? hintText;
   final String? Function(String?)? validator;
@@ -45,6 +49,7 @@ class DateField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       enabled: enabled,
       readOnly: true,
       onTap: enabled ? () => _pick(context) : null,

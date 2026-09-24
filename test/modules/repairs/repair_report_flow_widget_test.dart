@@ -124,6 +124,38 @@ MockRepairs registerFakes() {
 void main() {
   tearDown(Get.reset);
 
+  test('addPhotos bỏ ảnh trùng hoàn toàn, giữ ảnh khác', () {
+    final c = RepairFormController(
+      repairs: MockRepairs(),
+      equipment: MockEquipment(),
+      faults: MockFaults(),
+      attachments: MockAttachments(),
+      popWithId: (_) async {},
+    );
+    final a = (
+      bytes: Uint8List.fromList([1, 2, 3]),
+      name: 'a.jpg',
+      mime: 'image/jpeg',
+    );
+    final aCopy = (
+      bytes: Uint8List.fromList([1, 2, 3]),
+      name: 'a.jpg',
+      mime: 'image/jpeg',
+    );
+    final b = (
+      bytes: Uint8List.fromList([9]),
+      name: 'b.jpg',
+      mime: 'image/jpeg',
+    );
+
+    c.addPhotos([a, aCopy, b]);
+    expect(c.photos.map((p) => p.name), ['a.jpg', 'b.jpg']);
+
+    c.removePhoto(a);
+    expect(c.photos.map((p) => p.name), ['b.jpg']);
+    c.onClose();
+  });
+
   test('ảnh chụp lúc báo hỏng được gắn vào cùng phiếu khi thử lại', () async {
     final repairs = MockRepairs();
     final attachments = MockAttachments();
@@ -174,7 +206,7 @@ void main() {
       name: 'Máy',
     );
     c.description.text = 'Máy hỏng';
-    await c.addPhoto(source: ImageSource.camera);
+    c.addPhotos([(bytes: bytes, name: 'hong.jpg', mime: 'image/jpeg')]);
     expect(c.photos.length, 1);
     expect(await c.submit(), false);
     expect(await c.submit(), true);

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/format/format.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/section_card.dart';
 import '../../../data/models/equipment_detail.dart';
@@ -28,10 +30,43 @@ class SpecsTab extends StatelessWidget {
               _row(context, 'equipment.model'.tr, e.model),
               _row(context, 'equipment.serial'.tr, e.serial),
               _row(context, 'equipment.assetCode'.tr, e.assetCode),
+              _row(context, 'equipment.countryOfOrigin'.tr, e.countryOfOrigin),
+              _row(
+                context,
+                'equipment.manufactureYear'.tr,
+                e.manufactureYear?.toString(),
+              ),
+              _row(context, 'equipment.circulationNo'.tr, e.circulationNo),
+              _row(
+                context,
+                'equipment.purchaseContractNo'.tr,
+                e.purchaseContractNo,
+              ),
+              _row(context, 'equipment.decisionNo'.tr, e.decisionNo),
               _row(context, 'equipment.group'.tr, e.group?.name),
               _row(context, 'equipment.manufacturer'.tr, e.manufacturer?.name),
-              _row(context, 'equipment.department'.tr, e.department?.name),
-              _row(context, 'equipment.room.name'.tr, e.room?.name),
+              _linkedRow(
+                context,
+                'equipment.department'.tr,
+                e.department?.name,
+                onTap: e.department == null
+                    ? null
+                    : () => Get.toNamed(
+                        Routes.equipmentList,
+                        parameters: {'departmentId': e.department!.id},
+                      ),
+              ),
+              _linkedRow(
+                context,
+                'equipment.room.name'.tr,
+                e.room?.name,
+                onTap: e.room == null
+                    ? null
+                    : () => Get.toNamed(
+                        Routes.equipmentList,
+                        arguments: {'room': e.room},
+                      ),
+              ),
               _row(context, 'equipment.location.label'.tr, e.location),
               _row(context, 'equipment.staff'.tr, e.staffInCharge?.fullName),
               _row(
@@ -106,6 +141,54 @@ class SpecsTab extends StatelessWidget {
           ),
           Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
         ],
+      ),
+    );
+  }
+
+  /// Dòng bấm được: mở danh sách máy theo khoa/phòng của giá trị đó.
+  Widget _linkedRow(
+    BuildContext context,
+    String label,
+    String? value, {
+    required VoidCallback? onTap,
+  }) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final row = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 130,
+          child: Text(label, style: theme.textTheme.bodySmall),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: onTap == null ? null : theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        if (onTap != null)
+          Icon(
+            LucideIcons.chevronRight,
+            size: 16,
+            color: theme.colorScheme.primary,
+          ),
+      ],
+    );
+    if (onTap == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: row,
+      );
+    }
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: row,
       ),
     );
   }

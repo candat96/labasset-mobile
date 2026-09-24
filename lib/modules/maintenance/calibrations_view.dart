@@ -7,6 +7,7 @@ import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/date_field.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/form_focus.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/money_field.dart';
 import '../../core/widgets/picker_sheet.dart';
@@ -125,6 +126,12 @@ Future<void> _completeSheet(
   String? certificateFileId;
   String? certificateName;
   final formKey = GlobalKey<FormState>();
+  // Ô lỗi được focus + cuộn tới khi validate/hiện lỗi field (bàn phím không che).
+  final performedAtFocus = FocusNode();
+  final certificateNoFocus = FocusNode();
+  final findingsFocus = FocusNode();
+  final cycleFocus = FocusNode();
+  final nextDueFocus = FocusNode();
   await AppSheet.show<void>(
     context,
     builder: (ctx) => SheetForm(
@@ -149,6 +156,7 @@ Future<void> _completeSheet(
                 const SizedBox(height: AppSpacing.md),
                 DateField(
                   controller: performedAt,
+                  focusNode: performedAtFocus,
                   label: 'calibration.performedAt'.tr,
                   required: true,
                 ),
@@ -199,6 +207,7 @@ Future<void> _completeSheet(
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: certificateNo,
+                  focusNode: certificateNoFocus,
                   decoration: InputDecoration(
                     labelText: 'calibration.certificateNo'.tr,
                     errorText: c.fieldErrors['certificateNo'],
@@ -232,6 +241,7 @@ Future<void> _completeSheet(
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: findings,
+                  focusNode: findingsFocus,
                   decoration: InputDecoration(
                     labelText: 'calibration.findings'.tr,
                     errorText: c.fieldErrors['findings'],
@@ -242,17 +252,31 @@ Future<void> _completeSheet(
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: cycle,
+                  focusNode: cycleFocus,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'calibration.cycleMonths'.tr,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                DateField(controller: nextDue, label: 'calibration.nextDue'.tr),
+                DateField(
+                  controller: nextDue,
+                  focusNode: nextDueFocus,
+                  label: 'calibration.nextDue'.tr,
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton(
                   onPressed: () async {
-                    if (!(formKey.currentState?.validate() ?? false)) return;
+                    if (!(formKey.currentState?.validate() ?? false)) {
+                      FormFocus.firstError([
+                        performedAtFocus,
+                        certificateNoFocus,
+                        findingsFocus,
+                        cycleFocus,
+                        nextDueFocus,
+                      ]);
+                      return;
+                    }
                     final ok = await c.complete(
                       calibration,
                       performedAt: _iso(performedAt.text) ?? performedAt.text,
@@ -273,7 +297,14 @@ Future<void> _completeSheet(
                           ? null
                           : _iso(nextDue.text),
                     );
-                    if (ok) form.close();
+                    if (ok) {
+                      form.close();
+                    } else if (c.fieldErrors['certificateNo'] != null) {
+                      // Lỗi 400 gắn field → đưa ô lỗi lên trên bàn phím.
+                      FormFocus.reveal(certificateNoFocus);
+                    } else if (c.fieldErrors['findings'] != null) {
+                      FormFocus.reveal(findingsFocus);
+                    }
                   },
                   child: Text('common.save'.tr),
                 ),
@@ -284,6 +315,11 @@ Future<void> _completeSheet(
       },
     ),
   );
+  performedAtFocus.dispose();
+  certificateNoFocus.dispose();
+  findingsFocus.dispose();
+  cycleFocus.dispose();
+  nextDueFocus.dispose();
 }
 
 String? _iso(String display) {

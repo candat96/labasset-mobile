@@ -21,8 +21,10 @@ class EquipmentListController extends GetxController {
     required this.catalogs,
     String? initialStatus,
     String? initialDepartmentId,
+    RoomRef? initialRoom,
   }) : status = (initialStatus ?? '').obs,
-       _initialDepartmentId = initialDepartmentId;
+       _initialDepartmentId = initialDepartmentId,
+       _initialRoom = initialRoom;
 
   final EquipmentRepository equipment;
   final DepartmentsRepository departments;
@@ -42,9 +44,13 @@ class EquipmentListController extends GetxController {
   final RxBool loadingMore = false.obs;
   final Rxn<Object> error = Rxn<Object>();
 
+  /// Mode "Theo phòng": hiện danh sách phòng (kèm tổng số máy) thay vì danh sách máy.
+  final RxBool roomMode = false.obs;
+
   int _page = 1;
   Timer? _debounce;
   final String? _initialDepartmentId;
+  final RoomRef? _initialRoom;
 
   bool get hasMore => items.length < total.value;
 
@@ -55,6 +61,12 @@ class EquipmentListController extends GetxController {
   }
 
   Future<void> _bootstrap() async {
+    // Lọc sẵn theo phòng khi mở từ màn "Phòng" (kèm cả khoa của phòng đó).
+    final initial = _initialRoom;
+    if (initial != null) {
+      await _applyRoom(initial);
+      return;
+    }
     final id = _initialDepartmentId;
     if (id != null && id.isNotEmpty) {
       try {
@@ -62,6 +74,33 @@ class EquipmentListController extends GetxController {
         department.value = list.where((d) => d.id == id).firstOrNull;
       } catch (_) {
         // bỏ qua — vẫn tải danh sách
+      }
+    }
+    await load();
+  }
+
+  /// Bật/tắt mode "Theo phòng".
+  void setRoomMode(bool on) {
+    if (roomMode.value == on) return;
+    roomMode.value = on;
+  }
+
+  /// Mở danh sách máy của [room] (kèm khoa của phòng) và thoát mode phòng.
+  Future<void> openRoom(RoomRef value) async {
+    roomMode.value = false;
+    await _applyRoom(value);
+  }
+
+  /// Lọc theo phòng + nạp khoa của phòng đó rồi tải lại danh sách.
+  Future<void> _applyRoom(RoomRef value) async {
+    room.value = value;
+    final deptId = value.departmentId;
+    if (deptId != null && deptId.isNotEmpty) {
+      try {
+        final list = await departments.list(limit: 100);
+        department.value = list.where((d) => d.id == deptId).firstOrNull;
+      } catch (_) {
+        // bỏ qua — vẫn tải danh sách theo phòng
       }
     }
     await load();

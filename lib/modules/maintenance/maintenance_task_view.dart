@@ -471,6 +471,7 @@ Future<void> _sign(BuildContext context, MaintenanceTaskController c) async {
           SheetHeader(title: 'maintenance.sign'.tr),
           TextField(
             controller: form.field('name'),
+            focusNode: form.focusNode('name'),
             autofocus: true,
             decoration: InputDecoration(
               labelText: 'repairs.sign.signer'.tr,

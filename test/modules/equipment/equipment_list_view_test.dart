@@ -7,6 +7,7 @@ import 'package:labasset_mobile/data/repositories/departments_repository.dart';
 import 'package:labasset_mobile/data/repositories/equipment_repository.dart';
 import 'package:labasset_mobile/modules/equipment/equipment_list_controller.dart';
 import 'package:labasset_mobile/modules/equipment/equipment_list_view.dart';
+import 'package:labasset_mobile/modules/rooms/rooms_controller.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../helpers/test_helpers.dart';
@@ -67,6 +68,14 @@ void main() {
         catalogs: Get.find<CatalogsRepository>(),
       ),
     );
+    Get.put(
+      RoomsController(
+        catalogs: Get.find<CatalogsRepository>(),
+        departments: Get.find<DepartmentsRepository>(),
+        autoLoad: false,
+      ),
+      tag: RoomsController.tagEquipment,
+    );
 
     await tester.pumpWidget(wrap(const EquipmentListView()));
     await tester.pumpAndSettle();
@@ -92,6 +101,14 @@ void main() {
         departments: Get.find<DepartmentsRepository>(),
         catalogs: Get.find<CatalogsRepository>(),
       ),
+    );
+    Get.put(
+      RoomsController(
+        catalogs: Get.find<CatalogsRepository>(),
+        departments: Get.find<DepartmentsRepository>(),
+        autoLoad: false,
+      ),
+      tag: RoomsController.tagEquipment,
     );
 
     await tester.pumpWidget(wrap(const EquipmentListView()));

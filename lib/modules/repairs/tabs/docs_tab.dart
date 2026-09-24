@@ -34,8 +34,9 @@ class _DocsTabState extends State<DocsTab> {
         AttachmentsGrid(
           entityType: 'repair_ticket',
           entityId: widget.ticketId,
+          // Ảnh đã có mục "Ảnh tình trạng" riêng → không hiện lặp ở đây.
+          hidePhotos: true,
           kinds: const [
-            'photo',
             'video',
             'signature_technician',
             'signature_department',

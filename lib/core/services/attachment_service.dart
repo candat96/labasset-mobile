@@ -16,6 +16,9 @@ import '../sync/outbox_service.dart';
 /// Kết quả tải tệp: lên thẳng, xếp hàng offline, hoặc người dùng huỷ chọn.
 enum AttachmentUploadStatus { uploaded, queued, cancelled }
 
+/// Ảnh đã chọn (đã nén nếu là ảnh) — chưa tải lên.
+typedef PickedImage = ({Uint8List bytes, String name, String mime});
+
 class AttachmentUploadResult {
   const AttachmentUploadResult(this.status, [this.attachment]);
 
@@ -44,8 +47,9 @@ class AttachmentService {
   final Dio _uploadDio;
   final Future<String> Function(Uint8List bytes, String name) _persist;
 
-  /// Chọn/chụp ảnh nhưng chưa gắn vào đối tượng nào (trả bytes để upload sau).
-  Future<({Uint8List bytes, String name, String mime})?> pickImageBytes({
+  /// Chọn/chụp **một** ảnh nhưng chưa gắn vào đối tượng nào (trả bytes để
+  /// upload sau).
+  Future<PickedImage?> pickImageBytes({
     ImageSource source = ImageSource.gallery,
   }) async {
     final XFile? picked;
@@ -55,6 +59,27 @@ class AttachmentService {
       return null;
     }
     if (picked == null) return null;
+    return _readImage(picked);
+  }
+
+  /// Chọn **nhiều** ảnh từ thư viện một lúc (`pickMultiImage`), giữ thứ tự chọn.
+  Future<List<PickedImage>> pickImageBytesMulti() async {
+    final List<XFile> picked;
+    try {
+      picked = await _picker.pickMultiImage();
+    } catch (_) {
+      return const [];
+    }
+    final out = <PickedImage>[];
+    for (final x in picked) {
+      final one = await _readImage(x);
+      if (one != null) out.add(one);
+    }
+    return out;
+  }
+
+  /// Đọc + nén ảnh đã chọn thành [PickedImage].
+  Future<PickedImage?> _readImage(XFile picked) async {
     var bytes = await picked.readAsBytes();
     var name = picked.name;
     var mime = _mimeOf(name);
@@ -85,44 +110,22 @@ class AttachmentService {
     }
   }
 
-  /// Chọn/chụp ảnh rồi tải lên (nén ≤ 1600 px nếu cần).
-  Future<AttachmentUploadResult> addImage({
+  /// Tải ảnh đã chọn (từ [pickImageBytes]/[pickImageBytesMulti]) lên.
+  Future<AttachmentUploadResult> uploadPicked({
     required String entityType,
     required String entityId,
     required String kind,
-    ImageSource source = ImageSource.gallery,
+    required PickedImage picked,
     String? label,
-  }) async {
-    final XFile? picked;
-    try {
-      picked = await _picker.pickImage(source: source);
-    } catch (_) {
-      return const AttachmentUploadResult(AttachmentUploadStatus.cancelled);
-    }
-    if (picked == null) {
-      return const AttachmentUploadResult(AttachmentUploadStatus.cancelled);
-    }
-    var bytes = await picked.readAsBytes();
-    var name = picked.name;
-    var mime = _mimeOf(name);
-    if (mime.startsWith('image/')) {
-      final compressed = await _compress(picked);
-      if (compressed != null) {
-        bytes = compressed;
-        if (name.toLowerCase().endsWith('.png')) name = '$name.jpg';
-        mime = 'image/jpeg';
-      }
-    }
-    return uploadBytes(
-      entityType: entityType,
-      entityId: entityId,
-      kind: kind,
-      name: name,
-      mime: mime,
-      bytes: bytes,
-      label: label,
-    );
-  }
+  }) => uploadBytes(
+    entityType: entityType,
+    entityId: entityId,
+    kind: kind,
+    name: picked.name,
+    mime: picked.mime,
+    bytes: picked.bytes,
+    label: label,
+  );
 
   /// Tải bytes lên (chữ ký PNG, ảnh đã nén…). Offline → outbox.
   Future<AttachmentUploadResult> uploadBytes({

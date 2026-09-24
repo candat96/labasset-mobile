@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:get/get.dart';
 
@@ -36,6 +38,7 @@ import 'stocktake/stocktake_counts_handler.dart';
 import 'stocktake/stocktake_local_store.dart';
 import 'network/connectivity.dart';
 import 'network/dio_client.dart';
+import 'network/session_check.dart';
 import 'routes/app_routes.dart';
 import 'services/attachment_service.dart';
 import 'storage/session_store.dart';
@@ -130,6 +133,17 @@ Future<void> bootstrap() async {
     permanent: true,
   );
   Get.put(LockController(store: store), permanent: true);
+
+  // Phiên cũ: kiểm tra token còn hạn bằng `GET /auth/me` ngay sau frame đầu.
+  // Còn hạn → vào thẳng, không phải đăng nhập lại; hết hạn → interceptor refresh,
+  // refresh hỏng thì xoá phiên và về /login; mất mạng → giữ phiên để dùng offline.
+  if (store.isLoggedIn) {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => unawaited(
+        validateSession(store: store, auth: Get.find<AuthRepository>()),
+      ),
+    );
+  }
 }
 
 /// Đăng ký theo interface vì các route/controller tra cứu bằng abstraction.

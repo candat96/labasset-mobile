@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'form_focus.dart';
 
 /// Bottom sheet dùng chung cho toàn app.
 ///
@@ -178,6 +179,7 @@ class SheetForm extends StatefulWidget {
 
 class SheetFormState extends State<SheetForm> {
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String> _errors = {};
   bool busy = false;
 
@@ -186,6 +188,18 @@ class SheetFormState extends State<SheetForm> {
     key,
     () => TextEditingController(text: widget.initial[key] ?? ''),
   );
+
+  /// FocusNode cho ô [key] — truyền vào `focusNode:` của ô nhập để [setError]
+  /// tự focus + cuộn tới ô lỗi.
+  FocusNode focusNode(String key) =>
+      _focusNodes.putIfAbsent(key, FocusNode.new);
+
+  /// Focus + cuộn tới ô [key] (khi cần chỉ đúng ô lỗi).
+  void focusField(String key) {
+    if (!mounted) return;
+    final node = _focusNodes[key];
+    if (node != null) FormFocus.reveal(node);
+  }
 
   /// Chuỗi đã trim của ô [key].
   String text(String key) => field(key).text.trim();
@@ -199,22 +213,29 @@ class SheetFormState extends State<SheetForm> {
   /// Lỗi hiện dưới ô [key] (null = không lỗi).
   String? error(String key) => _errors[key];
 
-  void setError(String key, String? message) => refresh(() {
-    if (message == null) {
-      _errors.remove(key);
-    } else {
-      _errors[key] = message;
-    }
-  });
+  /// Gắn lỗi dưới ô [key]; mặc định focus + cuộn tới ô đó (bàn phím không che).
+  void setError(String key, String? message, {bool focus = true}) {
+    refresh(() {
+      if (message == null) {
+        _errors.remove(key);
+      } else {
+        _errors[key] = message;
+      }
+    });
+    if (message != null && focus) focusField(key);
+  }
 
   void clearErrors() => refresh(_errors.clear);
 
-  /// Gán nhiều lỗi field (từ `ApiError.fieldErrors`).
-  void setErrors(Map<String, String> errors) => refresh(() {
-    _errors
-      ..clear()
-      ..addAll(errors);
-  });
+  /// Gán nhiều lỗi field (từ `ApiError.fieldErrors`), focus ô lỗi đầu tiên.
+  void setErrors(Map<String, String> errors, {bool focus = true}) {
+    refresh(() {
+      _errors
+        ..clear()
+        ..addAll(errors);
+    });
+    if (focus && errors.isNotEmpty) focusField(errors.keys.first);
+  }
 
   /// Đánh dấu đang gửi (khoá nút).
   void setBusy(bool value) => refresh(() => busy = value);
@@ -238,12 +259,19 @@ class SheetFormState extends State<SheetForm> {
     for (final c in _controllers.values) {
       c.dispose();
     }
+    for (final n in _focusNodes.values) {
+      n.dispose();
+    }
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Padding(padding: widget.padding, child: widget.builder(context, this));
+  Widget build(BuildContext context) => Padding(
+    padding: widget.padding,
+    // Tự cuộn: bàn phím hiện làm sheet thấp đi nhưng form dài vẫn xem/sửa được
+    // hết ô (trước đây sheet dùng Column trần nên tràn khi bàn phím mở).
+    child: SingleChildScrollView(child: widget.builder(context, this)),
+  );
 }
 
 /// Hộp thoại nhập một chuỗi (tên người ký, lý do…). Controller do dialog sở
@@ -300,11 +328,13 @@ class _PromptDialogState extends State<_PromptDialog> {
   late final TextEditingController _text = TextEditingController(
     text: widget.initial ?? '',
   );
+  final FocusNode _focus = FocusNode();
   String? _error;
 
   @override
   void dispose() {
     _text.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -312,6 +342,8 @@ class _PromptDialogState extends State<_PromptDialog> {
     final v = _text.text.trim();
     if (widget.required && v.isEmpty) {
       setState(() => _error = 'common.required'.tr);
+      // Giữ focus + cuộn ô lên khi bàn phím che mất.
+      FormFocus.reveal(_focus);
       return;
     }
     Navigator.of(context, rootNavigator: true).pop(v);
@@ -322,6 +354,7 @@ class _PromptDialogState extends State<_PromptDialog> {
     title: Text(widget.title),
     content: TextField(
       controller: _text,
+      focusNode: _focus,
       autofocus: true,
       maxLines: widget.maxLines,
       onSubmitted: (_) => _submit(),

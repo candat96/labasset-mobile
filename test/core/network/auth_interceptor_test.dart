@@ -79,7 +79,7 @@ void main() {
       ),
     ).thenAnswer((_) async {});
     when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
-    store = SessionStore(storage: storage, checkFreshInstall: false);
+    store = SessionStore(storage: storage);
     await store.saveSession(LoginResult.fromJson(_session()));
     logoutReasons = [];
     route = (o) async => (404, {'code': 'NOT_FOUND', 'message': ''});

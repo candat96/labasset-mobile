@@ -26,6 +26,7 @@ class OtpView extends GetView<OtpController> {
             children: [
               TextFormField(
                 controller: controller.code,
+                focusNode: controller.codeFocus,
                 autofocus: true,
                 keyboardType: TextInputType.number,
                 maxLength: 6,
