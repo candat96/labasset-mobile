@@ -4,35 +4,42 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const primary = Color(0xFF2977FF);
-  static const primaryHover = Color(0xFF1E63E0);
-  static const primaryPressed = Color(0xFF1A55C2);
+  static const primary = Color(0xFF006FEE);
+  static const primaryHover = Color(0xFF005BC4);
+  static const primaryPressed = Color(0xFF004A9E);
   static const onPrimary = Color(0xFFFFFFFF);
-  static const primaryContainer = Color(0xFFE8F0FF);
-  static const onPrimaryContainer = Color(0xFF1747A6);
-  static const link = Color(0xFF1E63E0);
-  static const primaryDark = Color(0xFF5C9BFF);
-  static const primaryHoverDark = Color(0xFF7DB0FF);
-  static const onPrimaryDark = Color(0xFF0B1A33);
-  static const primaryContainerDark = Color(0xFF132B57);
-  static const onPrimaryContainerDark = Color(0xFFBFD6FF);
-  static const linkDark = Color(0xFF7DB0FF);
+  static const primaryContainer = Color(0xFFE6F1FE);
+  static const onPrimaryContainer = Color(0xFF005BC4);
+  static const link = Color(0xFF005BC4);
+  static const primaryDark = Color(0xFF4C9DFF);
+  static const primaryHoverDark = Color(0xFF6FB2FF);
+  static const onPrimaryDark = Color(0xFF08182E);
+  static const primaryContainerDark = Color(0xFF0A2A52);
+  static const onPrimaryContainerDark = Color(0xFFBFD9FF);
+  static const linkDark = Color(0xFF6FB2FF);
 
   /// Nền màn hình: trắng thuần (người dùng chốt 2026-09-21); card tách lớp
   /// bằng viền [cardBorder] + bóng [AppShadows.card], không dùng nền xám.
   static const background = Color(0xFFFFFFFF);
-  static const foreground = Color(0xFF0F172A);
+
+  /// Nền vùng nội dung (Figma: default-100).
+  static const surfaceAlt = Color(0xFFF4F4F5);
+
+  /// Màu nhấn phụ (Figma: colors/base/secondary).
+  static const accentPurple = Color(0xFF7828C8);
+  static const accentPurpleContainer = Color(0xFFF2EAFA);
+  static const foreground = Color(0xFF11181C);
   static const card = Color(0xFFFFFFFF);
   static const cardBorder = Color(0x0F101828);
-  static const subtle = Color(0xFF94A3B8);
+  static const subtle = Color(0xFFA1A1AA);
 
   /// Vùng phụ (chip, nền ô tìm, segment, chip icon trung tính).
-  static const muted = Color(0xFFF6F8FC);
-  static const segment = Color(0xFFE9EDF5);
-  static const mutedForeground = Color(0xFF64748B);
-  static const border = Color(0xFFE2E8F0);
-  static const divider = Color(0xFFEEF2F7);
-  static const timelineLine = Color(0xFFE5E9F2);
+  static const muted = Color(0xFFF4F4F5);
+  static const segment = Color(0xFFEFEFF1);
+  static const mutedForeground = Color(0xFF71717A);
+  static const border = Color(0xFFD4D4D8);
+  static const divider = Color(0xFFE4E4E7);
+  static const timelineLine = Color(0xFFE4E4E7);
 
   static const backgroundDark = Color(0xFF0B1220);
   static const foregroundDark = Color(0xFFE5EAF2);
@@ -45,29 +52,29 @@ class AppColors {
   static const borderDark = Color(0xFF26334D);
   static const dividerDark = Color(0xFF1C2739);
 
-  static const success = Color(0xFF15803D);
-  static const successBackground = Color(0xFFDCFCE7);
-  static const successForeground = Color(0xFF166534);
-  static const warning = Color(0xFFB45309);
-  static const warningBackground = Color(0xFFFEF3C7);
-  static const warningForeground = Color(0xFF92400E);
-  static const danger = Color(0xFFB91C1C);
-  static const dangerBackground = Color(0xFFFEE2E2);
-  static const dangerForeground = Color(0xFF991B1B);
-  static const info = Color(0xFF2977FF);
-  static const infoBackground = Color(0xFFE8F0FF);
+  static const success = Color(0xFF17C964);
+  static const successBackground = Color(0xFFE8FAF0);
+  static const successForeground = Color(0xFF0E7A3C);
+  static const warning = Color(0xFFF5A524);
+  static const warningBackground = Color(0xFFFEFCE8);
+  static const warningForeground = Color(0xFFA35F06);
+  static const danger = Color(0xFFF31260);
+  static const dangerBackground = Color(0xFFFEE7EF);
+  static const dangerForeground = Color(0xFFC40F4C);
+  static const info = Color(0xFF006FEE);
+  static const infoBackground = Color(0xFFE6F1FE);
   static const infoForeground = Color(0xFF1747A6);
   static const neutralBackground = Color(0xFFF6F8FC);
   static const neutralForeground = Color(0xFF475569);
 
-  static const successDark = Color(0xFF4ADE80);
+  static const successDark = Color(0xFF45D483);
   static const successBackgroundDark = Color(0xFF0F2A1A);
-  static const warningDark = Color(0xFFFBBF24);
+  static const warningDark = Color(0xFFF7B74D);
   static const warningBackgroundDark = Color(0xFF2E2109);
   static const dangerDark = Color(0xFFF87171);
   static const dangerBackgroundDark = Color(0xFF341417);
-  static const infoDark = Color(0xFF5C9BFF);
-  static const infoBackgroundDark = Color(0xFF132B57);
+  static const infoDark = Color(0xFF4C9DFF);
+  static const infoBackgroundDark = Color(0xFF0A2A52);
   static const neutralBackgroundDark = Color(0xFF1C2739);
   static const neutralForegroundDark = Color(0xFF94A3B8);
 }
@@ -162,7 +169,7 @@ class AppGradients {
   static const brandDark = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF1E63E0), AppColors.primaryDark],
+    colors: [Color(0xFF005BC4), AppColors.primaryDark],
   );
 }
 
