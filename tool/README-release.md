@@ -28,6 +28,12 @@ tool/release.sh --group BAPP   # chỉ gửi một nhóm
 
 Số build lấy từ `GITHUB_RUN_NUMBER` khi chạy trong CI, không thì lấy theo giờ (`yymmddHHMM`).
 
+Giới hạn: Telegram Bot API chỉ nhận tệp **≤ 50MB**, nên script gửi bản `arm64-v8a`
+(~36MB) chứ không phải bản gộp (~85MB). Bản gộp không còn được dựng.
+
+Nhóm **BAPP là channel**, bot phải có quyền quản trị mới đăng được; hiện để trống nên
+script bỏ qua. Muốn bật thì cấp quyền quản trị cho bot rồi điền lại id `-1003708073508`.
+
 ### Lấy chat id của nhóm
 
 1. Thêm `@oscarminbot` vào nhóm và cấp quyền quản trị (hoặc tắt privacy mode ở BotFather:

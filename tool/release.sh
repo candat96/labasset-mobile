@@ -39,11 +39,13 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 echo "▶ MedOne $VERSION (build $BUILD_NO) — $BRANCH@$COMMIT"
 flutter pub get
-flutter build apk --release --build-number="$BUILD_NO" 2>&1 | tail -5
+# Tách theo kiến trúc: bản gộp ~85MB vượt giới hạn 50MB của Telegram Bot API,
+# bản arm64-v8a ~30MB và chạy được trên mọi máy Android đời nay.
+flutter build apk --release --split-per-abi --build-number="$BUILD_NO" 2>&1 | tail -5
 
-APK="$ROOT/build/app/outputs/flutter-apk/app-release.apk"
+APK="$ROOT/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
 [ -f "$APK" ] || { echo "Không thấy APK: $APK"; exit 1; }
-OUT="$ROOT/build/medone-${VERSION%%+*}-b${BUILD_NO}-${STAMP}.apk"
+OUT="$ROOT/build/medone-${VERSION%%+*}-b${BUILD_NO}-${STAMP}-arm64.apk"
 cp "$APK" "$OUT"
 SIZE=$(du -h "$OUT" | awk '{print $1}')
 echo "✔ APK: $OUT ($SIZE)"
@@ -51,7 +53,7 @@ echo "✔ APK: $OUT ($SIZE)"
 [ "$SEND" = "1" ] || exit 0
 [ -n "${TELEGRAM_BOT_TOKEN:-}" ] || { echo "Thiếu TELEGRAM_BOT_TOKEN"; exit 1; }
 
-CAPTION="MedOne $VERSION · build $BUILD_NO ($STAMP)
+CAPTION="MedOne $VERSION · build $BUILD_NO ($STAMP) · arm64-v8a
 Nhánh $BRANCH · commit $COMMIT
 $(git log -1 --pretty=%s)"
 
