@@ -1,0 +1,85 @@
+name: release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: 'Nạp TestFlight'
+        type: boolean
+        default: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, flutter-version: 3.47.5, cache: true }
+      - name: Khôi phục khoá ký
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/medone-upload.jks
+          cat > android/key.properties <<EOF
+          storeFile=medone-upload.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=medone
+          keyPassword=$KEYSTORE_PASSWORD
+          EOF
+      - name: Nạp bí mật
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID_BAPP: ${{ secrets.TELEGRAM_CHAT_ID_BAPP }}
+          TELEGRAM_CHAT_ID_APP: ${{ secrets.TELEGRAM_CHAT_ID_APP }}
+        run: |
+          cat > .env.release <<EOF
+          TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+          TELEGRAM_CHAT_ID_BAPP=$TELEGRAM_CHAT_ID_BAPP
+          TELEGRAM_CHAT_ID_APP=$TELEGRAM_CHAT_ID_APP
+          EOF
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze
+      - run: flutter test
+      - run: tool/release.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: apk-release, path: build/medone-*.apk }
+
+  ios:
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.ios
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, flutter-version: 3.47.5, cache: true }
+      - uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DIST_CERT_BASE64 }}
+          p12-password: ${{ secrets.APPLE_DIST_CERT_PASSWORD }}
+      - uses: apple-actions/download-provisioning-profiles@v3
+        with:
+          bundle-id: com.labasset.app
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+      - name: Nạp bí mật
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID_BAPP: ${{ secrets.TELEGRAM_CHAT_ID_BAPP }}
+        run: |
+          cat > .env.release <<EOF
+          APPLE_ID=$APPLE_ID
+          APPLE_TEAM_ID=$APPLE_TEAM_ID
+          APPLE_APP_SPECIFIC_PASSWORD=$APPLE_APP_SPECIFIC_PASSWORD
+          TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+          TELEGRAM_CHAT_ID_BAPP=$TELEGRAM_CHAT_ID_BAPP
+          EOF
+      - run: flutter pub get
+      - run: tool/testflight.sh

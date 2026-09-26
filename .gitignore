@@ -46,3 +46,10 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+# Bí mật phát hành — KHÔNG commit
+.env.release
+*.p8
+*.p12
+*.mobileprovision
+android/key.properties
+android/app/medone-upload.jks
