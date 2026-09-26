@@ -91,6 +91,12 @@ class AccountView extends GetView<AccountController> {
                     icon: LucideIcons.chartPie,
                     title: 'reports.title'.tr,
                     onTap: () => Get.toNamed(Routes.reports),
+                    showDivider: true,
+                  ),
+                  AppListTile(
+                    icon: LucideIcons.gauge,
+                    title: 'kpi.title'.tr,
+                    onTap: () => Get.toNamed(Routes.kpi),
                   ),
                 ],
               ),

@@ -17,6 +17,7 @@ import '../data/repositories/departments_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/files_repository.dart';
 import '../data/repositories/faults_repository.dart';
+import '../data/repositories/kpi_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
 import '../data/repositories/requests_repository.dart';
@@ -49,6 +50,8 @@ import 'notifications/notifications_view.dart';
 import 'notifications/notifications_preferences_controller.dart';
 import 'notifications/notifications_preferences_view.dart';
 import 'equipment/equipment_detail_view.dart';
+import 'kpi/kpi_controller.dart';
+import 'kpi/kpi_view.dart';
 import 'maintenance/calibrations_controller.dart';
 import 'maintenance/calibrations_view.dart';
 import 'maintenance/maintenance_task_controller.dart';
@@ -554,6 +557,21 @@ List<GetPage<dynamic>> featurePages() {
           ),
         ),
       ),
+    ),
+    GetPage(
+      name: Routes.kpi,
+      page: () => const KpiView(),
+      middlewares: protected,
+      binding: BindingsBuilder(() {
+        final store = Get.find<SessionStore>();
+        Get.lazyPut(
+          () => KpiController(
+            repo: Get.find<KpiRepository>(),
+            userId: store.user.value?.id ?? '',
+            isAdmin: store.hasRole(const ['HOSPITAL_ADMIN']),
+          ),
+        );
+      }),
     ),
     GetPage(
       name: Routes.aiConversations,

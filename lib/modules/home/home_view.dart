@@ -94,6 +94,13 @@ class HomeView extends GetView<HomeController> {
       warehouse: true,
     ),
     _Shortcut(
+      'kpi',
+      LucideIcons.gauge,
+      AppAccent.green,
+      dept: true,
+      warehouse: true,
+    ),
+    _Shortcut(
       'demand',
       LucideIcons.clipboardList,
       AppAccent.indigo,
@@ -248,6 +255,7 @@ class HomeView extends GetView<HomeController> {
         'calendar' => Routes.calendar,
         'stocktake' => Routes.stocktakes,
         'reports' => Routes.reports,
+        'kpi' => Routes.kpi,
         'requests' => Routes.requests,
         'demand' => Routes.demand,
         'assistant' => Routes.aiConversations,

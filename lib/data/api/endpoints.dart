@@ -109,6 +109,12 @@ class Ep {
       '/v1/demand/requests/$id/accept';
   static const demandLinesSuggest = '/v1/demand/lines/suggest';
 
+  // Hiệu suất kỹ thuật (KPI) — /v1/performance.
+  static const performance = '/v1/performance';
+  static const performanceMe = '/v1/performance/me';
+  static const performancePeriods = '/v1/performance/periods';
+  static String performanceUser(String id) => '/v1/performance/users/$id';
+
   static const notifications = '/v1/notifications';
   static const notificationsReadAll = '/v1/notifications/read-all';
   static const notificationsPreferences = '/v1/notifications/preferences';

@@ -17,6 +17,7 @@ import '../data/repositories/device_repository.dart';
 import '../data/repositories/equipment_repository.dart';
 import '../data/repositories/faults_repository.dart';
 import '../data/repositories/files_repository.dart';
+import '../data/repositories/kpi_repository.dart';
 import '../data/repositories/me_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/repairs_repository.dart';
@@ -66,6 +67,7 @@ Future<void> bootstrap() async {
   Get.put(RepairsRepository(dio), permanent: true);
   Get.put(RequestsRepository(dio), permanent: true);
   Get.put(DemandRepository(dio), permanent: true);
+  Get.put(KpiRepository(dio), permanent: true);
   Get.put(NotificationsRepository(dio), permanent: true);
   Get.put(DeviceRepository(dio), permanent: true);
   Get.put(SettingsRepository(dio), permanent: true);

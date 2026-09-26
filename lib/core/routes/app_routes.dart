@@ -40,6 +40,7 @@ class Routes {
   static String stocktakeCount(String id) => '/stocktakes/$id/count';
   static const offlineData = '/offline-data';
   static const reports = '/reports';
+  static const kpi = '/kpi';
   static const ai = '/ai';
   static const aiConversations = '/ai/conversations';
   static const aiChatDetail = '/ai/:id';
