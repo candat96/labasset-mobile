@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/confirm_sheet.dart';
@@ -81,14 +82,14 @@ class SessionsView extends GetView<SessionsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('auth.sessions.title'.tr),
         actions: [
-          TextButton(
+          AppButton.soft(
+            tone: AppButtonTone.danger,
+            label: 'auth.sessions.revokeAll'.tr,
             onPressed: () => controller.revokeAll(context),
-            child: Text('auth.sessions.revokeAll'.tr),
           ),
         ],
       ),
@@ -125,12 +126,10 @@ class SessionsView extends GetView<SessionsController> {
                     '${'auth.sessions.expires'.tr}: ${formatDateTime(s.expiresAt)}',
                   ),
                   isThreeLine: true,
-                  trailing: IconButton(
+                  trailing: AppIconButton(
+                    icon: LucideIcons.logOut,
                     tooltip: 'auth.sessions.revoke'.tr,
-                    icon: Icon(
-                      LucideIcons.logOut,
-                      color: theme.colorScheme.error,
-                    ),
+                    tone: AppButtonTone.danger,
                     onPressed: () => controller.revoke(context, s),
                   ),
                 ),

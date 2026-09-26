@@ -9,6 +9,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
@@ -44,14 +45,15 @@ class AiView extends GetView<AiController> {
           ),
         ),
         actions: [
-          IconButton(
+          AppIconButton(
+            icon: LucideIcons.history,
             tooltip: 'ai.history'.tr,
-            icon: const Icon(LucideIcons.history),
             onPressed: () => Get.toNamed(Routes.aiConversations),
           ),
-          IconButton(
+          const SizedBox(width: AppSpacing.sm),
+          AppIconButton(
+            icon: LucideIcons.fileText,
             tooltip: 'ai.digest'.tr,
-            icon: const Icon(LucideIcons.fileText),
             onPressed: () => _digest(context, controller),
           ),
         ],
@@ -230,16 +232,10 @@ class _Suggestions extends StatelessWidget {
         for (final k in keys)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: OutlinedButton(
+            child: AppButton.soft(
+              label: k.tr,
+              expand: true,
               onPressed: () => onPick(k.tr),
-              style: OutlinedButton.styleFrom(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-              ),
-              child: Text(k.tr, textAlign: TextAlign.left),
             ),
           ),
       ],
@@ -478,10 +474,10 @@ class _Bubble extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    TextButton.icon(
+                    AppButton.soft(
+                      label: 'common.retry'.tr,
+                      icon: LucideIcons.refreshCw,
                       onPressed: onRetry,
-                      icon: const Icon(LucideIcons.refreshCw, size: 16),
-                      label: Text('common.retry'.tr),
                     ),
                   ],
                 ),
@@ -496,35 +492,34 @@ class _Bubble extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
+                  AppIconButton(
+                    icon: LucideIcons.thumbsUp,
                     tooltip: 'ai.feedback.helpful'.tr,
-                    icon: Icon(
-                      LucideIcons.thumbsUp,
-                      size: 18,
-                      color: message.feedback == true
-                          ? scheme.primary
-                          : context.appText.label.color,
-                    ),
+                    size: 32,
+                    iconSize: 16,
+                    tone: message.feedback == true
+                        ? AppButtonTone.success
+                        : AppButtonTone.neutral,
                     onPressed: () => onFeedback(true),
                   ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
+                  const SizedBox(width: AppSpacing.sm),
+                  AppIconButton(
+                    icon: LucideIcons.thumbsDown,
                     tooltip: 'ai.feedback.notHelpful'.tr,
-                    icon: Icon(
-                      LucideIcons.thumbsDown,
-                      size: 18,
-                      color: message.feedback == false
-                          ? context.status.danger
-                          : context.appText.label.color,
-                    ),
+                    size: 32,
+                    iconSize: 16,
+                    tone: message.feedback == false
+                        ? AppButtonTone.danger
+                        : AppButtonTone.neutral,
                     onPressed: () => onFeedback(false),
                   ),
-                  if (message.createdAt != null)
+                  if (message.createdAt != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       formatRelative(message.createdAt),
                       style: context.appText.caption,
                     ),
+                  ],
                 ],
               ),
           ],
@@ -646,9 +641,10 @@ class _ComposerState extends State<_Composer> {
                       style: context.appText.caption,
                     ),
                     const Spacer(),
-                    TextButton(
+                    AppButton.soft(
+                      tone: AppButtonTone.neutral,
+                      label: 'common.clear'.tr,
                       onPressed: () => setState(_fileIds.clear),
-                      child: Text('common.clear'.tr),
                     ),
                   ],
                 ),
@@ -656,16 +652,18 @@ class _ComposerState extends State<_Composer> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                IconButton(
-                  tooltip: 'ai.attach'.tr,
-                  onPressed: _fileIds.length >= 4 ? null : _attach,
-                  icon: _uploading
-                      ? const SizedBox.square(
-                          dimension: 18,
+                _uploading
+                    ? const SizedBox.square(
+                        dimension: 36,
+                        child: Center(
                           child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(LucideIcons.paperclip),
-                ),
+                        ),
+                      )
+                    : AppIconButton(
+                        icon: LucideIcons.paperclip,
+                        tooltip: 'ai.attach'.tr,
+                        onPressed: _fileIds.length >= 4 ? null : _attach,
+                      ),
                 Expanded(
                   child: TextField(
                     controller: _input,
@@ -693,15 +691,20 @@ class _ComposerState extends State<_Composer> {
                 const SizedBox(width: AppSpacing.xs),
                 Obx(
                   () => widget.controller.sending.value
-                      ? IconButton.filled(
+                      ? AppIconButton(
+                          icon: LucideIcons.square,
                           tooltip: 'ai.stop'.tr,
+                          tone: AppButtonTone.warning,
+                          size: 44,
+                          iconSize: 18,
                           onPressed: widget.controller.stop,
-                          icon: const Icon(LucideIcons.square, size: 18),
                         )
-                      : IconButton.filled(
+                      : AppIconButton(
+                          icon: LucideIcons.send,
                           tooltip: 'ai.send'.tr,
+                          size: 44,
+                          iconSize: 18,
                           onPressed: _send,
-                          icon: const Icon(LucideIcons.send, size: 18),
                         ),
                 ),
               ],

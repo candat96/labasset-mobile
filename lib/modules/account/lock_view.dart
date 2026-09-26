@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import 'lock_controller.dart';
 
 class LockView extends StatelessWidget {
@@ -35,14 +36,15 @@ class LockView extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text('lock.desc'.tr, textAlign: TextAlign.center),
                   const SizedBox(height: AppSpacing.xl),
-                  FilledButton.icon(
+                  AppButton.primary(
+                    label: 'lock.unlock'.tr,
+                    icon: LucideIcons.fingerprint,
                     onPressed: c.unlock,
-                    icon: const Icon(LucideIcons.fingerprint),
-                    label: Text('lock.unlock'.tr),
                   ),
-                  TextButton(
+                  const SizedBox(height: AppSpacing.sm),
+                  AppButton.soft(
+                    label: 'lock.useLogin'.tr,
                     onPressed: c.signOut,
-                    child: Text('lock.useLogin'.tr),
                   ),
                 ],
               ),

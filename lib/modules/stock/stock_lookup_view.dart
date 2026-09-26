@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -22,9 +23,9 @@ class StockLookupView extends GetView<StockLookupController> {
       appBar: AppBar(
         title: Text('stock.lookup.title'.tr),
         actions: [
-          IconButton(
+          AppIconButton(
             tooltip: 'scan.title'.tr,
-            icon: const Icon(LucideIcons.scanQrCode),
+            icon: LucideIcons.scanQrCode,
             onPressed: () async {
               final codes =
                   (await Get.toNamed(
@@ -49,8 +50,8 @@ class StockLookupView extends GetView<StockLookupController> {
               decoration: InputDecoration(
                 prefixIcon: const Icon(LucideIcons.search),
                 hintText: 'stock.lookup.hint'.tr,
-                suffixIcon: IconButton(
-                  icon: const Icon(LucideIcons.arrowRight),
+                suffixIcon: AppIconButton(
+                  icon: LucideIcons.arrowRight,
                   onPressed: () => controller.search(controller.query.text),
                 ),
               ),

@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -139,9 +140,10 @@ class StockAlertsView extends GetView<StockAlertsController> {
                       footer: a.type == 'stale'
                           ? Align(
                               alignment: Alignment.centerLeft,
-                              child: TextButton(
+                              child: AppButton.soft(
+                                tone: AppButtonTone.success,
                                 onPressed: () => controller.resolve(a),
-                                child: Text('stock.alert.resolve'.tr),
+                                label: 'stock.alert.resolve'.tr,
                               ),
                             )
                           : null,

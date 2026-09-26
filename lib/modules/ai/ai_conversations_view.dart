@@ -49,12 +49,13 @@ class AiConversationsView extends GetView<AiConversationsController> {
           return EmptyState(
             icon: LucideIcons.sparkles,
             title: 'ai.conversations.empty'.tr,
-            action: OutlinedButton(
+            action: AppButton.primary(
+              label: 'ai.new'.tr,
+              icon: LucideIcons.plus,
               onPressed: () async {
                 await controller.create();
                 await controller.load();
               },
-              child: Text('ai.new'.tr),
             ),
           );
         }

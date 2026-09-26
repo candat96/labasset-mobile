@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -30,16 +31,18 @@ class NotificationsView extends GetView<NotificationsController> {
             SliverAppBar.large(
               title: Text('notifications.title'.tr),
               actions: [
-                IconButton(
+                AppIconButton(
+                  icon: LucideIcons.slidersHorizontal,
                   tooltip: 'notifications.preferences.title'.tr,
-                  icon: const Icon(LucideIcons.slidersHorizontal),
                   onPressed: () => Get.toNamed(Routes.notificationsPreferences),
                 ),
-                TextButton(
+                const SizedBox(width: AppSpacing.sm),
+                AppButton.soft(
+                  tone: AppButtonTone.success,
+                  label: 'notifications.markAll'.tr,
                   onPressed: controller.unreadCount.value == 0
                       ? null
                       : controller.markAllRead,
-                  child: Text('notifications.markAll'.tr),
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],

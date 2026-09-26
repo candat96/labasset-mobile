@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import '../../../core/format/format.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/confirm_sheet.dart';
@@ -192,16 +193,15 @@ class SoftwareTab extends GetView<SoftwareTabController> {
                       if (shown == null) {
                         return Align(
                           alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
+                          child: AppButton.soft(
+                            tone: AppButtonTone.primary,
+                            icon: LucideIcons.keyRound,
+                            label: s.hasLicenseKey
+                                ? 'equipment.software.viewKey'.tr
+                                : 'equipment.software.noKey'.tr,
                             onPressed: s.hasLicenseKey
                                 ? () => controller.revealKey(s)
                                 : null,
-                            icon: const Icon(LucideIcons.keyRound, size: 18),
-                            label: Text(
-                              s.hasLicenseKey
-                                  ? 'equipment.software.viewKey'.tr
-                                  : 'equipment.software.noKey'.tr,
-                            ),
                           ),
                         );
                       }
@@ -225,21 +225,25 @@ class SoftwareTab extends GetView<SoftwareTabController> {
                     const SizedBox(height: AppSpacing.xs),
                     Wrap(
                       spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
                       children: [
-                        OutlinedButton(
+                        AppButton.soft(
+                          tone: AppButtonTone.primary,
+                          label: 'equipment.software.upgrade'.tr,
                           onPressed: () =>
                               _upgradeDialog(context, controller, s),
-                          child: Text('equipment.software.upgrade'.tr),
                         ),
-                        OutlinedButton(
+                        AppButton.soft(
+                          tone: AppButtonTone.primary,
+                          label: 'equipment.software.history'.tr,
                           onPressed: () =>
                               _historySheet(context, controller, s),
-                          child: Text('equipment.software.history'.tr),
                         ),
-                        OutlinedButton(
+                        AppButton.soft(
+                          tone: AppButtonTone.primary,
+                          label: 'common.edit'.tr,
                           onPressed: () =>
                               _formSheet(context, controller, software: s),
-                          child: Text('common.edit'.tr),
                         ),
                       ],
                     ),
@@ -331,7 +335,8 @@ Future<void> _formSheet(
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
+              label: 'common.save'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -350,20 +355,17 @@ Future<void> _formSheet(
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.save'.tr),
             ),
             if (software != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
+              AppButton.soft(
+                tone: AppButtonTone.danger,
+                icon: LucideIcons.trash2,
+                label: 'common.delete'.tr,
                 onPressed: () {
                   deleteRequested = true;
                   form.close();
                 },
-                icon: const Icon(LucideIcons.trash2),
-                label: Text('common.delete'.tr),
               ),
             ],
           ],
@@ -418,7 +420,8 @@ Future<void> _upgradeDialog(
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.primary(
+            label: 'common.save'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -435,7 +438,6 @@ Future<void> _upgradeDialog(
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.save'.tr),
           ),
         ],
       ),

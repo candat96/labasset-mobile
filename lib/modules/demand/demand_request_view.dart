@@ -212,21 +212,20 @@ class DemandRequestView extends GetView<DemandRequestController> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: form.busy
-                  ? null
-                  : () async {
-                      final reason = form.text('reason');
-                      if (reason.isEmpty) {
-                        form.setError('reason', 'common.required'.tr);
-                        return;
-                      }
-                      form.setBusy(true);
-                      final ok = await controller.returnRequest(reason);
-                      form.setBusy(false);
-                      if (ok) form.close();
-                    },
-              child: Text('demand.reject'.tr),
+            AppButton.danger(
+              loading: form.busy,
+              onPressed: () async {
+                final reason = form.text('reason');
+                if (reason.isEmpty) {
+                  form.setError('reason', 'common.required'.tr);
+                  return;
+                }
+                form.setBusy(true);
+                final ok = await controller.returnRequest(reason);
+                form.setBusy(false);
+                if (ok) form.close();
+              },
+              label: 'demand.reject'.tr,
             ),
           ],
         ),

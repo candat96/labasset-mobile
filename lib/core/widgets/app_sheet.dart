@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'app_buttons.dart';
 import 'form_focus.dart';
 
 /// Bottom sheet dùng chung cho toàn app.
@@ -178,7 +179,6 @@ class SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.status;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -196,16 +196,12 @@ class SheetHeader extends StatelessWidget {
           ),
           ?trailing,
           if (showClose)
-            IconButton(
+            AppIconButton(
               tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
               onPressed: () => AppSheet.close(context),
-              style: IconButton.styleFrom(
-                backgroundColor: status.mutedBackground,
-                foregroundColor: status.mutedForeground,
-                minimumSize: const Size(32, 32),
-                padding: EdgeInsets.zero,
-              ),
-              icon: const Icon(Icons.close, size: 18),
+              tone: AppButtonTone.neutral,
+              size: 32,
+              icon: Icons.close,
             ),
         ],
       ),
@@ -427,13 +423,14 @@ class _PromptDialogState extends State<_PromptDialog> {
       ),
     ),
     actions: [
-      TextButton(
+      AppButton.soft(
+        label: 'common.cancel'.tr,
+        tone: AppButtonTone.neutral,
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-        child: Text('common.cancel'.tr),
       ),
-      FilledButton(
+      AppButton.primary(
+        label: widget.confirmLabel ?? 'common.save'.tr,
         onPressed: _submit,
-        child: Text(widget.confirmLabel ?? 'common.save'.tr),
       ),
     ],
   );

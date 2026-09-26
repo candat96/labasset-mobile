@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock.dart';
@@ -103,26 +104,29 @@ class _LotCardViewState extends State<_LotCardView> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Obx(
-            () => FilledButton.icon(
-              onPressed: controller.opening.value ? null : controller.openVial,
-              icon: const Icon(LucideIcons.lockOpen),
-              label: Text('scan.lot.open'.tr),
+            () => AppButton.primary(
+              loading: controller.opening.value,
+              onPressed: controller.openVial,
+              icon: LucideIcons.lockOpen,
+              label: 'scan.lot.open'.tr,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: AppButton.soft(
+                  tone: AppButtonTone.primary,
                   onPressed: controller.viewSupply,
-                  child: Text('scan.lot.viewSupply'.tr),
+                  label: 'scan.lot.viewSupply'.tr,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: OutlinedButton(
+                child: AppButton.soft(
+                  tone: AppButtonTone.primary,
                   onPressed: controller.issueThisLot,
-                  child: Text('scan.lot.issue'.tr),
+                  label: 'scan.lot.issue'.tr,
                 ),
               ),
             ],

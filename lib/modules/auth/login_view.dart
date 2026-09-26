@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_buttons.dart';
 import 'auth_scaffold.dart';
@@ -91,15 +90,9 @@ class LoginView extends GetView<LoginController> {
                   loading: controller.submitting.value,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                TextButton(
+                AppButton.soft(
+                  label: 'auth.login.forgot'.tr,
                   onPressed: () => Get.toNamed(Routes.forgotPassword),
-                  child: Text(
-                    'auth.login.forgot'.tr,
-                    style: context.appText.label.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ),
               ],
             ),

@@ -374,7 +374,8 @@ Future<void> _addLog(BuildContext context, RepairDetailController c) async {
             decoration: InputDecoration(labelText: 'repairs.logs.minutes'.tr),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.primary(
+            label: 'common.save'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -390,7 +391,6 @@ Future<void> _addLog(BuildContext context, RepairDetailController c) async {
                     );
                     form.close();
                   },
-            child: Text('common.save'.tr),
           ),
         ],
       ),
@@ -627,7 +627,8 @@ Future<void> _diagnose(
             onChanged: (v) => form.refresh(() => resolutionType = v),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.primary(
+            label: 'common.save'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -643,7 +644,6 @@ Future<void> _diagnose(
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.save'.tr),
           ),
         ],
       ),
@@ -679,7 +679,8 @@ Future<void> _changeStatus(
             decoration: InputDecoration(labelText: 'repairs.status.note'.tr),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.success(
+            label: 'common.confirm'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -688,7 +689,6 @@ Future<void> _changeStatus(
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.confirm'.tr),
           ),
         ],
       ),
@@ -722,7 +722,8 @@ Future<void> _complete(BuildContext context, RepairDetailController c) async {
             onChanged: (v) => form.refresh(() => calibration = v),
           ),
           const SizedBox(height: AppSpacing.sm),
-          FilledButton(
+          AppButton.success(
+            label: 'common.confirm'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -738,7 +739,6 @@ Future<void> _complete(BuildContext context, RepairDetailController c) async {
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.confirm'.tr),
           ),
         ],
       ),
@@ -769,13 +769,12 @@ Future<void> _acceptance(BuildContext context, RepairDetailController c) async {
                 Text('repairs.acceptance.rating'.tr),
                 const Spacer(),
                 for (var i = 1; i <= 5; i++)
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
+                  AppIconButton(
+                    icon: LucideIcons.star,
+                    tone: AppButtonTone.warning,
+                    size: 32,
+                    iconSize: 20,
                     onPressed: () => form.refresh(() => rating = i),
-                    icon: Icon(
-                      i <= rating ? LucideIcons.star : LucideIcons.star,
-                      color: context.status.warning,
-                    ),
                   ),
               ],
             ),
@@ -786,7 +785,8 @@ Future<void> _acceptance(BuildContext context, RepairDetailController c) async {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.success(
+            label: 'common.confirm'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -799,7 +799,6 @@ Future<void> _acceptance(BuildContext context, RepairDetailController c) async {
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.confirm'.tr),
           ),
         ],
       ),
@@ -826,10 +825,8 @@ Future<void> _cancel(BuildContext context, RepairDetailController c) async {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+          AppButton.danger(
+            label: 'common.confirm'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -842,7 +839,6 @@ Future<void> _cancel(BuildContext context, RepairDetailController c) async {
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.confirm'.tr),
           ),
         ],
       ),
@@ -876,7 +872,9 @@ class _ReportTab extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.md),
-            FilledButton.icon(
+            AppButton.primary(
+              label: 'repairs.report.open'.tr,
+              icon: LucideIcons.externalLink,
               onPressed: () async {
                 try {
                   await exportRepairPdf(ticketId);
@@ -884,8 +882,6 @@ class _ReportTab extends StatelessWidget {
                   AppSnackbar.error(e);
                 }
               },
-              icon: const Icon(LucideIcons.externalLink),
-              label: Text('repairs.report.open'.tr),
             ),
           ],
         ),

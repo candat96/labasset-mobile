@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'app_buttons.dart';
 import 'app_sheet.dart';
 
 /// Bottom sheet xác nhận; trả true khi đồng ý. Mở bằng context của widget gọi.
@@ -47,7 +48,6 @@ class ConfirmSheetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = context.appText;
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -68,17 +68,20 @@ class ConfirmSheetBody extends StatelessWidget {
             Text(description!, style: text.label),
           ],
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
-            style: destructive
-                ? FilledButton.styleFrom(backgroundColor: scheme.error)
-                : null,
-            onPressed: () => AppSheet.close(context, true),
-            child: Text(confirmLabel ?? 'common.confirm'.tr),
-          ),
+          destructive
+              ? AppButton.danger(
+                  label: confirmLabel ?? 'common.confirm'.tr,
+                  onPressed: () => AppSheet.close(context, true),
+                )
+              : AppButton.primary(
+                  label: confirmLabel ?? 'common.confirm'.tr,
+                  onPressed: () => AppSheet.close(context, true),
+                ),
           const SizedBox(height: AppSpacing.sm),
-          OutlinedButton(
+          AppButton.soft(
+            label: 'common.cancel'.tr,
+            tone: AppButtonTone.neutral,
             onPressed: () => AppSheet.close(context, false),
-            child: Text('common.cancel'.tr),
           ),
         ],
       ),

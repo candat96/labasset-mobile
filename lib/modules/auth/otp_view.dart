@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import 'auth_scaffold.dart';
 import 'otp_controller.dart';
 
@@ -46,11 +47,10 @@ class OtpView extends GetView<OtpController> {
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: controller.submitting.value
-                    ? null
-                    : controller.submit,
-                child: Text('auth.otp.submit'.tr),
+              AppButton.primary(
+                label: 'auth.otp.submit'.tr,
+                loading: controller.submitting.value,
+                onPressed: controller.submit,
               ),
             ],
           ),

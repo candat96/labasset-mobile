@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -20,9 +21,10 @@ class SyncView extends GetView<SyncController> {
       appBar: AppBar(
         title: Text('sync.title'.tr),
         actions: [
-          IconButton(
+          AppIconButton(
+            tone: AppButtonTone.primary,
             tooltip: 'sync.retry'.tr,
-            icon: const Icon(LucideIcons.refreshCw),
+            icon: LucideIcons.refreshCw,
             onPressed: controller.load,
           ),
         ],
@@ -69,18 +71,19 @@ class SyncView extends GetView<SyncController> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: AppButton.soft(
+                    tone: AppButtonTone.primary,
                     onPressed: controller.retryAll,
-                    icon: const Icon(LucideIcons.rotateCcw),
-                    label: Text('sync.retry'.tr),
+                    icon: LucideIcons.rotateCcw,
+                    label: 'sync.retry'.tr,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: FilledButton.icon(
+                  child: AppButton.primary(
                     onPressed: controller.runNow,
-                    icon: const Icon(LucideIcons.cloudUpload),
-                    label: Text('sync.runNow'.tr),
+                    icon: LucideIcons.cloudUpload,
+                    label: 'sync.runNow'.tr,
                   ),
                 ),
               ],

@@ -40,11 +40,12 @@ class _ScanViewState extends State<ScanView> {
         title: Text('scan.title'.tr),
         actions: [
           Obx(
-            () => IconButton(
+            () => AppIconButton(
+              tone: AppButtonTone.primary,
               tooltip: 'scan.torch'.tr,
-              icon: Icon(
-                controller.torch.value ? LucideIcons.zap : LucideIcons.zapOff,
-              ),
+              icon: controller.torch.value
+                  ? LucideIcons.zap
+                  : LucideIcons.zapOff,
               onPressed: () async {
                 await scanner.toggleTorch();
                 controller.torch.toggle();
@@ -272,10 +273,10 @@ class _ContinuousPanel extends StatelessWidget {
                   style: theme.textTheme.labelLarge,
                 ),
               ),
-              FilledButton.tonalIcon(
+              AppButton.success(
                 onPressed: controller.finish,
-                icon: const Icon(LucideIcons.check),
-                label: Text('scan.done'.tr),
+                icon: LucideIcons.check,
+                label: 'scan.done'.tr,
               ),
             ],
           ),

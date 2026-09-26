@@ -6,6 +6,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/error_state.dart';
@@ -44,9 +45,9 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
         appBar: AppBar(
           title: Text(meta?.code ?? 'stocktake.count'.tr),
           actions: [
-            IconButton(
+            AppIconButton(
               tooltip: 'scan.title'.tr,
-              icon: const Icon(LucideIcons.scanQrCode),
+              icon: LucideIcons.scanQrCode,
               onPressed: () => _scanContinuous(context),
             ),
           ],
@@ -140,18 +141,11 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Obx(
-              () => FilledButton.icon(
+              () => AppButton.primary(
                 onPressed: controller.sending.value ? null : controller.send,
-                icon: controller.sending.value
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(LucideIcons.cloudUpload),
-                label: Text(
-                  '${'stocktake.send'.tr} (${controller.pending.value})',
-                ),
+                loading: controller.sending.value,
+                icon: LucideIcons.cloudUpload,
+                label: '${'stocktake.send'.tr} (${controller.pending.value})',
               ),
             ),
           ),
@@ -352,7 +346,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                 decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
               ),
               const SizedBox(height: AppSpacing.sm),
-              OutlinedButton.icon(
+              AppButton.soft(
                 onPressed: () async {
                   final upload = await controller.attachPhoto(
                     item,
@@ -367,21 +361,17 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                     }
                   });
                 },
-                icon: Icon(
-                  photoFileId != null || photoQueued
-                      ? LucideIcons.circleCheck
-                      : LucideIcons.camera,
-                ),
-                label: Text(
-                  photoFileId != null
-                      ? 'stocktake.photo.attached'.tr
-                      : photoQueued
-                      ? 'stocktake.photo.queued'.tr
-                      : 'stocktake.photo.add'.tr,
-                ),
+                icon: photoFileId != null || photoQueued
+                    ? LucideIcons.circleCheck
+                    : LucideIcons.camera,
+                label: photoFileId != null
+                    ? 'stocktake.photo.attached'.tr
+                    : photoQueued
+                    ? 'stocktake.photo.queued'.tr
+                    : 'stocktake.photo.add'.tr,
               ),
               const SizedBox(height: AppSpacing.lg),
-              FilledButton(
+              AppButton.primary(
                 onPressed: form.busy
                     ? null
                     : () async {
@@ -399,7 +389,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                         );
                         form.close();
                       },
-                child: Text('common.save'.tr),
+                label: 'common.save'.tr,
               ),
             ],
           ),

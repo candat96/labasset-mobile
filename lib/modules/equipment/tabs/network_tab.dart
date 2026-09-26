@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
@@ -140,18 +141,21 @@ class NetworkTab extends GetView<NetworkTabController> {
                   () => Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
+                        child: AppButton.soft(
+                          tone: AppButtonTone.primary,
+                          label: 'common.retry'.tr,
+                          expand: true,
                           onPressed: controller.load,
-                          child: Text('common.retry'.tr),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
-                        child: FilledButton(
+                        child: AppButton.primary(
+                          label: 'common.save'.tr,
+                          expand: true,
                           onPressed: controller.saving.value
                               ? null
                               : controller.save,
-                          child: Text('common.save'.tr),
                         ),
                       ),
                     ],

@@ -7,6 +7,7 @@ import '../../../core/format/decimal_input.dart';
 import '../../../core/format/format.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -198,7 +199,8 @@ Future<void> _addCost(BuildContext context, CostsTabController c) async {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.primary(
+            label: 'common.save'.tr,
             onPressed: form.busy
                 ? null
                 : () async {
@@ -222,7 +224,6 @@ Future<void> _addCost(BuildContext context, CostsTabController c) async {
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.save'.tr),
           ),
         ],
       ),

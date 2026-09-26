@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -58,9 +59,9 @@ class IssuesView extends GetView<IssuesController> {
       appBar: AppBar(
         title: Text('stock.issues.title'.tr),
         actions: [
-          IconButton(
+          AppIconButton(
             tooltip: 'common.add'.tr,
-            icon: const Icon(LucideIcons.plus),
+            icon: LucideIcons.plus,
             onPressed: () => Get.toNamed('/stock/issues/new'),
           ),
         ],

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:signature/signature.dart';
 
 import '../theme/tokens.dart';
+import 'app_buttons.dart';
 import 'app_sheet.dart';
 import 'app_snackbar.dart';
 
@@ -100,15 +101,18 @@ class _SignatureSheetState extends State<_SignatureSheet> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppButton.soft(
+                  label: 'signature.clear'.tr,
+                  icon: Icons.cleaning_services_outlined,
+                  tone: AppButtonTone.danger,
                   onPressed: controller.clear,
-                  icon: const Icon(Icons.cleaning_services_outlined),
-                  label: Text('signature.clear'.tr),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: FilledButton.icon(
+                child: AppButton.primary(
+                  icon: Icons.check,
+                  label: 'signature.save'.tr,
                   onPressed: () async {
                     final png = await SignaturePad.toPng(controller);
                     if (png == null) {
@@ -117,8 +121,6 @@ class _SignatureSheetState extends State<_SignatureSheet> {
                     }
                     if (context.mounted) AppSheet.close(context, png);
                   },
-                  icon: const Icon(Icons.check),
-                  label: Text('signature.save'.tr),
                 ),
               ),
             ],

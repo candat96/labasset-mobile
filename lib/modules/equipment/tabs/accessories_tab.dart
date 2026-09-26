@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/confirm_sheet.dart';
@@ -242,7 +243,8 @@ Future<void> _showForm(
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
+              label: 'common.save'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -267,20 +269,17 @@ Future<void> _showForm(
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.save'.tr),
             ),
             if (accessory != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
+              AppButton.soft(
+                tone: AppButtonTone.danger,
+                icon: LucideIcons.trash2,
+                label: 'common.delete'.tr,
                 onPressed: () {
                   deleteRequested = true;
                   form.close();
                 },
-                icon: const Icon(LucideIcons.trash2),
-                label: Text('common.delete'.tr),
               ),
             ],
           ],

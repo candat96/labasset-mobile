@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'app_buttons.dart';
 import 'app_sheet.dart';
 import 'empty_state.dart';
 import 'error_state.dart';
@@ -184,17 +185,21 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (widget.onScan != null)
-                  IconButton(
+                  AppIconButton(
                     tooltip: 'picker.scan'.tr,
-                    icon: const Icon(LucideIcons.scanLine, size: 20),
+                    icon: LucideIcons.scanLine,
                     onPressed: _scan,
                   ),
-                if (widget.showClear)
-                  TextButton(
+                if (widget.showClear) ...[
+                  if (widget.onScan != null)
+                    const SizedBox(width: AppSpacing.sm),
+                  AppButton.soft(
+                    label: 'common.clear'.tr,
+                    tone: AppButtonTone.neutral,
                     onPressed: () =>
                         AppSheet.close(context, PickerSelection<T>.cleared()),
-                    child: Text('common.clear'.tr),
                   ),
+                ],
               ],
             ),
           ),

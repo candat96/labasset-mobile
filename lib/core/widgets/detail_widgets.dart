@@ -326,13 +326,17 @@ class StickySecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? context.status.danger : null;
     return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color ?? Theme.of(context).colorScheme.outline),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-      ),
+      style:
+          AppButton.styleFor(
+            context,
+            danger ? AppButtonTone.danger : AppButtonTone.primary,
+            soft: true,
+          ).copyWith(
+            padding: const WidgetStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
       onPressed: onPressed,
       child: Row(
         mainAxisSize: MainAxisSize.min,

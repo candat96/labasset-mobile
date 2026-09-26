@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/models/attachment.dart';
 import '../services/attachment_service.dart';
 import '../theme/tokens.dart';
+import 'app_buttons.dart';
 import 'app_sheet.dart';
 import 'app_snackbar.dart';
 import 'confirm_sheet.dart';
@@ -240,26 +241,23 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
               OverflowBar(
                 children: [
                   if (widget.downloadable)
-                    TextButton(
+                    AppButton.soft(
+                      label: 'attachment.download'.tr,
                       onPressed: () => _download(url, a),
-                      child: Text('attachment.download'.tr),
                     ),
-                  TextButton(
+                  AppButton.soft(
+                    label: 'common.close'.tr,
+                    tone: AppButtonTone.neutral,
                     onPressed: () => Navigator.pop(ctx),
-                    child: Text('common.close'.tr),
                   ),
                   if (widget.canEdit)
-                    TextButton(
+                    AppButton.soft(
+                      label: 'common.delete'.tr,
+                      tone: AppButtonTone.danger,
                       onPressed: () {
                         Navigator.pop(ctx);
                         _delete(a);
                       },
-                      child: Text(
-                        'common.delete'.tr,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
                     ),
                 ],
               ),
@@ -278,19 +276,19 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
                   : attachmentKindLabel(a.kind),
             ),
             actions: [
-              TextButton(
+              AppButton.soft(
+                label: 'attachment.download'.tr,
                 onPressed: () {
                   Navigator.pop(ctx);
                   _download(url, a);
                 },
-                child: Text('attachment.download'.tr),
               ),
-              TextButton(
+              AppButton.soft(
+                label: 'common.copy'.tr,
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: url));
                   AppSnackbar.info('common.copied'.tr);
                 },
-                child: Text('common.copy'.tr),
               ),
             ],
           ),
@@ -337,9 +335,9 @@ class _AttachmentsGridState extends State<AttachmentsGrid> {
               ),
             ),
             if (widget.canEdit && !widget.photosOnly)
-              IconButton(
+              AppIconButton(
                 tooltip: 'attachment.add'.tr,
-                icon: const Icon(Icons.add_circle_outline),
+                icon: Icons.add_circle_outline,
                 onPressed: _uploading ? null : () => _add(),
               ),
           ],

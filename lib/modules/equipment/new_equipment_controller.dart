@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/form_focus.dart';
@@ -89,7 +90,10 @@ class NewEquipmentController extends GetxController {
       footer: canCreateRoom
           ? (ctx) => Align(
               alignment: Alignment.centerLeft,
-              child: TextButton.icon(
+              child: AppButton.soft(
+                tone: AppButtonTone.primary,
+                icon: LucideIcons.plus,
+                label: 'equipment.room.new'.tr,
                 onPressed: () async {
                   final created = await _promptNewRoom(ctx, dep);
                   if (created != null && ctx.mounted) {
@@ -105,8 +109,6 @@ class NewEquipmentController extends GetxController {
                     );
                   }
                 },
-                icon: const Icon(LucideIcons.plus, size: 18),
-                label: Text('equipment.room.new'.tr),
               ),
             )
           : null,
@@ -224,7 +226,8 @@ class NewEquipmentController extends GetxController {
                   const SizedBox(height: AppSpacing.lg),
                   SizedBox(
                     width: double.infinity,
-                    child: FilledButton(
+                    child: AppButton.primary(
+                      label: 'common.save'.tr,
                       onPressed: form.busy
                           ? null
                           : () async {
@@ -250,7 +253,6 @@ class NewEquipmentController extends GetxController {
                                 AppSnackbar.error(e);
                               }
                             },
-                      child: Text('common.save'.tr),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),

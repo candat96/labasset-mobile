@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../errors/api_error.dart';
+import 'app_buttons.dart';
 import 'empty_state.dart';
 
 class ErrorState extends StatelessWidget {
@@ -19,7 +20,7 @@ class ErrorState extends StatelessWidget {
       description: ApiError.messageFor(error),
       action: onRetry == null
           ? null
-          : OutlinedButton(onPressed: onRetry, child: Text('common.retry'.tr)),
+          : AppButton.soft(label: 'common.retry'.tr, onPressed: onRetry),
     );
   }
 }

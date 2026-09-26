@@ -5,6 +5,7 @@ import '../../core/errors/api_error.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/form_focus.dart';
 import '../../data/repositories/auth_repository.dart';
@@ -136,11 +137,10 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                   ),
                 ],
                 const SizedBox(height: AppSpacing.lg),
-                FilledButton(
-                  onPressed: controller.submitting.value
-                      ? null
-                      : controller.submit,
-                  child: Text('auth.change.submit'.tr),
+                AppButton.primary(
+                  label: 'auth.change.submit'.tr,
+                  loading: controller.submitting.value,
+                  onPressed: controller.submit,
                 ),
               ],
             ),

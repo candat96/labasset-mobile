@@ -52,22 +52,28 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
         appBar: AppBar(
           title: Text(t.code),
           actions: [
-            IconButton(
+            AppIconButton(
+              tone: AppButtonTone.primary,
               tooltip: 'repairs.report.open'.tr,
-              icon: const Icon(LucideIcons.fileText),
+              icon: LucideIcons.fileText,
               onPressed: () => _exportPdf(context, controller),
             ),
-            IconButton(
+            const SizedBox(width: AppSpacing.sm),
+            AppIconButton(
+              tone: AppButtonTone.primary,
               tooltip: 'common.share'.tr,
-              icon: const Icon(LucideIcons.share2),
+              icon: LucideIcons.share2,
               onPressed: () => _exportPdf(context, controller, share: true),
             ),
-            if (controller.canStart)
-              IconButton(
+            if (controller.canStart) ...[
+              const SizedBox(width: AppSpacing.sm),
+              AppIconButton(
+                tone: AppButtonTone.warning,
                 tooltip: 'maintenance.skip'.tr,
-                icon: const Icon(LucideIcons.skipForward),
+                icon: LucideIcons.skipForward,
                 onPressed: () => _skip(context, controller),
               ),
+            ],
           ],
         ),
         // Header cuộn cùng checklist (không ghim) — mục 7.
@@ -244,16 +250,14 @@ class _ChecklistCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
+                AppIconButton(
+                  tone: r?.photoFileId == null
+                      ? AppButtonTone.primary
+                      : AppButtonTone.success,
                   tooltip: 'repairs.form.addPhoto'.tr,
-                  icon: Icon(
-                    r?.photoFileId == null
-                        ? LucideIcons.camera
-                        : LucideIcons.circleCheck,
-                    color: r?.photoFileId == null
-                        ? null
-                        : context.status.success,
-                  ),
+                  icon: r?.photoFileId == null
+                      ? LucideIcons.camera
+                      : LucideIcons.circleCheck,
                   onPressed: () => controller.attachPhoto(item.key),
                 ),
               ],
@@ -433,19 +437,18 @@ Future<void> _finish(BuildContext context, MaintenanceTaskController c) async {
             decoration: InputDecoration(labelText: 'maintenance.notes'.tr),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
-            onPressed: form.busy
-                ? null
-                : () async {
-                    form.setBusy(true);
-                    final ok = await c.finish(
-                      overallPass: pass,
-                      notes: form.textOrNull('notes'),
-                    );
-                    form.setBusy(false);
-                    if (ok) form.close();
-                  },
-            child: Text('common.confirm'.tr),
+          AppButton.success(
+            loading: form.busy,
+            onPressed: () async {
+              form.setBusy(true);
+              final ok = await c.finish(
+                overallPass: pass,
+                notes: form.textOrNull('notes'),
+              );
+              form.setBusy(false);
+              if (ok) form.close();
+            },
+            label: 'common.confirm'.tr,
           ),
         ],
       ),
@@ -474,12 +477,7 @@ Future<void> _sign(BuildContext context, MaintenanceTaskController c) async {
           ),
           const SizedBox(height: AppSpacing.lg),
           for (final role in ['technician', 'department']) ...[
-            FilledButton(
-              style: role == 'technician'
-                  ? null
-                  : FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                    ),
+            AppButton.success(
               onPressed: () {
                 if (form.text('name').isEmpty) {
                   form.setError('name', 'common.required'.tr);
@@ -488,7 +486,7 @@ Future<void> _sign(BuildContext context, MaintenanceTaskController c) async {
                 picked = (role: role, name: form.text('name'));
                 form.close();
               },
-              child: Text('repairs.sign.$role'.tr),
+              label: 'repairs.sign.$role'.tr,
             ),
             const SizedBox(height: AppSpacing.sm),
           ],

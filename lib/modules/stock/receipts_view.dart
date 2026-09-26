@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/format/format.dart';
 import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -30,9 +31,9 @@ class ReceiptsView extends GetView<ReceiptsController> {
       appBar: AppBar(
         title: Text('stock.receipts.title'.tr),
         actions: [
-          IconButton(
+          AppIconButton(
             tooltip: 'common.add'.tr,
-            icon: const Icon(LucideIcons.plus),
+            icon: LucideIcons.plus,
             onPressed: () => Get.toNamed('/stock/receipts/new'),
           ),
         ],
@@ -211,7 +212,6 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Obx(() {
       if (loading.value && receipt.value == null) {
         return Scaffold(
@@ -231,14 +231,15 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
         appBar: AppBar(
           title: Text(r.code),
           actions: [
-            IconButton(
+            AppIconButton(
               tooltip: 'repairs.report.open'.tr,
-              icon: const Icon(LucideIcons.fileText),
+              icon: LucideIcons.fileText,
               onPressed: _pdf,
             ),
-            IconButton(
+            const SizedBox(width: AppSpacing.sm),
+            AppIconButton(
               tooltip: 'common.share'.tr,
-              icon: const Icon(LucideIcons.share2),
+              icon: LucideIcons.share2,
               onPressed: () => _pdf(share: true),
             ),
           ],
@@ -294,27 +295,31 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
                 ],
               ),
             const SizedBox(height: AppSpacing.md),
-            if (r.status == 'draft')
-              FilledButton.icon(
-                onPressed: _post,
-                icon: const Icon(LucideIcons.check),
-                label: Text('stock.receipt.post'.tr),
-              ),
-            if (r.status == 'posted' && r.qcStatus == 'pending')
-              OutlinedButton.icon(
-                onPressed: _qc,
-                icon: const Icon(LucideIcons.badgeCheck),
-                label: Text('stock.receipt.qc'.tr),
-              ),
-            if (r.status == 'posted')
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                ),
-                onPressed: _cancel,
-                icon: const Icon(LucideIcons.circleX),
-                label: Text('stock.receipt.cancel'.tr),
-              ),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                if (r.status == 'draft')
+                  AppButton.primary(
+                    onPressed: _post,
+                    icon: LucideIcons.check,
+                    label: 'stock.receipt.post'.tr,
+                  ),
+                if (r.status == 'posted' && r.qcStatus == 'pending')
+                  AppButton.success(
+                    onPressed: _qc,
+                    icon: LucideIcons.badgeCheck,
+                    label: 'stock.receipt.qc'.tr,
+                  ),
+                if (r.status == 'posted')
+                  AppButton.soft(
+                    tone: AppButtonTone.danger,
+                    onPressed: _cancel,
+                    icon: LucideIcons.circleX,
+                    label: 'stock.receipt.cancel'.tr,
+                  ),
+              ],
+            ),
           ],
         ),
       );

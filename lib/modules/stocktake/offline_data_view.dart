@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -50,9 +51,10 @@ class OfflineDataView extends GetView<OfflineDataController> {
                   style: theme.textTheme.bodySmall,
                 ),
                 isThreeLine: true,
-                trailing: IconButton(
+                trailing: AppIconButton(
+                  tone: AppButtonTone.danger,
                   tooltip: 'common.delete'.tr,
-                  icon: const Icon(LucideIcons.trash2),
+                  icon: LucideIcons.trash2,
                   onPressed: () =>
                       _confirmDelete(context, controller, meta, pending),
                 ),

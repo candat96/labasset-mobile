@@ -9,6 +9,7 @@ import '../../core/format/format.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/error_state.dart';
@@ -174,14 +175,15 @@ class _IssueDetailViewState extends State<IssueDetailView> {
         appBar: AppBar(
           title: Text(x.code),
           actions: [
-            IconButton(
+            AppIconButton(
               tooltip: 'repairs.report.open'.tr,
-              icon: const Icon(LucideIcons.fileText),
+              icon: LucideIcons.fileText,
               onPressed: _pdf,
             ),
-            IconButton(
+            const SizedBox(width: AppSpacing.sm),
+            AppIconButton(
               tooltip: 'common.share'.tr,
-              icon: const Icon(LucideIcons.share2),
+              icon: LucideIcons.share2,
               onPressed: () => _pdf(share: true),
             ),
           ],
@@ -239,35 +241,31 @@ class _IssueDetailViewState extends State<IssueDetailView> {
               ),
             const SizedBox(height: AppSpacing.md),
             if (x.status == 'draft') ...[
-              OutlinedButton.icon(
+              AppButton.soft(
                 onPressed: _sign,
-                icon: Icon(
-                  x.receiverSignatureFileId == null
-                      ? LucideIcons.pencil
-                      : LucideIcons.circleCheck,
-                ),
-                label: Text(
-                  x.receiverSignatureFileId == null
-                      ? 'stock.issue.sign'.tr
-                      : 'stock.issue.signed'.tr,
-                ),
+                icon: x.receiverSignatureFileId == null
+                    ? LucideIcons.pencil
+                    : LucideIcons.circleCheck,
+                label: x.receiverSignatureFileId == null
+                    ? 'stock.issue.sign'.tr
+                    : 'stock.issue.signed'.tr,
               ),
               const SizedBox(height: AppSpacing.sm),
-              FilledButton.icon(
+              AppButton.primary(
                 onPressed: _post,
-                icon: const Icon(LucideIcons.check),
-                label: Text('stock.receipt.post'.tr),
+                icon: LucideIcons.check,
+                label: 'stock.receipt.post'.tr,
               ),
             ],
-            if (x.status != 'cancelled')
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                ),
+            if (x.status != 'cancelled') ...[
+              const SizedBox(height: AppSpacing.sm),
+              AppButton.soft(
+                tone: AppButtonTone.danger,
                 onPressed: _cancel,
-                icon: const Icon(LucideIcons.circleX),
-                label: Text('stock.receipt.cancel'.tr),
+                icon: LucideIcons.circleX,
+                label: 'stock.receipt.cancel'.tr,
               ),
+            ],
           ],
         ),
       );

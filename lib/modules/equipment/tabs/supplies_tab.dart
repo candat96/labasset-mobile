@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/format/format.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -182,9 +183,10 @@ class SuppliesTab extends GetView<SuppliesTabController> {
                       ),
                   ],
                 ),
-                trailing: IconButton(
+                trailing: AppIconButton(
+                  tone: AppButtonTone.danger,
                   tooltip: 'common.delete'.tr,
-                  icon: const Icon(LucideIcons.x),
+                  icon: LucideIcons.x,
                   onPressed: () => controller.removeAt(i),
                 ),
               ),

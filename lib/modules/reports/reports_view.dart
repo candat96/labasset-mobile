@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/kpi_tile.dart';
 import '../../core/widgets/loading_list.dart';
@@ -65,11 +66,9 @@ class ReportsView extends GetView<ReportsController> {
             SectionCard(
               title: 'reports.machinesByDepartment'.tr,
               actions: [
-                TextButton(
+                AppButton.soft(
+                  label: controller.departmentName.value ?? 'common.pick'.tr,
                   onPressed: () => controller.pickDepartment(context),
-                  child: Text(
-                    controller.departmentName.value ?? 'common.pick'.tr,
-                  ),
                 ),
               ],
               child: Column(

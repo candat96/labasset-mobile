@@ -46,9 +46,10 @@ class RequestDetailView extends GetView<RequestDetailController> {
           title: Text(d.code),
           actions: [
             if (controller.canApprove)
-              IconButton(
+              AppIconButton(
+                tone: AppButtonTone.danger,
                 tooltip: 'requests.reject'.tr,
-                icon: const Icon(LucideIcons.ban),
+                icon: LucideIcons.ban,
                 onPressed: () => _reject(context, controller),
               ),
           ],
@@ -126,10 +127,11 @@ class RequestDetailView extends GetView<RequestDetailController> {
                         style: context.appText.caption,
                       ),
                     ),
-                  TextButton.icon(
+                  AppButton.soft(
+                    tone: AppButtonTone.primary,
                     onPressed: () => _comment(context, controller),
-                    icon: const Icon(LucideIcons.messageSquarePlus, size: 18),
-                    label: Text('requests.addComment'.tr),
+                    icon: LucideIcons.messageSquarePlus,
+                    label: 'requests.addComment'.tr,
                   ),
                 ],
               ),
@@ -235,16 +237,15 @@ Future<void> _approve(BuildContext context, RequestDetailController c) async {
               ),
               const SizedBox(height: AppSpacing.sm),
             ],
-            FilledButton(
-              onPressed: form.busy
-                  ? null
-                  : () async {
-                      form.setBusy(true);
-                      final ok = await c.approve();
-                      form.setBusy(false);
-                      if (ok) form.close();
-                    },
-              child: Text('common.confirm'.tr),
+            AppButton.success(
+              loading: form.busy,
+              onPressed: () async {
+                form.setBusy(true);
+                final ok = await c.approve();
+                form.setBusy(false);
+                if (ok) form.close();
+              },
+              label: 'common.confirm'.tr,
             ),
           ],
         ),
@@ -288,20 +289,19 @@ Future<void> _comment(BuildContext context, RequestDetailController c) async {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
-            onPressed: form.busy
-                ? null
-                : () async {
-                    if (form.text('body').isEmpty) {
-                      form.setError('body', 'common.required'.tr);
-                      return;
-                    }
-                    form.setBusy(true);
-                    final ok = await c.addComment(form.text('body'));
-                    form.setBusy(false);
-                    if (ok) form.close();
-                  },
-            child: Text('common.save'.tr),
+          AppButton.primary(
+            loading: form.busy,
+            onPressed: () async {
+              if (form.text('body').isEmpty) {
+                form.setError('body', 'common.required'.tr);
+                return;
+              }
+              form.setBusy(true);
+              final ok = await c.addComment(form.text('body'));
+              form.setBusy(false);
+              if (ok) form.close();
+            },
+            label: 'common.save'.tr,
           ),
         ],
       ),

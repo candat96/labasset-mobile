@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/error_state.dart';
@@ -176,20 +177,20 @@ class _LotTile extends StatelessWidget {
               ),
             ),
           Wrap(
-            spacing: AppSpacing.xs,
+            spacing: AppSpacing.sm,
             children: [
-              TextButton(
+              AppButton.soft(
                 onPressed: () => _openVial(context, controller, lot),
-                child: Text('scan.lot.open'.tr),
+                label: 'scan.lot.open'.tr,
               ),
-              TextButton(
+              AppButton.soft(
                 onPressed: () => _quickIssue(context, controller, lot),
-                child: Text('scan.lot.issue'.tr),
+                label: 'scan.lot.issue'.tr,
               ),
               if (controller.isAdmin)
-                TextButton(
+                AppButton.soft(
                   onPressed: () => _adjust(context, controller, lot),
-                  child: Text('stock.adjust.title'.tr),
+                  label: 'stock.adjust.title'.tr,
                 ),
             ],
           ),
@@ -240,7 +241,7 @@ Future<void> _adjust(
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.primary(
             onPressed: form.busy
                 ? null
                 : () async {
@@ -257,7 +258,7 @@ Future<void> _adjust(
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.save'.tr),
+            label: 'common.save'.tr,
           ),
         ],
       ),
@@ -306,7 +307,7 @@ Future<void> _quickIssue(
             label: 'repairs.parts.quantity'.tr,
           ),
           const SizedBox(height: AppSpacing.lg),
-          FilledButton(
+          AppButton.primary(
             onPressed: form.busy
                 ? null
                 : () async {
@@ -321,7 +322,7 @@ Future<void> _quickIssue(
                     form.setBusy(false);
                     if (ok) form.close();
                   },
-            child: Text('common.confirm'.tr),
+            label: 'common.confirm'.tr,
           ),
         ],
       ),

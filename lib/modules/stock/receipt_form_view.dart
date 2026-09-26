@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/money_field.dart';
@@ -59,27 +60,28 @@ class ReceiptFormView extends GetView<ReceiptFormController> {
               children: [
                 if (controller.step.value > 0)
                   Expanded(
-                    child: OutlinedButton(
+                    child: AppButton.soft(
+                      tone: AppButtonTone.neutral,
                       onPressed: controller.back,
-                      child: Text('common.back'.tr),
+                      label: 'common.back'.tr,
                     ),
                   ),
                 if (controller.step.value > 0)
                   const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: controller.step.value < 2
-                      ? FilledButton(
+                      ? AppButton.primary(
                           onPressed: controller.canNext
                               ? controller.next
                               : null,
-                          child: Text('common.next'.tr),
+                          label: 'common.next'.tr,
                         )
-                      : FilledButton.icon(
+                      : AppButton.primary(
                           onPressed: controller.submitting.value
                               ? null
                               : controller.saveDraft,
-                          icon: const Icon(LucideIcons.save),
-                          label: Text('stock.receipt.saveDraft'.tr),
+                          icon: LucideIcons.save,
+                          label: 'stock.receipt.saveDraft'.tr,
                         ),
                 ),
               ],
@@ -178,18 +180,18 @@ class _Step2 extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
+              child: AppButton.soft(
                 onPressed: () => _scan(context, controller),
-                icon: const Icon(LucideIcons.scanQrCode),
-                label: Text('stock.receipt.scanCode'.tr),
+                icon: LucideIcons.scanQrCode,
+                label: 'stock.receipt.scanCode'.tr,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: OutlinedButton.icon(
+              child: AppButton.soft(
                 onPressed: () => _pickSupply(context, controller),
-                icon: const Icon(LucideIcons.list),
-                label: Text('stock.receipt.pickSupply'.tr),
+                icon: LucideIcons.list,
+                label: 'stock.receipt.pickSupply'.tr,
               ),
             ),
           ],
@@ -208,8 +210,9 @@ class _Step2 extends StatelessWidget {
                       '${controller.lines[i].lotNo == null ? '' : ' · Lô ${controller.lines[i].lotNo}'}'
                       '${controller.expiryWarning(controller.lines[i].expiresAt) ? ' · ⚠ ${'stock.receipt.expiryWarn'.tr}' : ''}',
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(LucideIcons.x),
+                    trailing: AppIconButton(
+                      tone: AppButtonTone.danger,
+                      icon: LucideIcons.x,
                       onPressed: () => controller.removeLine(i),
                     ),
                   ),
@@ -311,7 +314,7 @@ class _Step2 extends StatelessWidget {
               label: 'repairs.parts.unitCost'.tr,
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
               onPressed: () {
                 final cost = MoneyField.raw(form.text('cost'));
                 c.addLine(
@@ -326,7 +329,7 @@ class _Step2 extends StatelessWidget {
                 );
                 form.close();
               },
-              child: Text('common.add'.tr),
+              label: 'common.add'.tr,
             ),
           ],
         ),

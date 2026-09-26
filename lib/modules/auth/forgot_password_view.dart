@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/config/env.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/form_focus.dart';
 import '../../data/repositories/auth_repository.dart';
 import 'auth_scaffold.dart';
@@ -100,11 +101,10 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              FilledButton(
-                onPressed: controller.submitting.value
-                    ? null
-                    : controller.submit,
-                child: Text('auth.forgot.submit'.tr),
+              AppButton.primary(
+                label: 'auth.forgot.submit'.tr,
+                loading: controller.submitting.value,
+                onPressed: controller.submit,
               ),
             ],
           ),

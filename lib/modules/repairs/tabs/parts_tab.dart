@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/format/format.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -284,7 +285,8 @@ class _StockFormState extends State<_StockForm> {
           decoration: InputDecoration(labelText: 'repairs.logs.note'.tr),
         ),
         const SizedBox(height: AppSpacing.lg),
-        FilledButton(
+        AppButton.primary(
+          label: 'common.save'.tr,
           onPressed: () async {
             if (supply == null || qty.text.trim().isEmpty) return;
             final ok = await widget.c.addStock(
@@ -295,7 +297,6 @@ class _StockFormState extends State<_StockForm> {
             );
             if (ok && context.mounted) AppSheet.close(context);
           },
-          child: Text('common.save'.tr),
         ),
       ],
     );
@@ -338,7 +339,8 @@ class _PurchasedFormState extends State<_PurchasedForm> {
         const SizedBox(height: AppSpacing.sm),
         MoneyField(controller: cost, label: 'repairs.parts.unitCost'.tr),
         const SizedBox(height: AppSpacing.lg),
-        FilledButton(
+        AppButton.primary(
+          label: 'common.save'.tr,
           onPressed: () async {
             if (name.text.trim().isEmpty) return;
             final ok = await widget.c.addPurchased(
@@ -350,7 +352,6 @@ class _PurchasedFormState extends State<_PurchasedForm> {
             );
             if (ok && context.mounted) AppSheet.close(context);
           },
-          child: Text('common.save'.tr),
         ),
       ],
     );
@@ -420,7 +421,8 @@ class _ComponentFormState extends State<_ComponentForm> {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        FilledButton(
+        AppButton.primary(
+          label: 'common.save'.tr,
           onPressed: () async {
             if (component == null) return;
             final ok = await widget.c.addComponentReplace(
@@ -434,7 +436,6 @@ class _ComponentFormState extends State<_ComponentForm> {
             );
             if (ok && context.mounted) AppSheet.close(context);
           },
-          child: Text('common.save'.tr),
         ),
       ],
     );

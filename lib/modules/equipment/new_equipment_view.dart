@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/signature_pad.dart';
 import '../../data/models/department.dart';
@@ -56,9 +57,10 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                     ),
                   ),
                 ),
-                IconButton(
+                AppIconButton(
+                  tone: AppButtonTone.primary,
                   tooltip: 'equipment.new.scanSerial'.tr,
-                  icon: const Icon(LucideIcons.scanQrCode),
+                  icon: LucideIcons.scanQrCode,
                   onPressed: () async {
                     final codes =
                         (await Get.toNamed(
@@ -191,18 +193,13 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Obx(
-              () => FilledButton.icon(
+              () => AppButton.primary(
+                icon: LucideIcons.save,
+                label: 'equipment.new.submit'.tr,
+                loading: controller.submitting.value,
                 onPressed: controller.submitting.value
                     ? null
                     : controller.submit,
-                icon: controller.submitting.value
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(LucideIcons.save),
-                label: Text('equipment.new.submit'.tr),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

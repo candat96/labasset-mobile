@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/format/format.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
@@ -28,11 +29,7 @@ class RequestsListView extends GetView<RequestsListController> {
           () =>
               controller.segment.value == RequestSegment.pending &&
                   controller.selected.isNotEmpty
-              ? FilledButton(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 40),
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                  ),
+              ? AppButton.success(
                   onPressed: () async {
                     final ok = await controller.approveBulk();
                     if (!ok) {
@@ -43,9 +40,8 @@ class RequestsListView extends GetView<RequestsListController> {
                       AppSnackbar.success('requests.approved'.tr);
                     }
                   },
-                  child: Text(
-                    '${'requests.approveBulk'.tr} (${controller.selected.length})',
-                  ),
+                  label:
+                      '${'requests.approveBulk'.tr} (${controller.selected.length})',
                 )
               : const SizedBox.shrink(),
         ),

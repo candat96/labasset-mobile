@@ -8,6 +8,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/large_title_scaffold.dart';
@@ -239,17 +240,18 @@ Future<void> _filters(BuildContext context, RepairsController c) async {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: AppButton.soft(
+                      label: 'repairs.filter.clear'.tr,
                       onPressed: () {
                         AppSheet.close(context);
                         c.applyFilters(statuses: const {}, overdue: false);
                       },
-                      child: Text('repairs.filter.clear'.tr),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: FilledButton(
+                    child: AppButton.primary(
+                      label: 'repairs.filter.apply'.tr,
                       onPressed: () {
                         AppSheet.close(context);
                         c.applyFilters(
@@ -259,7 +261,6 @@ Future<void> _filters(BuildContext context, RepairsController c) async {
                           overdue: overdue,
                         );
                       },
-                      child: Text('repairs.filter.apply'.tr),
                     ),
                   ),
                 ],

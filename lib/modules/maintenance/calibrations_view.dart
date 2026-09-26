@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/date_field.dart';
 import '../../core/widgets/empty_state.dart';
@@ -176,7 +177,8 @@ Future<void> _completeSheet(
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                OutlinedButton.icon(
+                AppButton.soft(
+                  tone: AppButtonTone.primary,
                   onPressed: () async {
                     final selected = await PickerSheet.show<String>(
                       context,
@@ -195,8 +197,8 @@ Future<void> _completeSheet(
                           : selected.option?.label;
                     });
                   },
-                  icon: const Icon(LucideIcons.building2),
-                  label: Text(agencyLabel ?? 'calibration.agency.select'.tr),
+                  icon: LucideIcons.building2,
+                  label: agencyLabel ?? 'calibration.agency.select'.tr,
                 ),
                 if (c.fieldErrors['agencyId'] case final message?)
                   Text(
@@ -215,7 +217,8 @@ Future<void> _completeSheet(
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                OutlinedButton.icon(
+                AppButton.soft(
+                  tone: AppButtonTone.primary,
                   onPressed: c.uploadingCertificate.value
                       ? null
                       : () async {
@@ -227,10 +230,8 @@ Future<void> _completeSheet(
                                 'calibration.certificate.attached'.tr;
                           });
                         },
-                  icon: const Icon(LucideIcons.paperclip),
-                  label: Text(
-                    certificateName ?? 'calibration.certificate.select'.tr,
-                  ),
+                  icon: LucideIcons.paperclip,
+                  label: certificateName ?? 'calibration.certificate.select'.tr,
                 ),
                 if (c.fieldErrors['certificateFileId'] case final message?)
                   Text(
@@ -266,7 +267,7 @@ Future<void> _completeSheet(
                   label: 'calibration.nextDue'.tr,
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                FilledButton(
+                AppButton.success(
                   onPressed: () async {
                     if (!(formKey.currentState?.validate() ?? false)) {
                       FormFocus.firstError([
@@ -307,7 +308,7 @@ Future<void> _completeSheet(
                       FormFocus.reveal(findingsFocus);
                     }
                   },
-                  child: Text('common.save'.tr),
+                  label: 'common.save'.tr,
                 ),
               ],
             ),

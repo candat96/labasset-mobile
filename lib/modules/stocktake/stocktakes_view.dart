@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/large_title_scaffold.dart';
@@ -105,29 +106,22 @@ class StocktakesView extends GetView<StocktakesController> {
                     Row(
                       children: [
                         Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(0, 44),
-                            ),
+                          child: AppButton.soft(
+                            expand: true,
                             onPressed: () => controller.download(s),
-                            icon: const Icon(LucideIcons.download, size: 18),
-                            label: Text('stocktake.download'.tr),
+                            icon: LucideIcons.download,
+                            label: 'stocktake.download'.tr,
                           ),
                         ),
                         if (meta != null) ...[
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size(0, 44),
-                              ),
+                            child: AppButton.primary(
+                              expand: true,
                               onPressed: () =>
                                   Get.toNamed(Routes.stocktakeCount(s.id)),
-                              icon: const Icon(
-                                LucideIcons.pencilLine,
-                                size: 18,
-                              ),
-                              label: Text('stocktake.count'.tr),
+                              icon: LucideIcons.pencilLine,
+                              label: 'stocktake.count'.tr,
                             ),
                           ),
                         ],

@@ -6,6 +6,7 @@ import '../../core/errors/api_error.dart';
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
@@ -100,18 +101,18 @@ class IssueFormView extends GetView<IssueFormController> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppButton.soft(
                   onPressed: () => _scanLot(context, controller),
-                  icon: const Icon(LucideIcons.scanQrCode),
-                  label: Text('stock.issue.scanLot'.tr),
+                  icon: LucideIcons.scanQrCode,
+                  label: 'stock.issue.scanLot'.tr,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppButton.soft(
                   onPressed: () => _pickSupply(context, controller),
-                  icon: const Icon(LucideIcons.list),
-                  label: Text('stock.receipt.pickSupply'.tr),
+                  icon: LucideIcons.list,
+                  label: 'stock.receipt.pickSupply'.tr,
                 ),
               ),
             ],
@@ -133,8 +134,9 @@ class IssueFormView extends GetView<IssueFormController> {
                             ? TextStyle(color: theme.colorScheme.tertiary)
                             : null,
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(LucideIcons.x),
+                      trailing: AppIconButton(
+                        tone: AppButtonTone.danger,
+                        icon: LucideIcons.x,
                         onPressed: () => controller.removeLine(i),
                       ),
                     ),
@@ -152,10 +154,10 @@ class IssueFormView extends GetView<IssueFormController> {
           ),
           const SizedBox(height: AppSpacing.md),
           Obx(
-            () => FilledButton.icon(
+            () => AppButton.primary(
               onPressed: controller.submitting.value ? null : controller.save,
-              icon: const Icon(LucideIcons.save),
-              label: Text('stock.issue.saveDraft'.tr),
+              icon: LucideIcons.save,
+              label: 'stock.issue.saveDraft'.tr,
             ),
           ),
         ],
@@ -236,7 +238,7 @@ class IssueFormView extends GetView<IssueFormController> {
               label: 'repairs.parts.quantity'.tr,
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
               onPressed: form.busy
                   ? null
                   : () async {
@@ -255,7 +257,7 @@ class IssueFormView extends GetView<IssueFormController> {
                       c.lines.add(line);
                       form.close();
                     },
-              child: Text('common.add'.tr),
+              label: 'common.add'.tr,
             ),
           ],
         ),

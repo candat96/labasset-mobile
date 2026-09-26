@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import 'transfer_form_controller.dart';
@@ -59,10 +60,10 @@ class TransferFormView extends GetView<TransferFormController> {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          FilledButton.tonalIcon(
+          AppButton.soft(
             onPressed: () => _scanContinuous(context),
-            icon: const Icon(LucideIcons.scanQrCode),
-            label: Text('stock.transfer.scanLots'.tr),
+            icon: LucideIcons.scanQrCode,
+            label: 'stock.transfer.scanLots'.tr,
           ),
           const SizedBox(height: AppSpacing.sm),
           Obx(
@@ -78,8 +79,9 @@ class TransferFormView extends GetView<TransferFormController> {
                       subtitle: Text(
                         '${'repairs.parts.quantity'.tr}: ${controller.lines[i].quantity}',
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(LucideIcons.x),
+                      trailing: AppIconButton(
+                        tone: AppButtonTone.danger,
+                        icon: LucideIcons.x,
                         onPressed: () => controller.removeLine(i),
                       ),
                     ),
@@ -97,10 +99,10 @@ class TransferFormView extends GetView<TransferFormController> {
           ),
           const SizedBox(height: AppSpacing.md),
           Obx(
-            () => FilledButton.icon(
+            () => AppButton.primary(
               onPressed: controller.submitting.value ? null : controller.submit,
-              icon: const Icon(LucideIcons.arrowRightLeft),
-              label: Text('stock.transfer.submit'.tr),
+              icon: LucideIcons.arrowRightLeft,
+              label: 'stock.transfer.submit'.tr,
             ),
           ),
         ],

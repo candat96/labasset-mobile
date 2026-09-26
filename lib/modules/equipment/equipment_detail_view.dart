@@ -456,7 +456,8 @@ class _QuickActions extends StatelessWidget {
               decoration: InputDecoration(labelText: 'equipment.note.hint'.tr),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.success(
+              label: 'common.confirm'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -467,7 +468,6 @@ class _QuickActions extends StatelessWidget {
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.confirm'.tr),
             ),
           ],
         ),
@@ -505,7 +505,8 @@ class _QuickActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
+              label: 'common.save'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -520,7 +521,6 @@ class _QuickActions extends StatelessWidget {
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.save'.tr),
             ),
           ],
         ),
@@ -563,7 +563,8 @@ class _QuickActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.success(
+              label: 'common.confirm'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -579,7 +580,6 @@ class _QuickActions extends StatelessWidget {
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.confirm'.tr),
             ),
           ],
         ),
@@ -635,7 +635,8 @@ class _QuickActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
+              label: 'common.save'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -650,7 +651,6 @@ class _QuickActions extends StatelessWidget {
                       }
                       form.close();
                     },
-              child: Text('common.save'.tr),
             ),
           ],
         ),
@@ -756,7 +756,8 @@ class _QuickActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.success(
+              label: 'common.confirm'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -774,7 +775,6 @@ class _QuickActions extends StatelessWidget {
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.confirm'.tr),
             ),
           ],
         ),

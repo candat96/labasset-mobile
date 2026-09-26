@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/empty_state.dart';
 
 class NoAccessView extends StatelessWidget {
@@ -17,12 +18,12 @@ class NoAccessView extends StatelessWidget {
           icon: LucideIcons.smartphone,
           title: 'auth.noAccess.title'.tr,
           description: 'auth.noAccess.desc'.tr,
-          action: FilledButton(
+          action: AppButton.danger(
+            label: 'auth.logout'.tr,
             onPressed: () async {
               await Get.find<SessionStore>().clear(reason: 'manual');
               await Get.offAllNamed(Routes.login);
             },
-            child: Text('auth.logout'.tr),
           ),
         ),
       ),

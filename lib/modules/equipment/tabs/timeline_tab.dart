@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -114,11 +115,11 @@ class TimelineTab extends GetView<TimelineTabController> {
               ),
               if (controller.items.length < controller.total.value)
                 Obx(
-                  () => TextButton(
-                    onPressed: controller.loadingMore.value
-                        ? null
-                        : controller.loadMore,
-                    child: Text('common.loadMore'.tr),
+                  () => AppButton.soft(
+                    tone: AppButtonTone.primary,
+                    label: 'common.loadMore'.tr,
+                    loading: controller.loadingMore.value,
+                    onPressed: controller.loadMore,
                   ),
                 ),
             ],

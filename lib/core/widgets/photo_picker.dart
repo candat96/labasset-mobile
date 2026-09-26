@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../services/attachment_service.dart';
 import '../theme/tokens.dart';
+import 'app_buttons.dart';
 import 'app_sheet.dart';
 
 /// Chọn ảnh dùng chung: thư viện **chọn nhiều ảnh một lúc**, camera **chụp
@@ -76,14 +77,15 @@ class PhotoPicker {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
+              label: 'attachment.takeMoreYes'.tr,
               onPressed: () => AppSheet.close(ctx, true),
-              child: Text('attachment.takeMoreYes'.tr),
             ),
             const SizedBox(height: AppSpacing.sm),
-            OutlinedButton(
+            AppButton.soft(
+              label: 'common.done'.tr,
+              tone: AppButtonTone.neutral,
               onPressed: () => AppSheet.close(ctx, false),
-              child: Text('common.done'.tr),
             ),
           ],
         ),

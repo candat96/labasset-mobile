@@ -158,9 +158,10 @@ class EquipmentListView extends GetView<EquipmentListController> {
           return EmptyState(
             icon: LucideIcons.microscope,
             title: 'equipment.list.empty'.tr,
-            action: OutlinedButton(
+            action: AppButton.soft(
+              tone: AppButtonTone.primary,
+              label: 'equipment.list.clearFilters'.tr,
               onPressed: controller.clearFilters,
-              child: Text('equipment.list.clearFilters'.tr),
             ),
           );
         }

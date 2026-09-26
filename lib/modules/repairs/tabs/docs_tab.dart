@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../../core/services/pdf_file_service.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/attachments_grid.dart';
@@ -49,18 +50,18 @@ class _DocsTabState extends State<DocsTab> {
         Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
+              child: AppButton.soft(
+                label: 'repairs.sign.technician'.tr,
+                icon: LucideIcons.pencil,
                 onPressed: () => _sign(context, 'technician'),
-                icon: const Icon(LucideIcons.pencil),
-                label: Text('repairs.sign.technician'.tr),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: OutlinedButton.icon(
+              child: AppButton.soft(
+                label: 'repairs.sign.department'.tr,
+                icon: LucideIcons.pencil,
                 onPressed: () => _sign(context, 'department'),
-                icon: const Icon(LucideIcons.pencil),
-                label: Text('repairs.sign.department'.tr),
               ),
             ),
           ],
@@ -70,22 +71,22 @@ class _DocsTabState extends State<DocsTab> {
           () => Row(
             children: [
               Expanded(
-                child: FilledButton.icon(
+                child: AppButton.soft(
+                  label: 'common.view'.tr,
+                  icon: LucideIcons.fileText,
                   onPressed: exporting.value
                       ? null
                       : () => _exportReport(share: false),
-                  icon: const Icon(LucideIcons.fileText),
-                  label: Text('common.view'.tr),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppButton.soft(
+                  label: 'common.share'.tr,
+                  icon: LucideIcons.share2,
                   onPressed: exporting.value
                       ? null
                       : () => _exportReport(share: true),
-                  icon: const Icon(LucideIcons.share2),
-                  label: Text('common.share'.tr),
                 ),
               ),
             ],

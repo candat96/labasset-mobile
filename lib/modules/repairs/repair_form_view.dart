@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/list_item_card.dart';
 import '../../core/widgets/photo_grid.dart';
 import '../../core/widgets/photo_picker.dart';
@@ -37,9 +38,9 @@ class RepairFormView extends GetView<RepairFormController> {
                       : '${controller.equipmentRef.value!.code} — ${controller.equipmentRef.value!.name}',
                 ),
                 subtitle: Text('repairs.form.pick'.tr),
-                trailing: IconButton(
+                trailing: AppIconButton(
                   tooltip: 'repairs.form.scan'.tr,
-                  icon: const Icon(LucideIcons.scanQrCode),
+                  icon: LucideIcons.scanQrCode,
                   onPressed: () async {
                     final codes =
                         (await Get.toNamed(
@@ -219,16 +220,11 @@ class RepairFormView extends GetView<RepairFormController> {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Obx(
-            () => FilledButton.icon(
-              onPressed: controller.submitting.value ? null : controller.submit,
-              icon: controller.submitting.value
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(LucideIcons.send),
-              label: Text('common.confirm'.tr),
+            () => AppButton.primary(
+              label: 'common.confirm'.tr,
+              icon: LucideIcons.send,
+              loading: controller.submitting.value,
+              onPressed: controller.submit,
             ),
           ),
         ),
@@ -253,9 +249,10 @@ Future<void> _previewPhoto(BuildContext context, PickedImage photo) =>
             ),
             OverflowBar(
               children: [
-                TextButton(
+                AppButton.soft(
+                  label: 'common.close'.tr,
+                  tone: AppButtonTone.neutral,
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text('common.close'.tr),
                 ),
               ],
             ),

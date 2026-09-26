@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/format/format.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
@@ -169,9 +170,10 @@ class _ComponentCard extends StatelessWidget {
             ),
           Align(
             alignment: Alignment.centerRight,
-            child: OutlinedButton(
+            child: AppButton.soft(
+              tone: AppButtonTone.primary,
+              label: 'equipment.component.replace'.tr,
               onPressed: onReplace,
-              child: Text('equipment.component.replace'.tr),
             ),
           ),
         ],
@@ -217,7 +219,8 @@ Future<void> _replaceSheet(
               label: 'equipment.component.cost'.tr,
             ),
             const SizedBox(height: AppSpacing.lg),
-            FilledButton(
+            AppButton.primary(
+              label: 'common.save'.tr,
               onPressed: form.busy
                   ? null
                   : () async {
@@ -236,7 +239,6 @@ Future<void> _replaceSheet(
                       form.setBusy(false);
                       if (ok) form.close();
                     },
-              child: Text('common.save'.tr),
             ),
           ],
         ),
