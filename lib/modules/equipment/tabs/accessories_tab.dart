@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
@@ -110,10 +111,7 @@ class AccessoriesTab extends GetView<AccessoriesTabController> {
           );
         }
         if (controller.items.isEmpty) {
-          return EmptyState(
-            icon: Icons.extension_outlined,
-            title: 'common.empty'.tr,
-          );
+          return EmptyState(icon: LucideIcons.puzzle, title: 'common.empty'.tr);
         }
         return RefreshIndicator(
           onRefresh: controller.load,
@@ -148,7 +146,7 @@ class AccessoriesTab extends GetView<AccessoriesTabController> {
         heroTag: 'addAccessory',
         tooltip: 'equipment.accessory.add'.tr,
         onPressed: () => _showForm(context, controller),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -279,7 +277,7 @@ Future<void> _showForm(
                   deleteRequested = true;
                   form.close();
                 },
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(LucideIcons.trash2),
                 label: Text('common.delete'.tr),
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -109,7 +110,7 @@ class SupplyDetailView extends GetView<SupplyDetailController> {
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                         title: Text('${m.code} — ${m.name}'),
-                        trailing: const Icon(Icons.chevron_right),
+                        trailing: const Icon(LucideIcons.chevronRight),
                         onTap: () => Get.toNamed(Routes.equipment(m.id)),
                       ),
                   ],

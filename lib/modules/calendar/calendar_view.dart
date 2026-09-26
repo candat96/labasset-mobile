@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -100,7 +101,7 @@ class CalendarView extends GetView<CalendarController> {
               );
               if (events.isEmpty) {
                 return EmptyState(
-                  icon: Icons.event_busy_outlined,
+                  icon: LucideIcons.calendarX,
                   title: 'calendar.emptyDay'.tr,
                 );
               }
@@ -127,7 +128,7 @@ class CalendarView extends GetView<CalendarController> {
                         e.status.isEmpty ? null : 'status.task.${e.status}'.tr,
                       ].whereType<String>().join(' · '),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(LucideIcons.chevronRight),
                     onTap: () => controller.open(e),
                   );
                 },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -28,7 +29,7 @@ class OfflineDataView extends GetView<OfflineDataController> {
         }
         if (controller.sessions.isEmpty) {
           return EmptyState(
-            icon: Icons.storage_outlined,
+            icon: LucideIcons.database,
             title: 'offline.empty'.tr,
           );
         }
@@ -49,7 +50,7 @@ class OfflineDataView extends GetView<OfflineDataController> {
                 isThreeLine: true,
                 trailing: IconButton(
                   tooltip: 'common.delete'.tr,
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const Icon(LucideIcons.trash2),
                   onPressed: () =>
                       _confirmDelete(context, controller, meta, pending),
                 ),

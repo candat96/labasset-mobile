@@ -135,7 +135,7 @@ class _ScanViewState extends State<ScanView> {
                       child: Obx(
                         () => Chip(
                           backgroundColor: theme.colorScheme.surface,
-                          avatar: const Icon(Icons.qr_code_scanner, size: 18),
+                          avatar: const Icon(LucideIcons.scanQrCode, size: 18),
                           label: Text(
                             '${'scan.count'.tr}: ${controller.scanCount.value}',
                           ),
@@ -274,7 +274,7 @@ class _ContinuousPanel extends StatelessWidget {
               ),
               FilledButton.tonalIcon(
                 onPressed: controller.finish,
-                icon: const Icon(Icons.check),
+                icon: const Icon(LucideIcons.check),
                 label: Text('scan.done'.tr),
               ),
             ],

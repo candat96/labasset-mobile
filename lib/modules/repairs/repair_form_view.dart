@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
@@ -28,7 +29,7 @@ class RepairFormView extends GetView<RepairFormController> {
             Obx(
               () => ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.biotech_outlined),
+                leading: const Icon(LucideIcons.flaskConical),
                 title: Text(
                   controller.equipmentRef.value == null
                       ? 'repairs.form.equipment'.tr
@@ -37,7 +38,7 @@ class RepairFormView extends GetView<RepairFormController> {
                 subtitle: Text('repairs.form.pick'.tr),
                 trailing: IconButton(
                   tooltip: 'repairs.form.scan'.tr,
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: const Icon(LucideIcons.scanQrCode),
                   onPressed: () async {
                     final codes =
                         (await Get.toNamed(
@@ -226,7 +227,7 @@ class RepairFormView extends GetView<RepairFormController> {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.send_outlined),
+                  : const Icon(LucideIcons.send),
               label: Text('common.confirm'.tr),
             ),
           ),

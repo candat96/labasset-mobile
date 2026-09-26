@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
@@ -20,11 +21,11 @@ class SearchView extends GetView<GlobalSearchController> {
   const SearchView({super.key});
 
   static const _icons = {
-    'equipment': Icons.biotech_outlined,
-    'supplies': Icons.inventory_2_outlined,
-    'repairs': Icons.build_outlined,
-    'requests': Icons.description_outlined,
-    'faults': Icons.warning_amber_outlined,
+    'equipment': LucideIcons.flaskConical,
+    'supplies': LucideIcons.package2,
+    'repairs': LucideIcons.wrench,
+    'requests': LucideIcons.fileText,
+    'faults': LucideIcons.triangleAlert,
   };
 
   @override
@@ -45,7 +46,7 @@ class SearchView extends GetView<GlobalSearchController> {
         actions: [
           IconButton(
             tooltip: 'common.clear'.tr,
-            icon: const Icon(Icons.close),
+            icon: const Icon(LucideIcons.x),
             onPressed: () {
               controller.query.clear();
               controller.onQueryChanged('');
@@ -67,12 +68,15 @@ class SearchView extends GetView<GlobalSearchController> {
         }
         if (controller.searched.value && controller.groups.isEmpty) {
           return EmptyState(
-            icon: Icons.search_off,
+            icon: LucideIcons.searchX,
             title: 'search.noResult'.tr,
           );
         }
         if (!controller.searched.value) {
-          return EmptyState(icon: Icons.search, title: 'search.minChars'.tr);
+          return EmptyState(
+            icon: LucideIcons.search,
+            title: 'search.minChars'.tr,
+          );
         }
         return ListView(
           children: [
@@ -91,7 +95,7 @@ class SearchView extends GetView<GlobalSearchController> {
               ),
               for (final hit in g.hits)
                 ListTile(
-                  leading: Icon(_icons[g.key] ?? Icons.search),
+                  leading: Icon(_icons[g.key] ?? LucideIcons.search),
                   title: Text(hit.title),
                   subtitle: _subtitle(hit),
                   onTap: () => controller.open(hit),

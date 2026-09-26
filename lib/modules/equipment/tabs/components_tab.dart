@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -81,7 +82,7 @@ class ComponentsTab extends GetView<ComponentsTabController> {
       }
       if (controller.items.isEmpty) {
         return EmptyState(
-          icon: Icons.memory_outlined,
+          icon: LucideIcons.cpu,
           title: 'equipment.component.none'.tr,
         );
       }

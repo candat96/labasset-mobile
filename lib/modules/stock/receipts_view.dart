@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -30,7 +31,7 @@ class ReceiptsView extends GetView<ReceiptsController> {
         actions: [
           IconButton(
             tooltip: 'common.add'.tr,
-            icon: const Icon(Icons.add),
+            icon: const Icon(LucideIcons.plus),
             onPressed: () => Get.toNamed('/stock/receipts/new'),
           ),
         ],
@@ -67,7 +68,7 @@ class ReceiptsView extends GetView<ReceiptsController> {
               }
               if (controller.items.isEmpty) {
                 return EmptyState(
-                  icon: Icons.move_to_inbox_outlined,
+                  icon: LucideIcons.inbox,
                   title: 'common.empty'.tr,
                 );
               }
@@ -232,12 +233,12 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
           actions: [
             IconButton(
               tooltip: 'repairs.report.open'.tr,
-              icon: const Icon(Icons.picture_as_pdf_outlined),
+              icon: const Icon(LucideIcons.fileText),
               onPressed: _pdf,
             ),
             IconButton(
               tooltip: 'common.share'.tr,
-              icon: const Icon(Icons.share_outlined),
+              icon: const Icon(LucideIcons.share2),
               onPressed: () => _pdf(share: true),
             ),
           ],
@@ -299,13 +300,13 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
             if (r.status == 'draft')
               FilledButton.icon(
                 onPressed: _post,
-                icon: const Icon(Icons.check),
+                icon: const Icon(LucideIcons.check),
                 label: Text('stock.receipt.post'.tr),
               ),
             if (r.status == 'posted' && r.qcStatus == 'pending')
               OutlinedButton.icon(
                 onPressed: _qc,
-                icon: const Icon(Icons.verified_outlined),
+                icon: const Icon(LucideIcons.badgeCheck),
                 label: Text('stock.receipt.qc'.tr),
               ),
             if (r.status == 'posted')
@@ -314,7 +315,7 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
                   foregroundColor: theme.colorScheme.error,
                 ),
                 onPressed: _cancel,
-                icon: const Icon(Icons.cancel_outlined),
+                icon: const Icon(LucideIcons.circleX),
                 label: Text('stock.receipt.cancel'.tr),
               ),
           ],

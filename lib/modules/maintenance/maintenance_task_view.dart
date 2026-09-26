@@ -253,8 +253,8 @@ class _ChecklistCard extends StatelessWidget {
                     tooltip: 'repairs.form.addPhoto'.tr,
                     icon: Icon(
                       r?.photoFileId == null
-                          ? Icons.add_a_photo_outlined
-                          : Icons.check_circle_outline,
+                          ? LucideIcons.camera
+                          : LucideIcons.circleCheck,
                       color: r?.photoFileId == null
                           ? null
                           : context.status.success,
@@ -322,7 +322,7 @@ class _ChecklistCard extends StatelessWidget {
         if (r?.pass != null) ...[
           const SizedBox(width: AppSpacing.xs),
           Icon(
-            r!.pass! ? Icons.check_circle : Icons.cancel,
+            r!.pass! ? LucideIcons.circleCheck : LucideIcons.circleX,
             size: 18,
             color: r.pass! ? context.status.success : context.status.danger,
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/tokens.dart';
@@ -89,7 +90,10 @@ class TimelineTab extends GetView<TimelineTabController> {
           );
         }
         if (controller.items.isEmpty) {
-          return EmptyState(icon: Icons.history, title: 'common.empty'.tr);
+          return EmptyState(
+            icon: LucideIcons.history,
+            title: 'common.empty'.tr,
+          );
         }
         return RefreshIndicator(
           onRefresh: controller.load,
@@ -125,18 +129,18 @@ class TimelineTab extends GetView<TimelineTabController> {
         heroTag: 'addNote',
         tooltip: 'equipment.timeline.addNote'.tr,
         onPressed: () => _addNote(context, controller),
-        child: const Icon(Icons.note_add_outlined),
+        child: const Icon(LucideIcons.notebookPen),
       ),
     );
   }
 
   IconData _iconFor(String type) => switch (type) {
-    'status' => Icons.sync_alt_outlined,
-    'maintenance' => Icons.build_circle_outlined,
-    'repair' => Icons.build_outlined,
-    'transfer' => Icons.swap_horiz_outlined,
-    'counter' => Icons.speed_outlined,
-    _ => Icons.circle_outlined,
+    'status' => LucideIcons.refreshCw,
+    'maintenance' => LucideIcons.wrench,
+    'repair' => LucideIcons.wrench,
+    'transfer' => LucideIcons.arrowRightLeft,
+    'counter' => LucideIcons.gauge,
+    _ => LucideIcons.circle,
   };
 }
 

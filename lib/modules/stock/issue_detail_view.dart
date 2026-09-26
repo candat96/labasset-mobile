@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -173,12 +174,12 @@ class _IssueDetailViewState extends State<IssueDetailView> {
           actions: [
             IconButton(
               tooltip: 'repairs.report.open'.tr,
-              icon: const Icon(Icons.picture_as_pdf_outlined),
+              icon: const Icon(LucideIcons.fileText),
               onPressed: _pdf,
             ),
             IconButton(
               tooltip: 'common.share'.tr,
-              icon: const Icon(Icons.share_outlined),
+              icon: const Icon(LucideIcons.share2),
               onPressed: () => _pdf(share: true),
             ),
           ],
@@ -247,8 +248,8 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                 onPressed: _sign,
                 icon: Icon(
                   x.receiverSignatureFileId == null
-                      ? Icons.draw_outlined
-                      : Icons.check_circle_outline,
+                      ? LucideIcons.pencil
+                      : LucideIcons.circleCheck,
                 ),
                 label: Text(
                   x.receiverSignatureFileId == null
@@ -259,7 +260,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
               const SizedBox(height: AppSpacing.sm),
               FilledButton.icon(
                 onPressed: _post,
-                icon: const Icon(Icons.check),
+                icon: const Icon(LucideIcons.check),
                 label: Text('stock.receipt.post'.tr),
               ),
             ],
@@ -269,7 +270,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                   foregroundColor: theme.colorScheme.error,
                 ),
                 onPressed: _cancel,
-                icon: const Icon(Icons.cancel_outlined),
+                icon: const Icon(LucideIcons.circleX),
                 label: Text('stock.receipt.cancel'.tr),
               ),
           ],

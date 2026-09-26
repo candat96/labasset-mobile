@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
@@ -48,7 +49,7 @@ class NotificationsPreferencesView
         }
         if (controller.items.isEmpty) {
           return EmptyState(
-            icon: Icons.notifications_off_outlined,
+            icon: LucideIcons.bellOff,
             title: 'notifications.preferences.empty'.tr,
           );
         }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/format/format.dart';
@@ -138,7 +139,7 @@ class PartsTab extends GetView<PartsTabController> {
         }
         if (controller.items.isEmpty) {
           return EmptyState(
-            icon: Icons.inventory_2_outlined,
+            icon: LucideIcons.package2,
             title: 'repairs.parts.empty'.tr,
           );
         }
@@ -175,7 +176,7 @@ class PartsTab extends GetView<PartsTabController> {
         heroTag: 'addPart',
         tooltip: 'repairs.parts.add'.tr,
         onPressed: () => _addPart(context, controller),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -254,7 +255,7 @@ class _StockFormState extends State<_StockForm> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(supply?.label ?? 'repairs.parts.pickSupply'.tr),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const Icon(LucideIcons.chevronRight),
           onTap: () async {
             final selection = await PickerSheet.show<String>(
               context,

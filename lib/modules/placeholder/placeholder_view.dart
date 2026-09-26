@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/widgets/empty_state.dart';
@@ -16,7 +17,7 @@ class PlaceholderView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(name)),
       body: EmptyState(
-        icon: Icons.construction_outlined,
+        icon: LucideIcons.construction,
         title: 'common.developing'.tr,
         description: 'common.developingDesc'.trParams({'name': name}),
       ),

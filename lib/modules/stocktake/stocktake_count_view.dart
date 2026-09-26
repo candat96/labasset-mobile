@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
@@ -45,7 +46,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
           actions: [
             IconButton(
               tooltip: 'scan.title'.tr,
-              icon: const Icon(Icons.qr_code_scanner),
+              icon: const Icon(LucideIcons.scanQrCode),
               onPressed: () => _scanContinuous(context),
             ),
           ],
@@ -83,7 +84,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                     controller: controller.search,
                     onChanged: controller.onSearchChanged,
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(LucideIcons.search),
                       hintText: 'stocktake.searchHint'.tr,
                     ),
                   ),
@@ -147,7 +148,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.cloud_upload_outlined),
+                    : const Icon(LucideIcons.cloudUpload),
                 label: Text(
                   '${'stocktake.send'.tr} (${controller.pending.value})',
                 ),
@@ -173,7 +174,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                   return const SizedBox(
                     width: 48,
                     height: 48,
-                    child: Icon(Icons.image_outlined),
+                    child: Icon(LucideIcons.image),
                   );
                 }
                 return ClipRRect(
@@ -186,7 +187,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                     errorBuilder: (_, _, _) => const SizedBox(
                       width: 48,
                       height: 48,
-                      child: Icon(Icons.broken_image_outlined),
+                      child: Icon(LucideIcons.imageOff),
                     ),
                   ),
                 );
@@ -213,7 +214,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
               : null,
         ),
       ),
-      trailing: const Icon(Icons.edit_outlined),
+      trailing: const Icon(LucideIcons.pencil),
       onTap: () => _countSheet(context, item),
     );
   }
@@ -230,7 +231,7 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
         itemBuilder: (_, i) {
           final e = controller.extras[i];
           return ListTile(
-            leading: const Icon(Icons.add_circle_outline),
+            leading: const Icon(LucideIcons.circlePlus),
             title: Text(e.code),
             subtitle: Text(
               '${'stocktake.countedQty'.tr}: ${e.qty}'
@@ -368,8 +369,8 @@ class StocktakeCountView extends GetView<StocktakeCountController> {
                 },
                 icon: Icon(
                   photoFileId != null || photoQueued
-                      ? Icons.check_circle_outline
-                      : Icons.camera_alt_outlined,
+                      ? LucideIcons.circleCheck
+                      : LucideIcons.camera,
                 ),
                 label: Text(
                   photoFileId != null

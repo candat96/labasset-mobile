@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -21,7 +22,7 @@ class SyncView extends GetView<SyncController> {
         actions: [
           IconButton(
             tooltip: 'sync.retry'.tr,
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(LucideIcons.refreshCw),
             onPressed: controller.load,
           ),
         ],
@@ -70,7 +71,7 @@ class SyncView extends GetView<SyncController> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: controller.retryAll,
-                    icon: const Icon(Icons.replay),
+                    icon: const Icon(LucideIcons.rotateCcw),
                     label: Text('sync.retry'.tr),
                   ),
                 ),
@@ -78,7 +79,7 @@ class SyncView extends GetView<SyncController> {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: controller.runNow,
-                    icon: const Icon(Icons.cloud_upload_outlined),
+                    icon: const Icon(LucideIcons.cloudUpload),
                     label: Text('sync.runNow'.tr),
                   ),
                 ),
@@ -88,7 +89,7 @@ class SyncView extends GetView<SyncController> {
             Expanded(
               child: controller.items.isEmpty
                   ? EmptyState(
-                      icon: Icons.cloud_done_outlined,
+                      icon: LucideIcons.cloudCheck,
                       title: 'sync.empty'.tr,
                     )
                   : RefreshIndicator(
@@ -103,8 +104,8 @@ class SyncView extends GetView<SyncController> {
                           return ListTile(
                             leading: Icon(
                               item.attempts > 0
-                                  ? Icons.error_outline
-                                  : Icons.schedule,
+                                  ? LucideIcons.circleAlert
+                                  : LucideIcons.clock,
                               color: item.attempts > 0
                                   ? theme.colorScheme.error
                                   : theme.colorScheme.primary,

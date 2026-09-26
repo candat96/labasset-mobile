@@ -49,17 +49,17 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
   String? get tag => Get.parameters['id'];
 
   static const _actionKeys = [
-    (key: 'reportFault', icon: Icons.report_problem_outlined),
-    (key: 'adhocMaintenance', icon: Icons.build_circle_outlined),
-    (key: 'issueSupplies', icon: Icons.outbox_outlined),
-    (key: 'counters', icon: Icons.speed_outlined),
-    (key: 'updateStatus', icon: Icons.sync_alt_outlined),
-    (key: 'addPhoto', icon: Icons.add_a_photo_outlined),
-    (key: 'location', icon: Icons.router_outlined),
-    (key: 'note', icon: Icons.note_add_outlined),
-    (key: 'transfer', icon: Icons.swap_horiz_outlined),
-    (key: 'assistant', icon: Icons.smart_toy_outlined),
-    (key: 'reprint', icon: Icons.print_outlined),
+    (key: 'reportFault', icon: LucideIcons.triangleAlert),
+    (key: 'adhocMaintenance', icon: LucideIcons.wrench),
+    (key: 'issueSupplies', icon: LucideIcons.upload),
+    (key: 'counters', icon: LucideIcons.gauge),
+    (key: 'updateStatus', icon: LucideIcons.refreshCw),
+    (key: 'addPhoto', icon: LucideIcons.camera),
+    (key: 'location', icon: LucideIcons.router),
+    (key: 'note', icon: LucideIcons.notebookPen),
+    (key: 'transfer', icon: LucideIcons.arrowRightLeft),
+    (key: 'assistant', icon: LucideIcons.bot),
+    (key: 'reprint', icon: LucideIcons.printer),
   ];
 
   @override
@@ -77,7 +77,7 @@ class EquipmentDetailView extends GetView<EquipmentDetailController> {
           return Scaffold(
             appBar: AppBar(title: Text('equipment.title'.tr)),
             body: EmptyState(
-              icon: Icons.search_off,
+              icon: LucideIcons.searchX,
               title: 'equipment.notFound'.tr,
             ),
           );
@@ -734,7 +734,7 @@ class _QuickActions extends StatelessWidget {
               child: InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'equipment.room.name'.tr,
-                  suffixIcon: const Icon(Icons.chevron_right),
+                  suffixIcon: const Icon(LucideIcons.chevronRight),
                 ),
                 child: Text(toRoom?.name ?? 'equipment.room.name'.tr),
               ),

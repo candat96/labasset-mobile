@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/format/format.dart';
@@ -130,7 +131,7 @@ class SuppliesTab extends GetView<SuppliesTabController> {
         }
         if (controller.links.isEmpty) {
           return EmptyState(
-            icon: Icons.inventory_2_outlined,
+            icon: LucideIcons.package2,
             title: 'equipment.supply.none'.tr,
           );
         }
@@ -163,7 +164,7 @@ class SuppliesTab extends GetView<SuppliesTabController> {
                       Row(
                         children: [
                           Icon(
-                            Icons.trending_down,
+                            LucideIcons.trendingDown,
                             size: 16,
                             color: _runwayColor(context, runway.daysLeft),
                           ),
@@ -181,7 +182,7 @@ class SuppliesTab extends GetView<SuppliesTabController> {
                 ),
                 trailing: IconButton(
                   tooltip: 'common.delete'.tr,
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(LucideIcons.x),
                   onPressed: () => controller.removeAt(i),
                 ),
               ),
@@ -192,7 +193,7 @@ class SuppliesTab extends GetView<SuppliesTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addSupply',
         onPressed: () => controller.add(context),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }

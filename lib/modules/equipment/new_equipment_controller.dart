@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/errors/api_error.dart';
@@ -104,7 +105,7 @@ class NewEquipmentController extends GetxController {
                     );
                   }
                 },
-                icon: const Icon(Icons.add, size: 18),
+                icon: const Icon(LucideIcons.plus, size: 18),
                 label: Text('equipment.room.new'.tr),
               ),
             )

@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/format/decimal_input.dart';
@@ -92,7 +93,7 @@ class CostsTab extends GetView<CostsTabController> {
         }
         if (controller.items.isEmpty) {
           return EmptyState(
-            icon: Icons.payments_outlined,
+            icon: LucideIcons.banknote,
             title: 'repairs.costs.empty'.tr,
           );
         }
@@ -137,7 +138,7 @@ class CostsTab extends GetView<CostsTabController> {
         heroTag: 'addCost',
         tooltip: 'repairs.costs.add'.tr,
         onPressed: () => _addCost(context, controller),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }

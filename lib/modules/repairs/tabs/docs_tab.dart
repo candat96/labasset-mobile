@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -50,7 +51,7 @@ class _DocsTabState extends State<DocsTab> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _sign(context, 'technician'),
-                icon: const Icon(Icons.draw_outlined),
+                icon: const Icon(LucideIcons.pencil),
                 label: Text('repairs.sign.technician'.tr),
               ),
             ),
@@ -58,7 +59,7 @@ class _DocsTabState extends State<DocsTab> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _sign(context, 'department'),
-                icon: const Icon(Icons.draw_outlined),
+                icon: const Icon(LucideIcons.pencil),
                 label: Text('repairs.sign.department'.tr),
               ),
             ),
@@ -73,7 +74,7 @@ class _DocsTabState extends State<DocsTab> {
                   onPressed: exporting.value
                       ? null
                       : () => _exportReport(share: false),
-                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  icon: const Icon(LucideIcons.fileText),
                   label: Text('common.view'.tr),
                 ),
               ),
@@ -83,7 +84,7 @@ class _DocsTabState extends State<DocsTab> {
                   onPressed: exporting.value
                       ? null
                       : () => _exportReport(share: true),
-                  icon: const Icon(Icons.share_outlined),
+                  icon: const Icon(LucideIcons.share2),
                   label: Text('common.share'.tr),
                 ),
               ),

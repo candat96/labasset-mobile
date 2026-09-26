@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/cache/kv_cache.dart';
@@ -161,7 +162,7 @@ class _FaultsTabState extends State<FaultsTab> {
             controller: controller.search,
             onChanged: controller.onSearchChanged,
             decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(LucideIcons.search),
               hintText: 'equipment.faults.search'.tr,
             ),
           ),
@@ -175,7 +176,7 @@ class _FaultsTabState extends State<FaultsTab> {
                   child: Row(
                     children: [
                       Icon(
-                        Icons.cloud_off_outlined,
+                        LucideIcons.cloudOff,
                         size: 16,
                         color: context.status.warning,
                       ),
@@ -200,7 +201,7 @@ class _FaultsTabState extends State<FaultsTab> {
             }
             if (controller.items.isEmpty) {
               return EmptyState(
-                icon: Icons.menu_book_outlined,
+                icon: LucideIcons.bookOpen,
                 title: 'equipment.faults.empty'.tr,
               );
             }

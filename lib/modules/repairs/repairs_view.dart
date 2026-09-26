@@ -222,7 +222,7 @@ Future<void> _filters(BuildContext context, RepairsController c) async {
                       ? 'repairs.filter.department'.tr
                       : '${'repairs.filter.department'.tr} ✓',
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(LucideIcons.chevronRight),
                 onTap: () async {
                   final repo = Get.find<DepartmentsRepository>();
                   final sel = await _pickDepartment(context, repo);

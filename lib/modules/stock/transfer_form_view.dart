@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
@@ -21,13 +22,13 @@ class TransferFormView extends GetView<TransferFormController> {
           Obx(
             () => ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.warehouse_outlined),
+              leading: const Icon(LucideIcons.warehouse),
               title: Text(
                 controller.fromWarehouse.value == null
                     ? 'stock.transfer.from'.tr
                     : controller.fromWarehouse.value!.name,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(LucideIcons.chevronRight),
               onTap: () async {
                 final d = await controller.pickWarehouse(
                   context,
@@ -40,13 +41,13 @@ class TransferFormView extends GetView<TransferFormController> {
           Obx(
             () => ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.warehouse_outlined),
+              leading: const Icon(LucideIcons.warehouse),
               title: Text(
                 controller.toWarehouse.value == null
                     ? 'stock.transfer.to'.tr
                     : controller.toWarehouse.value!.name,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(LucideIcons.chevronRight),
               onTap: () async {
                 final d = await controller.pickWarehouse(
                   context,
@@ -59,7 +60,7 @@ class TransferFormView extends GetView<TransferFormController> {
           const SizedBox(height: AppSpacing.sm),
           FilledButton.tonalIcon(
             onPressed: () => _scanContinuous(context),
-            icon: const Icon(Icons.qr_code_scanner),
+            icon: const Icon(LucideIcons.scanQrCode),
             label: Text('stock.transfer.scanLots'.tr),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -76,7 +77,7 @@ class TransferFormView extends GetView<TransferFormController> {
                         '${'repairs.parts.quantity'.tr}: ${controller.lines[i].quantity}',
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(LucideIcons.x),
                         onPressed: () => controller.removeLine(i),
                       ),
                     ),
@@ -96,7 +97,7 @@ class TransferFormView extends GetView<TransferFormController> {
           Obx(
             () => FilledButton.icon(
               onPressed: controller.submitting.value ? null : controller.submit,
-              icon: const Icon(Icons.swap_horiz_outlined),
+              icon: const Icon(LucideIcons.arrowRightLeft),
               label: Text('stock.transfer.submit'.tr),
             ),
           ),

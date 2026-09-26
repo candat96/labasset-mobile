@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -107,7 +108,7 @@ class StockAlertsView extends GetView<StockAlertsController> {
               }
               if (controller.items.isEmpty) {
                 return EmptyState(
-                  icon: Icons.check_circle_outline,
+                  icon: LucideIcons.circleCheck,
                   title: 'stock.alert.empty'.tr,
                 );
               }
@@ -123,7 +124,7 @@ class StockAlertsView extends GetView<StockAlertsController> {
                     return Card(
                       child: ListTile(
                         leading: Icon(
-                          Icons.warning_amber_outlined,
+                          LucideIcons.triangleAlert,
                           color: a.type == 'expired'
                               ? context.status.danger
                               : context.status.warning,
@@ -139,7 +140,7 @@ class StockAlertsView extends GetView<StockAlertsController> {
                                 onPressed: () => controller.resolve(a),
                                 child: Text('stock.alert.resolve'.tr),
                               )
-                            : const Icon(Icons.chevron_right),
+                            : const Icon(LucideIcons.chevronRight),
                         onTap: () => Get.toNamed(Routes.supply(a.supplyId)),
                       ),
                     );

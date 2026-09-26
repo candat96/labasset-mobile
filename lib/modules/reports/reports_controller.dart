@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -168,10 +169,10 @@ class ReportsController extends GetxController {
             ),
           ),
           for (final (icon, key, value) in [
-            (Icons.open_in_new, 'reports.openXlsx', 'open:xlsx'),
-            (Icons.share_outlined, 'reports.shareXlsx', 'share:xlsx'),
-            (Icons.picture_as_pdf_outlined, 'reports.openPdf', 'open:pdf'),
-            (Icons.share_outlined, 'reports.sharePdf', 'share:pdf'),
+            (LucideIcons.externalLink, 'reports.openXlsx', 'open:xlsx'),
+            (LucideIcons.share2, 'reports.shareXlsx', 'share:xlsx'),
+            (LucideIcons.fileText, 'reports.openPdf', 'open:pdf'),
+            (LucideIcons.share2, 'reports.sharePdf', 'share:pdf'),
           ])
             ListTile(
               leading: Icon(icon),

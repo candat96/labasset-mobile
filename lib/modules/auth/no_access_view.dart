@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
@@ -13,7 +14,7 @@ class NoAccessView extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: EmptyState(
-          icon: Icons.phonelink_lock_outlined,
+          icon: LucideIcons.smartphone,
           title: 'auth.noAccess.title'.tr,
           description: 'auth.noAccess.desc'.tr,
           action: FilledButton(

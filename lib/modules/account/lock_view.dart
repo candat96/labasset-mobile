@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
@@ -22,7 +23,7 @@ class LockView extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.lock_outline,
+                    LucideIcons.lock,
                     size: 56,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -36,7 +37,7 @@ class LockView extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xl),
                   FilledButton.icon(
                     onPressed: c.unlock,
-                    icon: const Icon(Icons.fingerprint),
+                    icon: const Icon(LucideIcons.fingerprint),
                     label: Text('lock.unlock'.tr),
                   ),
                   TextButton(

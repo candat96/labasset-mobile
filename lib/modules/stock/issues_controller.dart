@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/tokens.dart';
@@ -59,7 +60,7 @@ class IssuesView extends GetView<IssuesController> {
         actions: [
           IconButton(
             tooltip: 'common.add'.tr,
-            icon: const Icon(Icons.add),
+            icon: const Icon(LucideIcons.plus),
             onPressed: () => Get.toNamed('/stock/issues/new'),
           ),
         ],
@@ -96,7 +97,7 @@ class IssuesView extends GetView<IssuesController> {
               }
               if (controller.items.isEmpty) {
                 return EmptyState(
-                  icon: Icons.outbox_outlined,
+                  icon: LucideIcons.upload,
                   title: 'common.empty'.tr,
                 );
               }

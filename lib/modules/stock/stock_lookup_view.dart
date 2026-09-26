@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -23,7 +24,7 @@ class StockLookupView extends GetView<StockLookupController> {
         actions: [
           IconButton(
             tooltip: 'scan.title'.tr,
-            icon: const Icon(Icons.qr_code_scanner),
+            icon: const Icon(LucideIcons.scanQrCode),
             onPressed: () async {
               final codes =
                   (await Get.toNamed(
@@ -46,10 +47,10 @@ class StockLookupView extends GetView<StockLookupController> {
               textInputAction: TextInputAction.search,
               onSubmitted: controller.search,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(LucideIcons.search),
                 hintText: 'stock.lookup.hint'.tr,
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
+                  icon: const Icon(LucideIcons.arrowRight),
                   onPressed: () => controller.search(controller.query.text),
                 ),
               ),
@@ -66,14 +67,14 @@ class StockLookupView extends GetView<StockLookupController> {
               }
               if (!controller.searched.value) {
                 return EmptyState(
-                  icon: Icons.search,
+                  icon: LucideIcons.search,
                   title: 'stock.lookup.hint'.tr,
                 );
               }
               if (controller.supplyResults.isEmpty &&
                   controller.lotResults.isEmpty) {
                 return EmptyState(
-                  icon: Icons.search_off,
+                  icon: LucideIcons.searchX,
                   title: 'picker.empty'.tr,
                 );
               }
@@ -88,7 +89,7 @@ class StockLookupView extends GetView<StockLookupController> {
                     for (final s in controller.supplyResults)
                       ListTile(
                         title: Text('${s.code} — ${s.name}'),
-                        trailing: const Icon(Icons.chevron_right),
+                        trailing: const Icon(LucideIcons.chevronRight),
                         onTap: () => controller.openSupply(s.id),
                       ),
                   ],

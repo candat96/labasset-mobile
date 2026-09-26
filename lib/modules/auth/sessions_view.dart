@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -124,7 +125,10 @@ class SessionsView extends GetView<SessionsController> {
                   isThreeLine: true,
                   trailing: IconButton(
                     tooltip: 'auth.sessions.revoke'.tr,
-                    icon: Icon(Icons.logout, color: theme.colorScheme.error),
+                    icon: Icon(
+                      LucideIcons.logOut,
+                      color: theme.colorScheme.error,
+                    ),
                     onPressed: () => controller.revoke(context, s),
                   ),
                 ),

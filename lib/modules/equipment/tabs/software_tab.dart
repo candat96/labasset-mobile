@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
@@ -150,7 +151,7 @@ class SoftwareTab extends GetView<SoftwareTabController> {
         }
         if (controller.items.isEmpty) {
           return EmptyState(
-            icon: Icons.terminal_outlined,
+            icon: LucideIcons.terminal,
             title: 'common.empty'.tr,
           );
         }
@@ -198,7 +199,7 @@ class SoftwareTab extends GetView<SoftwareTabController> {
                               onPressed: s.hasLicenseKey
                                   ? () => controller.revealKey(s)
                                   : null,
-                              icon: const Icon(Icons.key_outlined, size: 18),
+                              icon: const Icon(LucideIcons.keyRound, size: 18),
                               label: Text(
                                 s.hasLicenseKey
                                     ? 'equipment.software.viewKey'.tr
@@ -256,7 +257,7 @@ class SoftwareTab extends GetView<SoftwareTabController> {
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'addSoftware',
         onPressed: () => _formSheet(context, controller),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -323,7 +324,7 @@ Future<void> _formSheet(
               },
               decoration: InputDecoration(
                 labelText: 'equipment.software.license'.tr,
-                suffixIcon: const Icon(Icons.event_outlined),
+                suffixIcon: const Icon(LucideIcons.calendarDays),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -365,7 +366,7 @@ Future<void> _formSheet(
                   deleteRequested = true;
                   form.close();
                 },
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(LucideIcons.trash2),
                 label: Text('common.delete'.tr),
               ),
             ],

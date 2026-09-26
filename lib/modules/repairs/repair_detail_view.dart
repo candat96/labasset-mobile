@@ -206,7 +206,7 @@ class _Overview extends StatelessWidget {
             color: context.status.warning.withValues(alpha: 0.12),
             child: ListTile(
               leading: Icon(
-                Icons.verified_outlined,
+                LucideIcons.badgeCheck,
                 color: context.status.warning,
               ),
               title: Text('repairs.overview.calibration'.tr),
@@ -224,9 +224,7 @@ class _Overview extends StatelessWidget {
               children: [
                 for (var i = 1; i <= 5; i++)
                   Icon(
-                    i <= (d.rating ?? 0)
-                        ? Icons.star
-                        : Icons.star_border_outlined,
+                    i <= (d.rating ?? 0) ? LucideIcons.star : LucideIcons.star,
                     size: 18,
                     color: context.status.warning,
                   ),
@@ -304,7 +302,7 @@ class _Logs extends StatelessWidget {
         final logs = controller.mergedLogs;
         if (logs.isEmpty) {
           return EmptyState(
-            icon: Icons.history,
+            icon: LucideIcons.history,
             title: 'repairs.logs.empty'.tr,
           );
         }
@@ -325,8 +323,8 @@ class _Logs extends StatelessWidget {
                       by: _userLabel(l.byUserId, controller),
                       color: l.pending ? context.status.warning : null,
                       icon: l.pending
-                          ? Icons.cloud_upload_outlined
-                          : Icons.check_circle_outline,
+                          ? LucideIcons.cloudUpload
+                          : LucideIcons.circleCheck,
                     ),
                 ],
               ),
@@ -338,7 +336,7 @@ class _Logs extends StatelessWidget {
         heroTag: 'addLog',
         tooltip: 'repairs.logs.add'.tr,
         onPressed: () => _addLog(context, controller),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -773,7 +771,7 @@ Future<void> _acceptance(BuildContext context, RepairDetailController c) async {
                     visualDensity: VisualDensity.compact,
                     onPressed: () => form.refresh(() => rating = i),
                     icon: Icon(
-                      i <= rating ? Icons.star : Icons.star_border_outlined,
+                      i <= rating ? LucideIcons.star : LucideIcons.star,
                       color: context.status.warning,
                     ),
                   ),
@@ -865,7 +863,7 @@ class _ReportTab extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.picture_as_pdf_outlined,
+              LucideIcons.fileText,
               size: 48,
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -884,7 +882,7 @@ class _ReportTab extends StatelessWidget {
                   AppSnackbar.error(e);
                 }
               },
-              icon: const Icon(Icons.open_in_new),
+              icon: const Icon(LucideIcons.externalLink),
               label: Text('repairs.report.open'.tr),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -104,7 +105,7 @@ class _LotCardViewState extends State<_LotCardView> {
           Obx(
             () => FilledButton.icon(
               onPressed: controller.opening.value ? null : controller.openVial,
-              icon: const Icon(Icons.lock_open_outlined),
+              icon: const Icon(LucideIcons.lockOpen),
               label: Text('scan.lot.open'.tr),
             ),
           ),

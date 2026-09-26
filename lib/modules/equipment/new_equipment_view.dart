@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -57,7 +58,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                 ),
                 IconButton(
                   tooltip: 'equipment.new.scanSerial'.tr,
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: const Icon(LucideIcons.scanQrCode),
                   onPressed: () async {
                     final codes =
                         (await Get.toNamed(
@@ -82,7 +83,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
             // Nhóm máy.
             Obx(
               () => _PickerTile(
-                icon: Icons.category_outlined,
+                icon: LucideIcons.shapes,
                 label: 'equipment.group'.tr,
                 value: controller.group.value?.name,
                 onTap: () => _pickCatalog(
@@ -96,7 +97,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
             // Hãng.
             Obx(
               () => _PickerTile(
-                icon: Icons.factory_outlined,
+                icon: LucideIcons.factory,
                 label: 'equipment.manufacturer'.tr,
                 value: controller.manufacturer.value?.name,
                 onTap: () => _pickCatalog(
@@ -110,7 +111,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
             // Khoa/Phòng ban.
             Obx(
               () => _PickerTile(
-                icon: Icons.apartment_outlined,
+                icon: LucideIcons.building2,
                 label: 'equipment.new.department'.tr,
                 value: controller.department.value?.name,
                 error: controller.fieldErrors['departmentId'],
@@ -140,7 +141,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
             // Phòng (disabled khi chưa chọn khoa).
             Obx(
               () => _PickerTile(
-                icon: Icons.meeting_room_outlined,
+                icon: LucideIcons.doorOpen,
                 label: 'equipment.new.room'.tr,
                 value: controller.room.value?.name,
                 placeholder: 'equipment.new.roomPlaceholder'.tr,
@@ -200,7 +201,7 @@ class NewEquipmentView extends GetView<NewEquipmentController> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.save_outlined),
+                    : const Icon(LucideIcons.save),
                 label: Text('equipment.new.submit'.tr),
               ),
             ),
@@ -277,7 +278,7 @@ class _PickerTile extends StatelessWidget {
                 : null,
           ),
           subtitle: value != null ? Text(label) : null,
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const Icon(LucideIcons.chevronRight),
           onTap: enabled ? onTap : null,
         ),
         if (error != null)
@@ -312,14 +313,14 @@ class _AttachRow extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: bytes == null
-          ? const Icon(Icons.attach_file_outlined)
+          ? const Icon(LucideIcons.paperclip)
           : Image.memory(bytes!, width: 40, height: 40, fit: BoxFit.cover),
       title: Text(label),
       subtitle: Text(
         bytes == null ? 'common.add'.tr : 'common.done'.tr,
         style: theme.textTheme.bodySmall,
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: const Icon(LucideIcons.chevronRight),
       onTap: onPick,
     );
   }

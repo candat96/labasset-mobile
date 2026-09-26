@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/format/display_text.dart';
@@ -104,7 +105,7 @@ class VendorsTab extends GetView<VendorsTabController> {
         }
         if (controller.items.isEmpty) {
           return EmptyState(
-            icon: Icons.engineering_outlined,
+            icon: LucideIcons.hardHat,
             title: 'repairs.vendors.empty'.tr,
           );
         }
@@ -145,7 +146,7 @@ class VendorsTab extends GetView<VendorsTabController> {
         heroTag: 'addVendor',
         tooltip: 'repairs.vendors.add'.tr,
         onPressed: () => _addVendor(context, controller),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -218,7 +219,7 @@ Future<void> _addVendor(BuildContext context, VendorsTabController c) async {
               },
               decoration: InputDecoration(
                 labelText: 'repairs.vendors.visitAt'.tr,
-                suffixIcon: const Icon(Icons.event_outlined),
+                suffixIcon: const Icon(LucideIcons.calendarDays),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

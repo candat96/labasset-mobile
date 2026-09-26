@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -90,7 +91,7 @@ class ReportsView extends GetView<ReportsController> {
                   TextField(
                     controller: controller.machinesSearch,
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(LucideIcons.search),
                       hintText: 'stock.searchHint'.tr,
                     ),
                   ),
@@ -132,14 +133,14 @@ class ReportsView extends GetView<ReportsController> {
                     ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.table_chart_outlined),
+                      leading: const Icon(LucideIcons.table),
                       title: Text(report.title),
                       trailing: controller.exportingKey.value == report.key
                           ? const SizedBox.square(
                               dimension: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.download_outlined),
+                          : const Icon(LucideIcons.download),
                       onTap: controller.exportingKey.value == null
                           ? () => controller.chooseExport(context, report)
                           : null,
@@ -159,12 +160,12 @@ class ReportsView extends GetView<ReportsController> {
       : '${card.value}${card.unit == null ? '' : ' ${card.unit}'}';
 
   static IconData _icon(String key) {
-    if (key.startsWith('equipment.')) return Icons.biotech_outlined;
-    if (key.startsWith('repair.')) return Icons.build_outlined;
-    if (key.startsWith('maintenance.')) return Icons.event_available_outlined;
-    if (key.startsWith('calibration.')) return Icons.verified_outlined;
-    if (key.startsWith('stock.')) return Icons.inventory_2_outlined;
-    return Icons.description_outlined;
+    if (key.startsWith('equipment.')) return LucideIcons.flaskConical;
+    if (key.startsWith('repair.')) return LucideIcons.wrench;
+    if (key.startsWith('maintenance.')) return LucideIcons.calendarCheck;
+    if (key.startsWith('calibration.')) return LucideIcons.badgeCheck;
+    if (key.startsWith('stock.')) return LucideIcons.package2;
+    return LucideIcons.fileText;
   }
 
   static StatusTone _tone(DashboardCard card) =>

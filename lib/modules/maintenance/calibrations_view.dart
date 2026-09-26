@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -63,7 +64,7 @@ class CalibrationsView extends GetView<CalibrationsController> {
               }
               if (controller.items.isEmpty) {
                 return EmptyState(
-                  icon: Icons.verified_outlined,
+                  icon: LucideIcons.badgeCheck,
                   title: 'calibration.empty'.tr,
                 );
               }
@@ -194,7 +195,7 @@ Future<void> _completeSheet(
                           : selected.option?.label;
                     });
                   },
-                  icon: const Icon(Icons.business_outlined),
+                  icon: const Icon(LucideIcons.building2),
                   label: Text(agencyLabel ?? 'calibration.agency.select'.tr),
                 ),
                 if (c.fieldErrors['agencyId'] case final message?)
@@ -226,7 +227,7 @@ Future<void> _completeSheet(
                                 'calibration.certificate.attached'.tr;
                           });
                         },
-                  icon: const Icon(Icons.attach_file),
+                  icon: const Icon(LucideIcons.paperclip),
                   label: Text(
                     certificateName ?? 'calibration.certificate.select'.tr,
                   ),

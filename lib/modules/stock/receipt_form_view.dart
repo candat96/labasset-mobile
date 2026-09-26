@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/format/format.dart';
@@ -76,7 +77,7 @@ class ReceiptFormView extends GetView<ReceiptFormController> {
                           onPressed: controller.submitting.value
                               ? null
                               : controller.saveDraft,
-                          icon: const Icon(Icons.save_outlined),
+                          icon: const Icon(LucideIcons.save),
                           label: Text('stock.receipt.saveDraft'.tr),
                         ),
                 ),
@@ -123,7 +124,7 @@ class _Step1 extends StatelessWidget {
                   ? 'stock.receipt.warehouse'.tr
                   : controller.warehouse.value!.name,
             ),
-            trailing: const Icon(Icons.chevron_right),
+            trailing: const Icon(LucideIcons.chevronRight),
             onTap: () => controller.pickWarehouse(context),
           ),
         ),
@@ -136,7 +137,7 @@ class _Step1 extends StatelessWidget {
                     ? 'stock.receipt.supplier'.tr
                     : controller.supplier.value!.name,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(LucideIcons.chevronRight),
               onTap: () => controller.pickSupplier(context),
             ),
           ),
@@ -149,7 +150,7 @@ class _Step1 extends StatelessWidget {
                     ? 'stock.receipt.fromDepartment'.tr
                     : controller.fromDepartment.value!.name,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(LucideIcons.chevronRight),
               onTap: () => controller.pickFromDepartment(context),
             ),
           ),
@@ -178,7 +179,7 @@ class _Step2 extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _scan(context, controller),
-                icon: const Icon(Icons.qr_code_scanner),
+                icon: const Icon(LucideIcons.scanQrCode),
                 label: Text('stock.receipt.scanCode'.tr),
               ),
             ),
@@ -186,7 +187,7 @@ class _Step2 extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _pickSupply(context, controller),
-                icon: const Icon(Icons.list_alt_outlined),
+                icon: const Icon(LucideIcons.list),
                 label: Text('stock.receipt.pickSupply'.tr),
               ),
             ),
@@ -206,7 +207,7 @@ class _Step2 extends StatelessWidget {
                       '${controller.expiryWarning(controller.lines[i].expiresAt) ? ' · ⚠ ${'stock.receipt.expiryWarn'.tr}' : ''}',
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(LucideIcons.x),
                       onPressed: () => controller.removeLine(i),
                     ),
                   ),
@@ -294,7 +295,7 @@ class _Step2 extends StatelessWidget {
               },
               decoration: InputDecoration(
                 labelText: 'scan.lot.expiry'.tr,
-                suffixIcon: const Icon(Icons.event_outlined),
+                suffixIcon: const Icon(LucideIcons.calendarDays),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

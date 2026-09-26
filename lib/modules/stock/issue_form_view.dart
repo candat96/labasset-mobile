@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../core/errors/api_error.dart';
@@ -48,13 +49,13 @@ class IssueFormView extends GetView<IssueFormController> {
           Obx(
             () => ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.warehouse_outlined),
+              leading: const Icon(LucideIcons.warehouse),
               title: Text(
                 controller.warehouse.value == null
                     ? 'stock.receipt.warehouse'.tr
                     : controller.warehouse.value!.name,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(LucideIcons.chevronRight),
               onTap: () => controller.pickWarehouse(context),
             ),
           ),
@@ -62,26 +63,26 @@ class IssueFormView extends GetView<IssueFormController> {
             Obx(
               () => ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.apartment_outlined),
+                leading: const Icon(LucideIcons.building2),
                 title: Text(
                   controller.toDepartment.value == null
                       ? 'stock.issue.toDepartment'.tr
                       : controller.toDepartment.value!.name,
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(LucideIcons.chevronRight),
                 onTap: () => controller.pickToDepartment(context),
               ),
             ),
           Obx(
             () => ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.biotech_outlined),
+              leading: const Icon(LucideIcons.flaskConical),
               title: Text(
                 controller.equipment.value == null
                     ? 'stock.issue.equipment'.tr
                     : controller.equipment.value!.name,
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(LucideIcons.chevronRight),
               onTap: () => _pickEquipment(context, controller),
             ),
           ),
@@ -100,7 +101,7 @@ class IssueFormView extends GetView<IssueFormController> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _scanLot(context, controller),
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: const Icon(LucideIcons.scanQrCode),
                   label: Text('stock.issue.scanLot'.tr),
                 ),
               ),
@@ -108,7 +109,7 @@ class IssueFormView extends GetView<IssueFormController> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _pickSupply(context, controller),
-                  icon: const Icon(Icons.list_alt_outlined),
+                  icon: const Icon(LucideIcons.list),
                   label: Text('stock.receipt.pickSupply'.tr),
                 ),
               ),
@@ -131,7 +132,7 @@ class IssueFormView extends GetView<IssueFormController> {
                             : null,
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(LucideIcons.x),
                         onPressed: () => controller.removeLine(i),
                       ),
                     ),
@@ -151,7 +152,7 @@ class IssueFormView extends GetView<IssueFormController> {
           Obx(
             () => FilledButton.icon(
               onPressed: controller.submitting.value ? null : controller.save,
-              icon: const Icon(Icons.save_outlined),
+              icon: const Icon(LucideIcons.save),
               label: Text('stock.issue.saveDraft'.tr),
             ),
           ),
