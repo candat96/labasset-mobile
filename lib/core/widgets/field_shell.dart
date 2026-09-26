@@ -34,8 +34,11 @@ class FieldLabel extends StatelessWidget {
   );
 }
 
-/// Decoration chuẩn cho ô nhập trong app: nền `--muted`, **không viền**, bo 12,
-/// cao 44, chữ 14/20; focus vòng sáng 2px, lỗi viền 1px `--destructive`.
+/// Decoration chuẩn cho ô nhập trong app: **nền trắng, viền 1px** `--border`, bo 12,
+/// cao 44, chữ 14/20; focus viền `--primary`, lỗi viền 1px `--destructive`.
+///
+/// Người dùng chốt 2026-09-27: nền xám `--muted` của Figma làm ô nhập tàng hình khi
+/// đặt trên nền xám (thanh lọc, vùng nội dung) — nền trắng có viền thì luôn thấy.
 InputDecoration appFieldDecoration(
   BuildContext context, {
   String? hintText,
@@ -57,7 +60,7 @@ InputDecoration appFieldDecoration(
   return InputDecoration(
     isDense: true,
     filled: true,
-    fillColor: context.isDark ? AppColors.mutedDark : AppColors.muted,
+    fillColor: context.isDark ? AppColors.cardDark : AppColors.card,
     hintText: hintText,
     hintStyle: context.appText.label.copyWith(fontSize: 14),
     errorText: errorText,
@@ -66,9 +69,12 @@ InputDecoration appFieldDecoration(
     suffixText: suffixText,
     suffixIcon: suffixIcon,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11.5),
-    border: line(scheme.primary, 0),
-    enabledBorder: line(scheme.primary, 0),
-    focusedBorder: line(scheme.primary.withValues(alpha: 0.2), 2),
+    border: line(context.isDark ? AppColors.borderDark : AppColors.border, 1),
+    enabledBorder: line(
+      context.isDark ? AppColors.borderDark : AppColors.border,
+      1,
+    ),
+    focusedBorder: line(scheme.primary, 2),
     errorBorder: line(scheme.error, 1),
     focusedErrorBorder: line(scheme.error, 1),
   );

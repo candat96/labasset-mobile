@@ -9,7 +9,7 @@ import 'package:labasset_mobile/core/widgets/qty_field.dart';
 import '../../helpers/test_helpers.dart';
 
 void main() {
-  testWidgets('ô nhập: nhãn TRÊN ô, nền muted, không viền, bo 12, cao 44', (
+  testWidgets('ô nhập: nhãn TRÊN ô, nền trắng, viền 1px, bo 12, cao 44', (
     tester,
   ) async {
     final controller = TextEditingController();
@@ -35,10 +35,13 @@ void main() {
     final field = tester.widget<TextField>(find.byType(TextField));
     final decoration = field.decoration!;
     expect(decoration.filled, isTrue);
-    expect(decoration.fillColor, AppColors.muted);
+    // Nền trắng có viền: người dùng chốt 2026-09-27 vì nền xám của Figma làm ô
+    // nhập chìm hẳn khi đặt trên vùng lọc / nền trang cũng xám.
+    expect(decoration.fillColor, AppColors.card);
     expect(decoration.border, isA<OutlineInputBorder>());
     final border = decoration.border! as OutlineInputBorder;
-    expect(border.borderSide, BorderSide.none);
+    expect(border.borderSide.color, AppColors.border);
+    expect(border.borderSide.width, 1);
     expect(border.borderRadius, BorderRadius.circular(AppRadius.card));
 
     expect(tester.getSize(find.byType(TextFormField)).height, 44);

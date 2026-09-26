@@ -249,7 +249,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         filled: true,
-        fillColor: isDark ? card : muted,
+        // Nền trắng để ô nhập không chìm vào nền xám của trang.
+        fillColor: card,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,
