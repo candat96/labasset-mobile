@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'icon_chip.dart';
 
-/// Lối tắt đặt trực tiếp trên nền: chip icon 48 bo 14 + nhãn 12/600 hai dòng.
+/// Lối tắt đặt trực tiếp trên nền: chip icon 48 bo 12 + nhãn 12/600 hai dòng.
 class ShortcutTile extends StatelessWidget {
   const ShortcutTile({
     super.key,
@@ -41,7 +41,7 @@ class ShortcutTile extends StatelessWidget {
               icon: icon,
               size: 48,
               iconSize: 22,
-              radius: 14,
+              radius: AppRadius.card,
               background: a?.backgroundFor(context),
               foreground: a?.foregroundFor(context),
             ),

@@ -54,7 +54,7 @@ class AppListTile extends StatelessWidget {
                   icon: icon,
                   size: chipSize,
                   iconSize: accent ? 20 : 18,
-                  radius: accent ? 12 : 10,
+                  radius: AppRadius.card,
                   background:
                       iconAccent?.backgroundFor(context) ??
                       (accent

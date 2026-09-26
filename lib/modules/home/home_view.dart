@@ -311,7 +311,7 @@ class _Hero extends StatelessWidget {
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: white,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppRadius.tile),
                       ),
                       child: Image.asset('assets/brand/logo-512.png'),
                     ),
@@ -342,7 +342,7 @@ class _Hero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.appText.title.copyWith(
-                            fontSize: 22,
+                            fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: white,
                           ),

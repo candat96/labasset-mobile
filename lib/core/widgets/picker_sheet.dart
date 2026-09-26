@@ -274,20 +274,14 @@ class _PickerContentState<T> extends State<_PickerContent<T>> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        o.name,
-                        style: context.appText.bodyStrong.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      Text(o.name, style: context.appText.bodyStrong),
                       if (meta.isNotEmpty) ...[
                         const SizedBox(height: 2),
                         Text(
                           meta,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: context.appText.caption.copyWith(fontSize: 12),
+                          style: context.appText.caption,
                         ),
                       ],
                     ],

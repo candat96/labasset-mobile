@@ -125,7 +125,7 @@ class _NavButton extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 11,
+                fontSize: 12,
                 height: 1.2,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: color,
@@ -138,7 +138,7 @@ class _NavButton extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 color: scheme.primary,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(AppRadius.chip),
               ),
             ),
           ],
@@ -190,7 +190,7 @@ class _CenterButton extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 11,
+                  fontSize: 12,
                   height: 1.2,
                   fontWeight: FontWeight.w700,
                   color: scheme.onSurfaceVariant,

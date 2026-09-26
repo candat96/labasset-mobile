@@ -75,7 +75,7 @@ class KpiTile extends StatelessWidget {
                           icon: icon!,
                           size: 32,
                           iconSize: 18,
-                          radius: 10,
+                          radius: AppRadius.card,
                           tone: effectiveTone,
                           background: chipBg,
                           foreground: chipFg,

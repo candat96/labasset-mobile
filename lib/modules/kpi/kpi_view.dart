@@ -163,7 +163,6 @@ class _ScoreCard extends StatelessWidget {
                         Text(
                           total == null ? '—' : formatNumber(total, digits: 1),
                           style: context.appText.kpi.copyWith(
-                            fontSize: 40,
                             color: scheme.primary,
                           ),
                         ),
@@ -636,7 +635,7 @@ class _RankRow extends StatelessWidget {
             Text(
               row.total == null ? '—' : formatNumber(row.total, digits: 1),
               style: context.appText.kpi.copyWith(
-                fontSize: 18,
+                fontSize: 16,
                 color: row.insufficient ? muted : scheme.primary,
               ),
             ),

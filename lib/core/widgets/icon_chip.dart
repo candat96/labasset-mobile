@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/tokens.dart';
 import 'status_badge.dart';
 
 /// Icon trong ô bo góc nền màu nhạt + icon màu đậm tương ứng.
@@ -9,7 +10,7 @@ class IconChip extends StatelessWidget {
     required this.icon,
     this.size = 36,
     this.iconSize,
-    this.radius = 12,
+    this.radius = AppRadius.card,
     this.tone,
     this.background,
     this.foreground,

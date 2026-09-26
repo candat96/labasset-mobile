@@ -178,7 +178,7 @@ class _SummaryCard extends StatelessWidget {
                   icon: LucideIcons.monitorCog,
                   size: 48,
                   iconSize: 24,
-                  radius: 14,
+                  radius: AppRadius.card,
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(

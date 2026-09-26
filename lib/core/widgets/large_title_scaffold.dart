@@ -106,7 +106,7 @@ class _LargeTitleScaffoldState extends State<LargeTitleScaffold> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: context.appText.title.copyWith(
-                                  fontSize: 17,
+                                  fontSize: 16,
                                 ),
                               ),
                             ),

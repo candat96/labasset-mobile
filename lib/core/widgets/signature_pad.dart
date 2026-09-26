@@ -28,7 +28,9 @@ class SignaturePad {
   }
 }
 
-/// Pad ký nhúng được trong form/trang.
+/// Pad ký nhúng được trong form/trang. Nền "giấy" và mực lấy từ token trắng/đen
+/// cố định (không theo theme): nét ký phải luôn là mực đen trên nền trắng để
+/// PNG xuất ra nhất quán ở cả light lẫn dark.
 class SignaturePadPanel extends StatelessWidget {
   const SignaturePadPanel({
     super.key,
@@ -44,12 +46,15 @@ class SignaturePadPanel extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.onPrimary,
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Signature(controller: controller, backgroundColor: Colors.white),
+      child: Signature(
+        controller: controller,
+        backgroundColor: AppColors.onPrimary,
+      ),
     );
   }
 }
@@ -66,8 +71,8 @@ class _SignatureSheet extends StatefulWidget {
 class _SignatureSheetState extends State<_SignatureSheet> {
   final SignatureController controller = SignatureController(
     penStrokeWidth: 3,
-    penColor: Colors.black,
-    exportBackgroundColor: Colors.white,
+    penColor: AppColors.foreground,
+    exportBackgroundColor: AppColors.onPrimary,
   );
 
   @override

@@ -45,7 +45,7 @@ class AuthScaffold extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: context.brandGradient,
                   borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(32),
+                    bottom: Radius.circular(AppRadius.hero),
                   ),
                 ),
                 child: Column(
@@ -75,7 +75,7 @@ class AuthScaffold extends StatelessWidget {
                       height: 96,
                       decoration: BoxDecoration(
                         color: white,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(AppRadius.hero),
                         boxShadow: [
                           BoxShadow(
                             color: AppShadows.logoColor,
@@ -87,7 +87,7 @@ class AuthScaffold extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(AppRadius.hero),
                         child: Image.asset(
                           'assets/brand/medone-icon.png',
                           width: 96,
@@ -102,10 +102,10 @@ class AuthScaffold extends StatelessWidget {
                       'MedOne',
                       style: TextStyle(
                         color: AppColors.onPrimary,
-                        fontSize: 30,
+                        fontSize: 28,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.8,
-                        height: 1.1,
+                        height: 1.2,
                       ),
                     ),
                     if (subtitle != null) ...[

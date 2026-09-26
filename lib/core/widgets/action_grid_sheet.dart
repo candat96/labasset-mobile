@@ -122,7 +122,7 @@ class _ActionCell extends StatelessWidget {
                 icon: action.icon,
                 size: 44,
                 iconSize: 22,
-                radius: 14,
+                radius: AppRadius.card,
                 tone: danger ? StatusTone.danger : null,
               ),
               const SizedBox(height: 6),

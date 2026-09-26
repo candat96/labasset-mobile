@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_buttons.dart';
 import '../account/account_view.dart';
@@ -108,7 +109,7 @@ class _CountBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: context.status.danger,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppRadius.chip),
         border: Border.all(
           color: Theme.of(context).colorScheme.surface,
           width: 1.5,
@@ -119,8 +120,8 @@ class _CountBadge extends StatelessWidget {
         value > 99 ? '99+' : '$value',
         style: TextStyle(
           color: Theme.of(context).colorScheme.onError,
-          fontSize: 10,
-          height: 1,
+          fontSize: 12,
+          height: 1.2,
           fontWeight: FontWeight.w700,
         ),
       ),

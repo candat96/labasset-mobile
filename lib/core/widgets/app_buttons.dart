@@ -151,7 +151,7 @@ class GradientButton extends StatelessWidget {
               child: DefaultTextStyle(
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.onPrimary,
                 ),
@@ -226,7 +226,7 @@ class GradientFab extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.onPrimary,
                   ),

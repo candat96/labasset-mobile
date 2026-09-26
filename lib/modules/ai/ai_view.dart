@@ -371,7 +371,7 @@ class _ToolChips extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadius.chip),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

@@ -257,7 +257,7 @@ class _FilterChip extends StatelessWidget {
               if (active)
                 InkWell(
                   onTap: onClear,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadius.chip),
                   child: Icon(
                     LucideIcons.x,
                     size: 16,

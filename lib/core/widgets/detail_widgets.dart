@@ -60,7 +60,12 @@ class DetailHeaderCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconChip(icon: icon, size: 48, iconSize: 24, radius: 14),
+                IconChip(
+                  icon: icon,
+                  size: 48,
+                  iconSize: 24,
+                  radius: AppRadius.card,
+                ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
