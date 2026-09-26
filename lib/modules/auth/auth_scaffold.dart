@@ -78,7 +78,7 @@ class AuthScaffold extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x33000000),
+                            color: AppShadows.logoColor,
                             offset: const Offset(0, 8),
                             blurRadius: 24,
                             spreadRadius: -6,

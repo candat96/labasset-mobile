@@ -25,6 +25,9 @@ class AppColors {
   /// Nền vùng nội dung (Figma: default-100).
   static const surfaceAlt = Color(0xFFF4F4F5);
 
+  /// Nền vùng nội dung ở chế độ tối (nền trang tối hơn card để card nổi lên).
+  static const surfaceAltDark = Color(0xFF0B1220);
+
   /// Màu nhấn phụ (Figma: colors/base/secondary).
   static const accentPurple = Color(0xFF7828C8);
   static const accentPurpleContainer = Color(0xFFF2EAFA);
@@ -35,7 +38,7 @@ class AppColors {
 
   /// Vùng phụ (chip, nền ô tìm, segment, chip icon trung tính).
   static const muted = Color(0xFFF4F4F5);
-  static const segment = Color(0xFFEFEFF1);
+  static const segment = Color(0xFFF4F4F5);
   static const mutedForeground = Color(0xFF71717A);
   static const border = Color(0xFFD4D4D8);
   static const divider = Color(0xFFE4E4E7);
@@ -63,9 +66,9 @@ class AppColors {
   static const dangerForeground = Color(0xFFC40F4C);
   static const info = Color(0xFF006FEE);
   static const infoBackground = Color(0xFFE6F1FE);
-  static const infoForeground = Color(0xFF1747A6);
-  static const neutralBackground = Color(0xFFF6F8FC);
-  static const neutralForeground = Color(0xFF475569);
+  static const infoForeground = Color(0xFF005BC4);
+  static const neutralBackground = Color(0xFFF4F4F5);
+  static const neutralForeground = Color(0xFF52525B);
 
   static const successDark = Color(0xFF45D483);
   static const successBackgroundDark = Color(0xFF0F2A1A);
@@ -91,10 +94,10 @@ class AppSpacing {
 
 class AppRadius {
   AppRadius._();
-  static const card = 16.0;
+  static const card = 12.0;
   static const tile = 12.0;
   static const chip = 999.0;
-  static const sheet = 20.0;
+  static const sheet = 12.0;
   static const hero = 24.0;
 
   // Bí danh tương thích cho widget cũ; vẫn quy về bốn bán kính chuẩn.
@@ -106,16 +109,20 @@ class AppRadius {
 class AppShadows {
   AppShadows._();
 
-  /// Card trên nền trắng: `0 1px 2px .04` + `0 6px 16px -8px .12`.
+  /// Card trên nền sáng: `0 1px 2px #0000000d` (Figma shadow/neutral/sm) —
+  /// bóng nhẹ, tách lớp chủ yếu bằng viền [AppColors.cardBorder].
   static const card = [
-    BoxShadow(color: Color(0x0A101828), offset: Offset(0, 1), blurRadius: 2),
-    BoxShadow(
-      color: Color(0x1F101828),
-      offset: Offset(0, 6),
-      blurRadius: 16,
-      spreadRadius: -8,
-    ),
+    BoxShadow(color: cardColor, offset: Offset(0, 1), blurRadius: 2),
   ];
+
+  /// Màu bóng card (dùng cho `CardThemeData.shadowColor`).
+  static const cardColor = Color(0x0D000000);
+
+  /// Màu bóng toast nổi.
+  static const toastColor = Color(0x33101828);
+
+  /// Màu bóng logo trên hero gradient.
+  static const logoColor = Color(0x33000000);
 
   /// Bí danh cũ.
   static const cardElevated = card;
@@ -138,7 +145,7 @@ class AppShadows {
   /// Bóng màu thương hiệu cho nút gradient / nút Quét.
   static const brand = [
     BoxShadow(
-      color: Color(0x592977FF),
+      color: Color(0x59006FEE),
       offset: Offset(0, 8),
       blurRadius: 20,
       spreadRadius: -4,
@@ -314,28 +321,28 @@ class AppAccent {
       : foreground;
 
   static const red = AppAccent(
-    background: Color(0xFFFEE2E2),
-    foreground: Color(0xFFB91C1C),
+    background: AppColors.dangerBackground,
+    foreground: AppColors.dangerForeground,
   );
   static const orange = AppAccent(
-    background: Color(0xFFFFEDD5),
-    foreground: Color(0xFFC2410C),
+    background: AppColors.warningBackground,
+    foreground: AppColors.warningForeground,
   );
   static const green = AppAccent(
-    background: Color(0xFFDCFCE7),
-    foreground: Color(0xFF15803D),
+    background: AppColors.successBackground,
+    foreground: AppColors.successForeground,
   );
   static const purple = AppAccent(
-    background: Color(0xFFEDE9FE),
-    foreground: Color(0xFF6D28D9),
+    background: AppColors.accentPurpleContainer,
+    foreground: AppColors.accentPurple,
   );
   static const teal = AppAccent(
     background: Color(0xFFCCFBF1),
     foreground: Color(0xFF0F766E),
   );
   static const brand = AppAccent(
-    background: Color(0xFFE8F0FF),
-    foreground: Color(0xFF1747A6),
+    background: AppColors.primaryContainer,
+    foreground: AppColors.onPrimaryContainer,
   );
   static const indigo = AppAccent(
     background: Color(0xFFE0E7FF),

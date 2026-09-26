@@ -25,4 +25,10 @@ void main() {
   test('không còn màu thương hiệu cũ', () {
     expect(AppColors.primary, isNot(const Color(0xFF2977FF)));
   });
+  test('bo góc thẻ/sheet 12 và bóng nhẹ theo Medone', () {
+    expect(AppRadius.card, 12);
+    expect(AppRadius.sheet, 12);
+    expect(AppColors.surfaceAlt, const Color(0xFFF4F4F5));
+    expect(AppShadows.cardColor, const Color(0x0D000000));
+  });
 }

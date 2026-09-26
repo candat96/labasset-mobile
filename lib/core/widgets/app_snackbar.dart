@@ -125,7 +125,7 @@ class _ToastState extends State<_Toast> {
         child: Material(
           color: bg,
           elevation: 6,
-          shadowColor: const Color(0x33101828),
+          shadowColor: AppShadows.toastColor,
           borderRadius: BorderRadius.circular(AppRadius.tile),
           child: InkWell(
             onTap: onTap,

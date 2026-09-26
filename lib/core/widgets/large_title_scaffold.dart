@@ -158,9 +158,14 @@ class _LargeTitleScaffoldState extends State<LargeTitleScaffold> {
               ),
             ),
             Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: _onScroll,
-                child: widget.body,
+              child: ColoredBox(
+                color: context.isDark
+                    ? AppColors.surfaceAltDark
+                    : AppColors.surfaceAlt,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: _onScroll,
+                  child: widget.body,
+                ),
               ),
             ),
           ],

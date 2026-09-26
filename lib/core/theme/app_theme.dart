@@ -238,7 +238,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: card,
         elevation: isDark ? 0 : 2,
-        shadowColor: isDark ? Colors.transparent : const Color(0x1F101828),
+        shadowColor: isDark ? Colors.transparent : AppShadows.cardColor,
         surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
