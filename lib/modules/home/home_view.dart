@@ -9,9 +9,8 @@ import '../../core/storage/session_store.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/app_list_tile.dart';
 import '../../core/widgets/error_state.dart';
-import '../../core/widgets/kpi_tile.dart';
+import '../../core/widgets/icon_chip.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/section_card.dart';
 import '../../core/widgets/shortcut_tile.dart';
@@ -19,6 +18,7 @@ import '../../core/widgets/status_badge.dart';
 import '../ai/ai_status_controller.dart';
 import '../notifications/notification_bell.dart';
 import 'home_controller.dart';
+import 'widgets/home_stat_tile.dart';
 
 /// Trang chủ: hero gradient + ô tìm đè hero, KPI cuộn ngang, việc hôm nay,
 /// lối tắt 4 cột trực tiếp trên nền trắng.
@@ -168,47 +168,42 @@ class HomeView extends GetView<HomeController> {
   List<Widget> _content(BuildContext context) => [
     if (controller.cachedAt.value != null)
       _OfflineBanner(cachedAt: controller.cachedAt.value!),
-    Row(
-      children: [
-        Expanded(
-          child: KpiTile(
-            width: double.infinity,
-            height: 104,
-            label: 'home.alert.brokenShort'.tr,
-            value: '${controller.brokenUnassigned}',
-            icon: LucideIcons.triangleAlert,
-            tone: StatusTone.danger,
-            accent: AppAccent.red,
-            onTap: () => Get.toNamed('${Routes.repairs}?segment=unassigned'),
+    SizedBox(
+      height: 148,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: HomeStatTile(
+              label: 'home.alert.brokenShort'.tr,
+              value: '${controller.brokenUnassigned}',
+              icon: LucideIcons.triangleAlert,
+              accent: AppAccent.red,
+              onTap: () => Get.toNamed('${Routes.repairs}?segment=unassigned'),
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: KpiTile(
-            width: double.infinity,
-            height: 104,
-            label: 'home.alert.suppliesLowShort'.tr,
-            value: '${controller.suppliesAlert}',
-            icon: LucideIcons.packageSearch,
-            tone: StatusTone.warning,
-            accent: AppAccent.orange,
-            onTap: () => Get.toNamed(Routes.stockAlerts),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: HomeStatTile(
+              label: 'home.alert.suppliesLowShort'.tr,
+              value: '${controller.suppliesAlert}',
+              icon: LucideIcons.packageSearch,
+              accent: AppAccent.orange,
+              onTap: () => Get.toNamed(Routes.stockAlerts),
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: KpiTile(
-            width: double.infinity,
-            height: 104,
-            label: 'home.alert.calibrationOverdueShort'.tr,
-            value: '${controller.calibrationOverdue}',
-            icon: LucideIcons.badgeCheck,
-            tone: StatusTone.danger,
-            accent: AppAccent.purple,
-            onTap: () => Get.toNamed(Routes.calibrations),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: HomeStatTile(
+              label: 'home.alert.calibrationOverdueShort'.tr,
+              value: '${controller.calibrationOverdue}',
+              icon: LucideIcons.badgeCheck,
+              accent: AppAccent.purple,
+              onTap: () => Get.toNamed(Routes.calibrations),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
     const SizedBox(height: AppSpacing.xl),
     SectionCard(
@@ -469,84 +464,84 @@ class _WorkGroups extends StatelessWidget {
         [
               (
                 icon: LucideIcons.wrench,
-                accent: AppAccent.brand,
+                tone: StatusTone.info,
                 title: 'home.task.repairsAssigned'.tr,
                 total: controller.repairsAssignedTotal,
                 route: '${Routes.repairs}?segment=mine',
               ),
               (
                 icon: LucideIcons.messageCircleWarning,
-                accent: AppAccent.yellow,
+                tone: StatusTone.warning,
                 title: 'home.task.repairsPendingResponse'.tr,
                 total: controller.repairsPendingResponse,
                 route: '${Routes.repairs}?segment=mine',
               ),
               (
                 icon: LucideIcons.clockAlert,
-                accent: AppAccent.red,
+                tone: StatusTone.danger,
                 title: 'home.task.repairsOverdue'.tr,
                 total: controller.repairsOverdue,
                 route: '${Routes.repairs}?segment=mine',
               ),
               (
                 icon: LucideIcons.clipboardCheck,
-                accent: AppAccent.purple,
+                tone: StatusTone.info,
                 title: 'home.task.stocktakesOpen'.tr,
                 total: controller.stocktakesOpenTotal,
                 route: Routes.stocktakes,
               ),
               (
                 icon: LucideIcons.calendarClock,
-                accent: AppAccent.teal,
+                tone: StatusTone.info,
                 title: 'home.task.maintenanceDue'.tr,
                 total: controller.tasksDueTotal,
                 route: Routes.maintenanceTasks,
               ),
               (
                 icon: LucideIcons.clockAlert,
-                accent: AppAccent.orange,
+                tone: StatusTone.danger,
                 title: 'home.task.maintenanceOverdue'.tr,
                 total: controller.tasksOverdue,
                 route: Routes.maintenanceTasks,
               ),
               (
                 icon: LucideIcons.fileCheck,
-                accent: AppAccent.indigo,
+                tone: StatusTone.warning,
                 title: 'home.task.requestsPending'.tr,
                 total: controller.requestsPendingTotal,
                 route: '${Routes.requests}?segment=pending',
               ),
               (
                 icon: LucideIcons.packageCheck,
-                accent: AppAccent.green,
+                tone: StatusTone.success,
                 title: 'home.task.requestsApproved'.tr,
                 total: controller.requestsApprovedTotal,
                 route: '${Routes.requests}?segment=toIssue',
               ),
               (
                 icon: LucideIcons.inbox,
-                accent: AppAccent.pink,
+                tone: StatusTone.info,
                 title: 'home.task.requestsPendingReceive'.tr,
                 total: controller.requestsPendingReceive,
                 route: '${Routes.requests}?segment=mine',
               ),
               (
                 icon: LucideIcons.clipboardList,
-                accent: AppAccent.indigo,
+                tone: StatusTone.warning,
                 title: 'home.task.demandToApprove'.tr,
                 total: controller.demandToApprove,
                 route: Routes.demand,
               ),
               (
                 icon: LucideIcons.packageCheck,
-                accent: AppAccent.green,
+                tone: StatusTone.info,
                 title: 'home.task.demandToAccept'.tr,
                 total: controller.demandToAccept,
                 route: Routes.demand,
               ),
               (
                 icon: LucideIcons.filePlus2,
-                accent: AppAccent.brand,
+                tone: StatusTone.info,
                 title: 'home.task.demandToSubmit'.tr,
                 total: controller.demandToSubmit,
                 route: Routes.demand,
@@ -575,17 +570,84 @@ class _WorkGroups extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i < groups.length; i++)
-          AppListTile(
-            accent: true,
-            iconAccent: groups[i].accent,
-            icon: groups[i].icon,
-            title: groups[i].title,
-            trailing: _CountPill(count: groups[i].total),
-            onTap: () => Get.toNamed(groups[i].route),
-            showDivider: i != groups.length - 1,
+        for (final group in groups)
+          _WorkRow(
+            icon: group.icon,
+            tone: group.tone,
+            title: group.title,
+            count: group.total,
+            onTap: () => Get.toNamed(group.route),
           ),
       ],
+    );
+  }
+}
+
+/// Dòng "Công việc hôm nay": nền nhạt theo mức độ (token), mở thẳng việc đó.
+class _WorkRow extends StatelessWidget {
+  const _WorkRow({
+    required this.icon,
+    required this.tone,
+    required this.title,
+    required this.count,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final StatusTone tone;
+  final String title;
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = paletteForTone(context, tone);
+    final radius = BorderRadius.circular(AppRadius.tile);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Material(
+        color: palette.background,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                IconChip(
+                  icon: icon,
+                  size: 36,
+                  iconSize: 18,
+                  circle: true,
+                  background: palette.color.withValues(alpha: 0.16),
+                  foreground: palette.color,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.appText.bodyStrong,
+                  ),
+                ),
+                _CountPill(count: count, tone: tone),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 18,
+                  color: palette.foreground,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -611,27 +673,31 @@ class _Shortcut {
 
 /// Số lượng trong pill primary-soft, chữ 13/700 on-primary-container.
 class _CountPill extends StatelessWidget {
-  const _CountPill({required this.count});
+  const _CountPill({required this.count, this.tone});
 
   final int count;
+  final StatusTone? tone;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final palette = tone == null ? null : paletteForTone(context, tone!);
     return Container(
       constraints: const BoxConstraints(minWidth: 28),
       height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: palette == null
+            ? scheme.primaryContainer
+            : palette.color.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(AppRadius.chip),
       ),
       child: Text(
         '$count',
         style: context.appText.label.copyWith(
           fontWeight: FontWeight.w700,
-          color: scheme.onPrimaryContainer,
+          color: palette?.foreground ?? scheme.onPrimaryContainer,
           fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),

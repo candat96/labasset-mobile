@@ -41,10 +41,11 @@ class AppBottomNav extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.surface,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.card),
+        ),
         boxShadow: context.isDark ? null : AppShadows.navUp,
-        border: context.isDark
-            ? Border(top: BorderSide(color: context.cardBorder))
-            : null,
+        border: context.isDark ? Border.all(color: context.cardBorder) : null,
       ),
       child: SafeArea(
         top: false,
@@ -176,7 +177,7 @@ class _CenterButton extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: context.brandGradient,
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   boxShadow: AppShadows.brand,
                 ),
