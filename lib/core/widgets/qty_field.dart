@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../format/decimal_input.dart';
+import 'field_shell.dart';
 
 /// Ô nhập số lượng: chuỗi thập phân (cho phép `,`/`.`), trả [Decimal] — không dùng double.
 class QtyField extends StatelessWidget {
@@ -43,21 +44,30 @@ class QtyField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      enabled: enabled,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-      textInputAction: textInputAction,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText,
-        errorText: errorText,
-        suffix: suffix,
-      ),
-      validator: validator ?? defaultValidator,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null) FieldLabel(label: label!, required: required),
+        TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+          ],
+          textInputAction: textInputAction,
+          onChanged: onChanged,
+          decoration: appFieldDecoration(
+            context,
+            hintText: hintText,
+            errorText: errorText,
+            suffix: suffix,
+          ),
+          validator: validator ?? defaultValidator,
+        ),
+      ],
     );
   }
 

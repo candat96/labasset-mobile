@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:labasset_mobile/core/theme/tokens.dart';
 import 'package:labasset_mobile/core/widgets/app_sheet.dart';
 import 'package:labasset_mobile/core/widgets/app_snackbar.dart';
 import 'package:labasset_mobile/core/widgets/confirm_sheet.dart';
@@ -161,6 +162,38 @@ void main() {
       expect(find.text('Đã lưu'), findsNothing);
     },
   );
+
+  testWidgets('AppSheet: nền trắng, bo 16 hai góc trên, footer dính đáy', (
+    tester,
+  ) async {
+    final result = <Object?>[];
+    await tester.pumpWidget(
+      host(
+        (ctx) => AppSheet.show<void>(
+          ctx,
+          builder: (_) => const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Nội dung sheet'),
+          ),
+          footer: (_) => const SheetActionBar(primary: Text('Lưu')),
+        ),
+        result,
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    final sheet = tester.widget<BottomSheet>(find.byType(BottomSheet));
+    expect(sheet.backgroundColor, AppColors.card);
+    final shape = sheet.shape! as RoundedRectangleBorder;
+    expect(
+      shape.borderRadius,
+      const BorderRadius.vertical(top: Radius.circular(16)),
+    );
+    expect(AppSheet.topRadius, 16);
+    expect(find.text('Nội dung sheet'), findsOneWidget);
+    expect(find.text('Lưu'), findsOneWidget);
+  });
 
   testWidgets('AppDialog.prompt trả chuỗi, huỷ trả null', (tester) async {
     final result = <Object?>[];

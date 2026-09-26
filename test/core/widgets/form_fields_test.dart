@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:labasset_mobile/core/theme/tokens.dart';
 import 'package:labasset_mobile/core/widgets/date_field.dart';
 import 'package:labasset_mobile/core/widgets/money_field.dart';
 import 'package:labasset_mobile/core/widgets/qty_field.dart';
@@ -8,6 +9,41 @@ import 'package:labasset_mobile/core/widgets/qty_field.dart';
 import '../../helpers/test_helpers.dart';
 
 void main() {
+  testWidgets('ô nhập: nhãn TRÊN ô, nền muted, không viền, bo 12, cao 44', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    await tester.pumpWidget(
+      wrap(
+        Scaffold(
+          body: MoneyField(
+            controller: controller,
+            label: 'Số tiền',
+            required: true,
+          ),
+        ),
+      ),
+    );
+
+    // Nhãn nằm trên ô nhập, có dấu * cho trường bắt buộc.
+    expect(find.textContaining('Số tiền'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.textContaining('Số tiền')).dy,
+      lessThan(tester.getTopLeft(find.byType(TextFormField)).dy),
+    );
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final decoration = field.decoration!;
+    expect(decoration.filled, isTrue);
+    expect(decoration.fillColor, AppColors.muted);
+    expect(decoration.border, isA<OutlineInputBorder>());
+    final border = decoration.border! as OutlineInputBorder;
+    expect(border.borderSide, BorderSide.none);
+    expect(border.borderRadius, BorderRadius.circular(AppRadius.card));
+
+    expect(tester.getSize(find.byType(TextFormField)).height, 44);
+  });
+
   testWidgets('QtyField nhận số thập phân , và .', (tester) async {
     final controller = TextEditingController();
     await tester.pumpWidget(

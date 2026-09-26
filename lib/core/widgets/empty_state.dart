@@ -4,7 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// Trạng thái rỗng: icon 40 trong tròn 88 nền primary-soft, tiêu đề 17/700,
+/// Trạng thái rỗng: icon 40 trong tròn 88 nền primary-soft, tiêu đề 16/700,
 /// mô tả 14, nút hành động (nếu có). Đặt ở 1/3 trên, không căn giữa màn.
 class EmptyState extends StatelessWidget {
   const EmptyState({
@@ -50,7 +50,7 @@ class EmptyState extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   title,
-                  style: context.appText.title.copyWith(fontSize: 17),
+                  style: context.appText.title.copyWith(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
                 if (description != null) ...[

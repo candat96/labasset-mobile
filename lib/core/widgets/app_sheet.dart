@@ -16,9 +16,14 @@ import 'form_focus.dart';
 class AppSheet {
   AppSheet._();
 
+  /// Bán kính hai góc trên của sheet (Figma: 16). Ghi chú: `AppRadius.sheet`
+  /// hiện là 12 — cần một token bo 16 ở đợt sau (B3 không sửa theme).
+  static const double topRadius = 16;
+
   static Future<T?> show<T>(
     BuildContext context, {
     required WidgetBuilder builder,
+    WidgetBuilder? footer,
     bool isScrollControlled = true,
     bool isDismissible = true,
     bool enableDrag = true,
@@ -40,19 +45,27 @@ class AppSheet {
       backgroundColor: Theme.of(context).colorScheme.surface,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppRadius.hero),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(topRadius)),
       ),
       builder: (ctx) {
-        Widget child = builder(ctx);
+        // Nội dung sheet có thể cuộn; [footer] (thanh nút) được ghim ở đáy.
+        final body = footer == null
+            ? builder(ctx)
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(child: builder(ctx)),
+                  footer(ctx),
+                ],
+              );
+        Widget child = body;
         if (safeArea) child = SafeArea(top: false, child: child);
         if (showHandle) {
           child = Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SheetHandle(),
-              Flexible(child: child),
+              Flexible(child: body),
             ],
           );
         }
@@ -100,7 +113,59 @@ class SheetHandle extends StatelessWidget {
   );
 }
 
-/// Tiêu đề sheet 17/700 + nút đóng tròn bên phải (+ [trailing] tuỳ chọn).
+/// Thanh nút hành động **dính đáy** sheet: nền trắng, đường kẻ trên `--divider`,
+/// nút phụ bên trái, nút chính bên phải (chia đều). Dùng qua tham số `footer`
+/// của [AppSheet.show] hoặc đặt trực tiếp cuối nội dung sheet.
+class SheetActionBar extends StatelessWidget {
+  const SheetActionBar({
+    super.key,
+    this.primary,
+    this.secondary = const [],
+    this.padding = const EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      AppSpacing.md,
+      AppSpacing.lg,
+      AppSpacing.md,
+    ),
+  });
+
+  /// Nút chính (thường là [FilledButton]).
+  final Widget? primary;
+
+  /// Nút phụ đặt trước nút chính (mỗi nút chiếm phần bằng nhau).
+  final List<Widget> secondary;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      border: Border(
+        top: BorderSide(
+          color: context.isDark ? AppColors.dividerDark : AppColors.divider,
+        ),
+      ),
+    ),
+    child: SafeArea(
+      top: false,
+      child: Padding(
+        padding: padding,
+        child: Row(
+          children: [
+            for (final s in secondary) ...[
+              Expanded(child: s),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            if (primary != null)
+              Expanded(flex: secondary.isEmpty ? 1 : 2, child: primary!),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Tiêu đề sheet 16/700 + nút đóng tròn bên phải (+ [trailing] tuỳ chọn).
 class SheetHeader extends StatelessWidget {
   const SheetHeader({
     super.key,
@@ -128,7 +193,7 @@ class SheetHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),
           ?trailing,

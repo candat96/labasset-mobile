@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../format/format.dart';
+import 'field_shell.dart';
 
 /// Ô chọn ngày: hiển thị `dd/MM/yyyy`, giá trị trong controller là ISO `yyyy-MM-dd`.
 class DateField extends StatelessWidget {
@@ -47,18 +48,25 @@ class DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      enabled: enabled,
-      readOnly: true,
-      onTap: enabled ? () => _pick(context) : null,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText ?? 'dd/MM/yyyy',
-        suffixIcon: const Icon(Icons.event_outlined),
-      ),
-      validator: validator ?? defaultValidator,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null) FieldLabel(label: label!, required: required),
+        TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          readOnly: true,
+          onTap: enabled ? () => _pick(context) : null,
+          decoration: appFieldDecoration(
+            context,
+            hintText: hintText ?? 'dd/MM/yyyy',
+            suffixIcon: const Icon(Icons.event_outlined, size: 18),
+          ),
+          validator: validator ?? defaultValidator,
+        ),
+      ],
     );
   }
 

@@ -112,7 +112,9 @@ StatusTone toneForDemandDecision(String decision) => switch (decision) {
   _ => StatusTone.muted,
 };
 
-/// Badge trạng thái cao 24px, dùng dot để không chỉ dựa vào màu chữ.
+/// Badge trạng thái: **luôn có chữ** (không bao giờ chỉ dùng màu), nền nhạt +
+/// chữ đậm theo màu vai trò, bo tròn hoàn toàn, cỡ 12.5. Chấm màu chỉ là lớp
+/// nhấn thêm.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.tone, required this.label});
 
@@ -144,6 +146,7 @@ class StatusBadge extends StatelessWidget {
           Text(
             label,
             style: context.appText.caption.copyWith(
+              fontSize: 12.5,
               color: palette.foreground,
               fontWeight: FontWeight.w600,
             ),

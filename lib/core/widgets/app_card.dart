@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// Bề mặt card chuẩn: nền card, bo 16, viền 1px mờ + bóng nhẹ (light) hoặc
-/// viền (dark). Dùng thay `Card` khi cần bóng hai lớp hoặc thanh màu trái.
+/// Bề mặt card chuẩn: nền card, bo 12, viền 1px `--border` + bóng nhẹ (light)
+/// hoặc viền (dark). Dùng thay `Card` khi cần bóng hai lớp hoặc thanh màu trái.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -60,7 +60,9 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? theme.colorScheme.surface,
         borderRadius: borderRadius,
-        border: Border.all(color: context.cardBorder),
+        border: Border.all(
+          color: context.isDark ? AppColors.borderDark : AppColors.border,
+        ),
         boxShadow: context.isDark
             ? null
             : floating

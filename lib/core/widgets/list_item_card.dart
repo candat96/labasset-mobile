@@ -13,8 +13,9 @@ class ListMeta {
   final Color? color;
 }
 
-/// Card mục danh sách: mã + badge phải, tiêu đề 16/700, 2–3 meta có icon,
-/// thanh màu trái 4px theo [accentColor], chevron mờ; padding 14, bo 16.
+/// Card mục danh sách: mã + badge phải, tiêu đề 16/700, 2–3 dòng phụ nhỏ hơn
+/// (13, màu nhạt) có icon, thanh màu trái 4px theo [accentColor], chevron mờ;
+/// nền trắng, viền `--border`, bo 12, bóng nhẹ (nhờ [AppCard]).
 class ListItemCard extends StatelessWidget {
   const ListItemCard({
     super.key,

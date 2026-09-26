@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../format/decimal_input.dart';
+import 'field_shell.dart';
 
 /// Ô nhập tiền VND: hiển thị nhóm `1.500.000`, giá trị thật lấy bằng [raw].
 class MoneyField extends StatelessWidget {
@@ -45,21 +46,28 @@ class MoneyField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      enabled: enabled,
-      keyboardType: TextInputType.number,
-      inputFormatters: const [_VndInputFormatter()],
-      textInputAction: textInputAction,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText,
-        errorText: errorText,
-        suffixText: suffixText,
-      ),
-      validator: validator ?? defaultValidator,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null) FieldLabel(label: label!, required: required),
+        TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          keyboardType: TextInputType.number,
+          inputFormatters: const [_VndInputFormatter()],
+          textInputAction: textInputAction,
+          onChanged: onChanged,
+          decoration: appFieldDecoration(
+            context,
+            hintText: hintText,
+            errorText: errorText,
+            suffixText: suffixText,
+          ),
+          validator: validator ?? defaultValidator,
+        ),
+      ],
     );
   }
 
