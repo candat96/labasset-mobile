@@ -8,9 +8,12 @@ import 'package:labasset_mobile/core/sync/outbox_service.dart';
 import 'package:labasset_mobile/core/widgets/app_card.dart';
 import 'package:labasset_mobile/core/widgets/empty_state.dart';
 import 'package:labasset_mobile/core/widgets/error_state.dart';
+import 'package:labasset_mobile/core/widgets/section_card.dart';
+import 'package:labasset_mobile/data/models/equipment_parts.dart';
 import 'package:labasset_mobile/data/models/maintenance.dart';
 import 'package:labasset_mobile/data/models/my_tasks.dart';
 import 'package:labasset_mobile/data/models/notification_item.dart';
+import 'package:labasset_mobile/data/models/notification_preference.dart';
 import 'package:labasset_mobile/data/models/report.dart';
 import 'package:labasset_mobile/data/repositories/ai_repository.dart';
 import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
@@ -29,11 +32,14 @@ import 'package:labasset_mobile/data/repositories/supplies_repository.dart';
 import 'package:labasset_mobile/data/repositories/tasks_repository.dart';
 import 'package:labasset_mobile/modules/ai/ai_controller.dart';
 import 'package:labasset_mobile/modules/ai/ai_view.dart';
+import 'package:labasset_mobile/modules/equipment/tabs/components_tab.dart';
 import 'package:labasset_mobile/modules/home/home_controller.dart';
 import 'package:labasset_mobile/modules/home/home_view.dart';
 import 'package:labasset_mobile/modules/maintenance/maintenance_task_controller.dart';
 import 'package:labasset_mobile/modules/maintenance/maintenance_task_view.dart';
 import 'package:labasset_mobile/modules/notifications/notifications_controller.dart';
+import 'package:labasset_mobile/modules/notifications/notifications_preferences_controller.dart';
+import 'package:labasset_mobile/modules/notifications/notifications_preferences_view.dart';
 import 'package:labasset_mobile/modules/notifications/notifications_view.dart';
 import 'package:labasset_mobile/modules/repairs/repair_detail_controller.dart';
 import 'package:labasset_mobile/modules/repairs/repair_detail_view.dart';
@@ -162,6 +168,20 @@ class _Reports extends ReportsController {
   void onInit() {}
 }
 
+class _ComponentsTab extends ComponentsTabController {
+  _ComponentsTab() : super(equipment: _EquipmentRepo(), id: 'e1');
+  @override
+  // ignore: must_call_super
+  void onInit() {}
+}
+
+class _NotifPrefs extends NotificationsPreferencesController {
+  _NotifPrefs() : super(repo: _NotificationsRepo());
+  @override
+  // ignore: must_call_super
+  void onInit() {}
+}
+
 class _Ai extends AiController {
   _Ai() : super(repo: _AiRepo());
   @override
@@ -283,6 +303,32 @@ void main() {
     await tester.pump();
     expect(find.text('Phiếu sửa chữa mới'), findsOneWidget);
     expect(find.byType(AppCard), findsWidgets);
+  });
+
+  testWidgets('components_tab dùng SectionCard cho linh kiện', (tester) async {
+    final c = Get.put<ComponentsTabController>(_ComponentsTab());
+    c.loading.value = false;
+    c.items.add(const EquipmentComponent(id: 'c1', name: 'Bơm', partNo: 'P-1'));
+    await tester.pumpWidget(wrap(const ComponentsTab()));
+    await tester.pump();
+    expect(find.byType(SectionCard), findsWidgets);
+    expect(find.text('P-1 — BƠM'), findsOneWidget);
+    expect(find.byType(Card), findsNothing);
+  });
+
+  testWidgets('notifications_preferences dùng SectionCard theo loại', (
+    tester,
+  ) async {
+    final c = Get.put<NotificationsPreferencesController>(_NotifPrefs());
+    c.loading.value = false;
+    c.labels['repair.created'] = 'Sửa chữa';
+    c.items.add(
+      NotificationPreference(type: 'repair.created', push: true, inapp: false),
+    );
+    await tester.pumpWidget(wrap(const NotificationsPreferencesView()));
+    expect(find.byType(SectionCard), findsWidgets);
+    expect(find.text('SỬA CHỮA'), findsOneWidget);
+    expect(find.byType(Card), findsNothing);
   });
 
   testWidgets('stock_overview_view render dữ liệu', (tester) async {

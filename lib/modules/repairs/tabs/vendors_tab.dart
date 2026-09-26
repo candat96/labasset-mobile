@@ -9,6 +9,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/list_item_card.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/picker_sheet.dart';
@@ -120,23 +121,26 @@ class VendorsTab extends GetView<VendorsTabController> {
               final supplierName = v.supplierId == null
                   ? null
                   : controller.supplierNames[v.supplierId!];
-              return Card(
-                child: ListTile(
-                  title: Text(
-                    displayNameOr(supplierName, 'repairs.vendors.supplier'.tr),
-                  ),
-                  subtitle: Text(
-                    [
-                      if (v.engineerName != null) v.engineerName!,
-                      if (v.engineerPhone != null) v.engineerPhone!,
-                      if (v.contractNo != null) v.contractNo!,
-                      if (v.quotationAmount != null)
-                        formatVnd(v.quotationAmount),
-                      if (v.visitAt != null) formatDate(v.visitAt),
-                    ].join(' · '),
-                  ),
-                  isThreeLine: v.note != null,
+              return ListItemCard(
+                title: displayNameOr(
+                  supplierName,
+                  'repairs.vendors.supplier'.tr,
                 ),
+                metas: [
+                  if (v.engineerName != null)
+                    ListMeta(LucideIcons.user, v.engineerName!),
+                  if (v.engineerPhone != null)
+                    ListMeta(LucideIcons.phone, v.engineerPhone!),
+                  if (v.contractNo != null)
+                    ListMeta(LucideIcons.fileText, v.contractNo!),
+                  if (v.quotationAmount != null)
+                    ListMeta(
+                      LucideIcons.banknote,
+                      formatVnd(v.quotationAmount),
+                    ),
+                  if (v.visitAt != null)
+                    ListMeta(LucideIcons.calendarClock, formatDate(v.visitAt)),
+                ],
               );
             },
           ),

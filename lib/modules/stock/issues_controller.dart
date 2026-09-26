@@ -6,6 +6,7 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/list_item_card.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock_issue.dart';
 import '../../data/repositories/stock_repository.dart';
@@ -53,7 +54,6 @@ class IssuesView extends GetView<IssuesController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('stock.issues.title'.tr),
@@ -110,28 +110,28 @@ class IssuesView extends GetView<IssuesController> {
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (_, i) {
                     final x = controller.items[i];
-                    return Card(
-                      child: ListTile(
-                        title: Text(x.code),
-                        subtitle: Text(
+                    return ListItemCard(
+                      title: x.code,
+                      badge: StatusBadge(
+                        tone: switch (x.status) {
+                          'posted' => StatusTone.success,
+                          'cancelled' => StatusTone.danger,
+                          _ => StatusTone.warning,
+                        },
+                        label: 'status.receipt.${x.status}'.tr,
+                      ),
+                      metas: [
+                        ListMeta(
+                          LucideIcons.layers,
                           '${'stock.issue.type.${x.type}'.tr}'
                           ' · ${x.items.length} ${'stock.issue.lines'.tr}'
                           '${x.fefoWarning ? ' · ⚠ FEFO' : ''}',
-                          style: theme.textTheme.bodySmall,
                         ),
-                        trailing: StatusBadge(
-                          tone: switch (x.status) {
-                            'posted' => StatusTone.success,
-                            'cancelled' => StatusTone.danger,
-                            _ => StatusTone.warning,
-                          },
-                          label: 'status.receipt.${x.status}'.tr,
-                        ),
-                        onTap: () async {
-                          await Get.toNamed('/stock/issues/${x.id}');
-                          await controller.load();
-                        },
-                      ),
+                      ],
+                      onTap: () async {
+                        await Get.toNamed('/stock/issues/${x.id}');
+                        await controller.load();
+                      },
                     );
                   },
                 ),

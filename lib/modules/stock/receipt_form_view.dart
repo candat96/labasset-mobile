@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/money_field.dart';
 import '../../core/widgets/picker_sheet.dart';
@@ -198,7 +199,8 @@ class _Step2 extends StatelessWidget {
           () => Column(
             children: [
               for (var i = 0; i < controller.lines.length; i++)
-                Card(
+                AppCard(
+                  padding: EdgeInsets.zero,
                   child: ListTile(
                     title: Text(controller.lines[i].label),
                     subtitle: Text(

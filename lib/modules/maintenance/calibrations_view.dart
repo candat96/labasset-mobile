@@ -10,6 +10,7 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/form_focus.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/list_item_card.dart';
 import '../../core/widgets/money_field.dart';
 import '../../core/widgets/picker_sheet.dart';
 import '../../core/widgets/status_badge.dart';
@@ -22,7 +23,6 @@ class CalibrationsView extends GetView<CalibrationsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text('calibration.title'.tr)),
       body: Column(
@@ -77,33 +77,33 @@ class CalibrationsView extends GetView<CalibrationsController> {
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (_, i) {
                     final c = controller.items[i];
-                    return Card(
-                      child: ListTile(
-                        title: Text(c.code),
-                        subtitle: Text(
+                    return ListItemCard(
+                      title: c.code,
+                      badge: c.status == 'done' && c.result != null
+                          ? StatusBadge(
+                              tone: switch (c.result) {
+                                'pass' => StatusTone.success,
+                                'fail' => StatusTone.danger,
+                                _ => StatusTone.warning,
+                              },
+                              label: 'calibration.result.${c.result}'.tr,
+                            )
+                          : StatusBadge(
+                              tone: StatusTone.info,
+                              label: 'status.task.scheduled'.tr,
+                            ),
+                      metas: [
+                        ListMeta(
+                          LucideIcons.badgeCheck,
                           '${c.type == 'inspection' ? 'calibration.type.inspection'.tr : 'calibration.type.calibration'.tr}'
                           '${c.room == null ? '' : ' · ${c.room!.name}'}'
                           '${c.scheduledAt == null ? '' : ' · ${formatDate(c.scheduledAt)}'}'
                           '${c.nextDueAt == null ? '' : ' · ${'calibration.nextDue'.tr}: ${formatDate(c.nextDueAt)}'}',
-                          style: theme.textTheme.bodySmall,
                         ),
-                        trailing: c.status == 'done' && c.result != null
-                            ? StatusBadge(
-                                tone: switch (c.result) {
-                                  'pass' => StatusTone.success,
-                                  'fail' => StatusTone.danger,
-                                  _ => StatusTone.warning,
-                                },
-                                label: 'calibration.result.${c.result}'.tr,
-                              )
-                            : StatusBadge(
-                                tone: StatusTone.info,
-                                label: 'status.task.scheduled'.tr,
-                              ),
-                        onTap: c.status == 'scheduled'
-                            ? () => _completeSheet(context, controller, c)
-                            : null,
-                      ),
+                      ],
+                      onTap: c.status == 'scheduled'
+                          ? () => _completeSheet(context, controller, c)
+                          : null,
                     );
                   },
                 ),

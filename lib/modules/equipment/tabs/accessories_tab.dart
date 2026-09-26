@@ -9,6 +9,7 @@ import '../../../core/widgets/confirm_sheet.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/list_item_card.dart';
 import '../../../core/widgets/qty_field.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/equipment_parts.dart';
@@ -121,22 +122,23 @@ class AccessoriesTab extends GetView<AccessoriesTabController> {
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (_, i) {
               final a = controller.items[i];
-              return Card(
-                child: ListTile(
-                  title: Text([a.code, a.name].whereType<String>().join(' — ')),
-                  subtitle: Text(
+              return ListItemCard(
+                title: [a.code, a.name].whereType<String>().join(' — '),
+                badge: StatusBadge(
+                  tone: switch (a.condition) {
+                    'good' => StatusTone.success,
+                    'worn' => StatusTone.warning,
+                    _ => StatusTone.danger,
+                  },
+                  label: 'status.accessory.${a.condition}'.tr,
+                ),
+                metas: [
+                  ListMeta(
+                    LucideIcons.puzzle,
                     '${'equipment.accessory.type.${a.type}'.tr} · SL ${a.quantity}',
                   ),
-                  trailing: StatusBadge(
-                    tone: switch (a.condition) {
-                      'good' => StatusTone.success,
-                      'worn' => StatusTone.warning,
-                      _ => StatusTone.danger,
-                    },
-                    label: 'status.accessory.${a.condition}'.tr,
-                  ),
-                  onTap: () => _showForm(context, controller, accessory: a),
-                ),
+                ],
+                onTap: () => _showForm(context, controller, accessory: a),
               );
             },
           ),

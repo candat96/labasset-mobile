@@ -8,6 +8,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/section_card.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/status_badge.dart';
@@ -123,70 +124,56 @@ class _ComponentCard extends StatelessWidget {
       StatusTone.warning => context.status.warning,
       _ => context.status.success,
     };
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return SectionCard(
+      title: [component.partNo, component.name].whereType<String>().join(' — '),
+      trailing: StatusBadge(
+        tone: tone,
+        label: 'status.component.${component.status}'.tr,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (component.serial != null)
+            Text('${'equipment.serial'.tr}: ${component.serial}'),
+          Text(
+            '${'equipment.component.installed'.tr}: ${component.installedAt ?? '—'}',
+          ),
+          if (pct != null) ...[
+            const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    [
-                      component.partNo,
-                      component.name,
-                    ].whereType<String>().join(' — '),
-                    style: theme.textTheme.titleSmall,
+                  child: LinearProgressIndicator(
+                    value: pct.clamp(0, 1),
+                    color: color,
+                    backgroundColor: color.withValues(alpha: 0.15),
                   ),
                 ),
-                StatusBadge(
-                  tone: tone,
-                  label: 'status.component.${component.status}'.tr,
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${(pct * 100).round()}%',
+                  style: theme.textTheme.labelMedium?.copyWith(color: color),
                 ),
               ],
             ),
-            if (component.serial != null)
-              Text('${'equipment.serial'.tr}: ${component.serial}'),
-            Text(
-              '${'equipment.component.installed'.tr}: ${component.installedAt ?? '—'}',
-            ),
-            if (pct != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Row(
-                children: [
-                  Expanded(
-                    child: LinearProgressIndicator(
-                      value: pct.clamp(0, 1),
-                      color: color,
-                      backgroundColor: color.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    '${(pct * 100).round()}%',
-                    style: theme.textTheme.labelMedium?.copyWith(color: color),
-                  ),
-                ],
-              ),
-            ],
-            if (component.lifespanHours != null ||
-                component.lifespanTests != null ||
-                component.lifespanMonths != null)
-              Text(
-                '${'equipment.component.lifespan'.tr}: '
-                '${[if (component.lifespanHours != null) '${component.lifespanHours} h', if (component.lifespanTests != null) '${component.lifespanTests} test', if (component.lifespanMonths != null) '${component.lifespanMonths} th'].join(' · ')}',
-                style: theme.textTheme.bodySmall,
-              ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: onReplace,
-                child: Text('equipment.component.replace'.tr),
-              ),
-            ),
           ],
-        ),
+          if (component.lifespanHours != null ||
+              component.lifespanTests != null ||
+              component.lifespanMonths != null)
+            Text(
+              '${'equipment.component.lifespan'.tr}: '
+              '${[if (component.lifespanHours != null) '${component.lifespanHours} h', if (component.lifespanTests != null) '${component.lifespanTests} test', if (component.lifespanMonths != null) '${component.lifespanMonths} th'].join(' · ')}',
+              style: theme.textTheme.bodySmall,
+            ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton(
+              onPressed: onReplace,
+              child: Text('equipment.component.replace'.tr),
+            ),
+          ),
+        ],
       ),
     );
   }

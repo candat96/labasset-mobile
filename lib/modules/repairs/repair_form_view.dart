@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/services/attachment_service.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/list_item_card.dart';
 import '../../core/widgets/photo_grid.dart';
 import '../../core/widgets/photo_picker.dart';
 import '../../core/widgets/picker_sheet.dart';
@@ -143,27 +144,26 @@ class RepairFormView extends GetView<RepairFormController> {
                     style: theme.textTheme.labelLarge,
                   ),
                   for (final s in controller.suggestions.take(5))
-                    Card(
-                      child: ListTile(
-                        title: Text(
-                          [
-                            s.fault.errorCode,
-                            s.fault.title,
-                          ].where((x) => x.isNotEmpty).join(' — '),
-                        ),
-                        subtitle: Text(
+                    ListItemCard(
+                      title: [
+                        s.fault.errorCode,
+                        s.fault.title,
+                      ].where((x) => x.isNotEmpty).join(' — '),
+                      badge: StatusBadge(
+                        tone: toneForRepairSeverity(s.fault.severity),
+                        label: 'status.severity.${s.fault.severity}'.tr,
+                      ),
+                      metas: [
+                        ListMeta(
+                          LucideIcons.history,
                           'repairs.suggestion.times'.trParams({
                             'on': '${s.onEquipment}',
                             'model': '${s.sameModel}',
                           }),
                         ),
-                        trailing: StatusBadge(
-                          tone: toneForRepairSeverity(s.fault.severity),
-                          label: 'status.severity.${s.fault.severity}'.tr,
-                        ),
-                        onTap: () =>
-                            controller.selectedFaultId.value = s.fault.id,
-                      ),
+                      ],
+                      onTap: () =>
+                          controller.selectedFaultId.value = s.fault.id,
                     ),
                 ],
               );

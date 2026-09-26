@@ -13,6 +13,7 @@ import '../../../core/widgets/confirm_sheet.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/timeline_list.dart';
 import '../../../data/models/equipment_parts.dart';
 import '../../../data/repositories/equipment_repository.dart';
@@ -169,85 +170,80 @@ class SoftwareTab extends GetView<SoftwareTabController> {
                         s.licenseExpiresAt!,
                       )?.isBefore(DateTime.now()) ??
                       false);
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s.name,
-                        style: Theme.of(context).textTheme.titleSmall,
+              return AppCard(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(s.name, style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      '${'equipment.software.version'.tr}: ${s.version ?? '—'}',
+                    ),
+                    Text(
+                      '${'equipment.software.license'.tr}: ${formatDate(s.licenseExpiresAt)}',
+                      style: TextStyle(
+                        color: expired
+                            ? Theme.of(context).colorScheme.error
+                            : null,
                       ),
-                      Text(
-                        '${'equipment.software.version'.tr}: ${s.version ?? '—'}',
-                      ),
-                      Text(
-                        '${'equipment.software.license'.tr}: ${formatDate(s.licenseExpiresAt)}',
-                        style: TextStyle(
-                          color: expired
-                              ? Theme.of(context).colorScheme.error
-                              : null,
-                        ),
-                      ),
-                      Obx(() {
-                        final shown = controller.shownKeys[s.id];
-                        if (shown == null) {
-                          return Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton.icon(
-                              onPressed: s.hasLicenseKey
-                                  ? () => controller.revealKey(s)
-                                  : null,
-                              icon: const Icon(LucideIcons.keyRound, size: 18),
-                              label: Text(
-                                s.hasLicenseKey
-                                    ? 'equipment.software.viewKey'.tr
-                                    : 'equipment.software.noKey'.tr,
-                              ),
+                    ),
+                    Obx(() {
+                      final shown = controller.shownKeys[s.id];
+                      if (shown == null) {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: s.hasLicenseKey
+                                ? () => controller.revealKey(s)
+                                : null,
+                            icon: const Icon(LucideIcons.keyRound, size: 18),
+                            label: Text(
+                              s.hasLicenseKey
+                                  ? 'equipment.software.viewKey'.tr
+                                  : 'equipment.software.noKey'.tr,
                             ),
-                          );
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SelectableText(
-                              shown,
-                              style: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              'equipment.software.keyHidden'.tr,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
+                          ),
                         );
-                      }),
-                      const SizedBox(height: AppSpacing.xs),
-                      Wrap(
-                        spacing: AppSpacing.sm,
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          OutlinedButton(
-                            onPressed: () =>
-                                _upgradeDialog(context, controller, s),
-                            child: Text('equipment.software.upgrade'.tr),
+                          SelectableText(
+                            shown,
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          OutlinedButton(
-                            onPressed: () =>
-                                _historySheet(context, controller, s),
-                            child: Text('equipment.software.history'.tr),
-                          ),
-                          OutlinedButton(
-                            onPressed: () =>
-                                _formSheet(context, controller, software: s),
-                            child: Text('common.edit'.tr),
+                          Text(
+                            'equipment.software.keyHidden'.tr,
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
                         ],
-                      ),
-                    ],
-                  ),
+                      );
+                    }),
+                    const SizedBox(height: AppSpacing.xs),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () =>
+                              _upgradeDialog(context, controller, s),
+                          child: Text('equipment.software.upgrade'.tr),
+                        ),
+                        OutlinedButton(
+                          onPressed: () =>
+                              _historySheet(context, controller, s),
+                          child: Text('equipment.software.history'.tr),
+                        ),
+                        OutlinedButton(
+                          onPressed: () =>
+                              _formSheet(context, controller, software: s),
+                          child: Text('common.edit'.tr),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               );
             },

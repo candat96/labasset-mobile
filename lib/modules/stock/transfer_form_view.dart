@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import 'transfer_form_controller.dart';
 
@@ -68,7 +69,8 @@ class TransferFormView extends GetView<TransferFormController> {
             () => Column(
               children: [
                 for (var i = 0; i < controller.lines.length; i++)
-                  Card(
+                  AppCard(
+                    padding: EdgeInsets.zero,
                     child: ListTile(
                       title: Text(
                         '${'scan.lot.lotNo'.tr}: ${controller.lines[i].lotNo}',

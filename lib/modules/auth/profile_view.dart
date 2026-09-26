@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/storage/session_store.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_card.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -28,7 +29,8 @@ class ProfileView extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            Card(
+            AppCard(
+              padding: EdgeInsets.zero,
               child: Column(
                 children: [
                   for (final (k, v) in rows)

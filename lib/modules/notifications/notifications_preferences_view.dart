@@ -6,6 +6,7 @@ import '../../core/theme/tokens.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/section_card.dart';
 import '../../data/models/notification_preference.dart';
 import 'notifications_preferences_controller.dart';
 
@@ -15,7 +16,6 @@ class NotificationsPreferencesView
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('notifications.preferences.title'.tr),
@@ -57,39 +57,33 @@ class NotificationsPreferencesView
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             for (final NotificationPreference p in controller.items)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.labels[p.type] ?? p.type,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      SwitchListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text('notifications.preferences.push'.tr),
-                        value: p.push,
-                        onChanged: (v) {
-                          p.push = v;
-                          controller.items.refresh();
-                        },
-                      ),
-                      SwitchListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text('notifications.preferences.inapp'.tr),
-                        value: p.inapp,
-                        onChanged: (v) {
-                          p.inapp = v;
-                          controller.items.refresh();
-                        },
-                      ),
-                    ],
-                  ),
+              SectionCard(
+                title: controller.labels[p.type] ?? p.type,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SwitchListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text('notifications.preferences.push'.tr),
+                      value: p.push,
+                      onChanged: (v) {
+                        p.push = v;
+                        controller.items.refresh();
+                      },
+                    ),
+                    SwitchListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text('notifications.preferences.inapp'.tr),
+                      value: p.inapp,
+                      onChanged: (v) {
+                        p.inapp = v;
+                        controller.items.refresh();
+                      },
+                    ),
+                  ],
                 ),
               ),
           ],

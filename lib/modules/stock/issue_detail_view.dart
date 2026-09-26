@@ -13,6 +13,8 @@ import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/list_item_card.dart';
+import '../../core/widgets/section_card.dart';
 import '../../core/widgets/signature_pad.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock_issue.dart';
@@ -187,60 +189,53 @@ class _IssueDetailViewState extends State<IssueDetailView> {
         body: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'stock.issue.type.${x.type}'.tr,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                        ),
-                        StatusBadge(
-                          tone: x.status == 'posted'
-                              ? StatusTone.success
-                              : x.status == 'cancelled'
-                              ? StatusTone.danger
-                              : StatusTone.warning,
-                          label: 'status.receipt.${x.status}'.tr,
-                        ),
-                      ],
+            SectionCard(
+              title: 'stock.issue.type.${x.type}'.tr,
+              trailing: StatusBadge(
+                tone: x.status == 'posted'
+                    ? StatusTone.success
+                    : x.status == 'cancelled'
+                    ? StatusTone.danger
+                    : StatusTone.warning,
+                label: 'status.receipt.${x.status}'.tr,
+              ),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (x.fefoWarning)
+                    Text(
+                      'stock.issue.fefoWarn'.tr,
+                      style: TextStyle(color: theme.colorScheme.tertiary),
                     ),
-                    if (x.fefoWarning)
-                      Text(
-                        'stock.issue.fefoWarn'.tr,
-                        style: TextStyle(color: theme.colorScheme.tertiary),
-                      ),
-                    if (x.reason != null)
-                      Text('${'stock.issue.reason'.tr}: ${x.reason}'),
-                    if (x.receiverName != null)
-                      Text('${'stock.issue.receiver'.tr}: ${x.receiverName}'),
-                    if (x.issuedAt != null)
-                      Text(
-                        '${'stock.issue.issuedAt'.tr}: ${formatDateTime(x.issuedAt)}',
-                      ),
-                  ],
-                ),
+                  if (x.reason != null)
+                    Text('${'stock.issue.reason'.tr}: ${x.reason}'),
+                  if (x.receiverName != null)
+                    Text('${'stock.issue.receiver'.tr}: ${x.receiverName}'),
+                  if (x.issuedAt != null)
+                    Text(
+                      '${'stock.issue.issuedAt'.tr}: ${formatDateTime(x.issuedAt)}',
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             for (final item in x.items)
-              Card(
-                child: ListTile(
-                  title: Text(
+              ListItemCard(
+                title:
                     supplyLabels[item.supplyId] ??
-                        'equipment.supply.unknown'.tr,
+                    'equipment.supply.unknown'.tr,
+                metas: [
+                  ListMeta(
+                    LucideIcons.hash,
+                    '${'repairs.parts.quantity'.tr}: ${item.quantity}',
                   ),
-                  subtitle: Text(
-                    '${'repairs.parts.quantity'.tr}: ${item.quantity}'
-                    '${item.lotId == null || lotLabels[item.lotId!] == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${lotLabels[item.lotId!]}'}',
-                  ),
-                ),
+                  if (item.lotId != null && lotLabels[item.lotId!] != null)
+                    ListMeta(
+                      LucideIcons.tag,
+                      '${'scan.lot.lotNo'.tr}: ${lotLabels[item.lotId!]}',
+                    ),
+                ],
               ),
             const SizedBox(height: AppSpacing.md),
             if (x.status == 'draft') ...[

@@ -8,10 +8,14 @@ import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
 import 'package:labasset_mobile/data/repositories/equipment_repository.dart';
 import 'package:labasset_mobile/data/repositories/repairs_repository.dart';
 import 'package:labasset_mobile/data/repositories/supplies_repository.dart';
+import 'package:labasset_mobile/core/widgets/list_item_card.dart';
+import 'package:labasset_mobile/core/widgets/app_card.dart';
 import 'package:labasset_mobile/modules/repairs/tabs/costs_tab.dart';
 import 'package:labasset_mobile/modules/repairs/tabs/parts_tab.dart';
 import 'package:labasset_mobile/modules/repairs/tabs/vendors_tab.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../helpers/test_helpers.dart';
 
 class _MockRepairs extends Mock implements RepairsRepository {}
 
@@ -137,4 +141,81 @@ void main() {
     });
     expect(cost.amount, '10.000');
   });
+
+  testWidgets('PartsTab dùng ListItemCard cho từng linh kiện', (tester) async {
+    final c = _PartsTab(repairs);
+    c.loading.value = false;
+    c.items.add(const RepairPart(id: 'p1', name: 'Găng tay', quantity: '2'));
+    Get.put<PartsTabController>(c);
+    await tester.pumpWidget(wrap(const PartsTab(equipmentId: 'e1')));
+    await tester.pump();
+    expect(find.byType(ListItemCard), findsOneWidget);
+    expect(find.text('Găng tay'), findsOneWidget);
+    expect(find.byType(Card), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('VendorsTab dùng ListItemCard cho nhà thầu', (tester) async {
+    final c = _VendorsTab(repairs);
+    c.loading.value = false;
+    c.items.add(const RepairVendor(id: 'v1', engineerName: 'Nguyễn Văn A'));
+    Get.put<VendorsTabController>(c);
+    await tester.pumpWidget(wrap(const VendorsTab()));
+    await tester.pump();
+    expect(find.byType(ListItemCard), findsOneWidget);
+    expect(find.text('Nguyễn Văn A'), findsOneWidget);
+    expect(find.byType(Card), findsNothing);
+  });
+
+  testWidgets('CostsTab dùng AppCard tổng + ListItemCard dòng chi phí', (
+    tester,
+  ) async {
+    final c = _CostsTab(repairs);
+    c.loading.value = false;
+    c.items.add(
+      const RepairCost(
+        id: 'c1',
+        category: 'labor',
+        description: 'Công thay bơm',
+        amount: '200000',
+      ),
+    );
+    Get.put<CostsTabController>(c);
+    await tester.pumpWidget(wrap(const CostsTab()));
+    await tester.pump();
+    expect(find.byType(AppCard), findsWidgets);
+    expect(find.byType(ListItemCard), findsOneWidget);
+    expect(find.text('Công thay bơm'), findsOneWidget);
+    expect(find.byType(Card), findsNothing);
+  });
+}
+
+class _PartsTab extends PartsTabController {
+  _PartsTab(RepairsRepository repairs)
+    : super(
+        repairs: repairs,
+        supplies: _MockSupplies(),
+        equipment: _MockEquipment(),
+        ticketId: 'r1',
+        equipmentId: 'e1',
+      );
+  @override
+  // ignore: must_call_super
+  void onInit() {}
+}
+
+class _VendorsTab extends VendorsTabController {
+  _VendorsTab(RepairsRepository repairs)
+    : super(repairs: repairs, catalogs: _MockCatalogs(), ticketId: 'r1');
+  @override
+  // ignore: must_call_super
+  void onInit() {}
+}
+
+class _CostsTab extends CostsTabController {
+  _CostsTab(RepairsRepository repairs)
+    : super(repairs: repairs, ticketId: 'r1');
+  @override
+  // ignore: must_call_super
+  void onInit() {}
 }

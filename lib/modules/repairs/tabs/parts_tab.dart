@@ -8,6 +8,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/list_item_card.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/picker_sheet.dart';
@@ -151,22 +152,23 @@ class PartsTab extends GetView<PartsTabController> {
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (_, i) {
               final p = controller.items[i];
-              return Card(
-                child: ListTile(
-                  title: Text(p.name),
-                  subtitle: Text(
+              return ListItemCard(
+                title: p.name,
+                badge: StatusBadge(
+                  tone: switch (p.source) {
+                    'stock' => StatusTone.info,
+                    'purchased' => StatusTone.warning,
+                    _ => StatusTone.muted,
+                  },
+                  label: 'repairs.parts.source.${p.source}'.tr,
+                ),
+                metas: [
+                  ListMeta(
+                    LucideIcons.hash,
                     '${'repairs.parts.quantity'.tr}: ${p.quantity}'
                     '${p.unitCost == null ? '' : ' · ${formatVnd(p.unitCost)}'}',
                   ),
-                  trailing: StatusBadge(
-                    tone: switch (p.source) {
-                      'stock' => StatusTone.info,
-                      'purchased' => StatusTone.warning,
-                      _ => StatusTone.muted,
-                    },
-                    label: 'repairs.parts.source.${p.source}'.tr,
-                  ),
-                ),
+                ],
               );
             },
           ),

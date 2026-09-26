@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/session_store.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/empty_state.dart';
@@ -110,7 +111,8 @@ class SessionsView extends GetView<SessionsController> {
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (_, i) {
               final s = controller.items[i];
-              return Card(
+              return AppCard(
+                padding: EdgeInsets.zero,
                 child: ListTile(
                   title: Text(
                     s.deviceInfo ?? 'auth.sessions.unknownDevice'.tr,

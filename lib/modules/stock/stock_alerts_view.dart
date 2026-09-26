@@ -10,6 +10,7 @@ import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/list_item_card.dart';
 import '../../data/models/stock.dart';
 import '../../data/repositories/stock_repository.dart';
 
@@ -77,7 +78,6 @@ class StockAlertsView extends GetView<StockAlertsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text('stock.alerts.title'.tr)),
       body: Column(
@@ -121,28 +121,31 @@ class StockAlertsView extends GetView<StockAlertsController> {
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (_, i) {
                     final a = controller.items[i];
-                    return Card(
-                      child: ListTile(
-                        leading: Icon(
-                          LucideIcons.triangleAlert,
-                          color: a.type == 'expired'
-                              ? context.status.danger
-                              : context.status.warning,
-                        ),
-                        title: Text(a.message),
-                        subtitle: Text(
+                    return ListItemCard(
+                      leading: Icon(
+                        LucideIcons.triangleAlert,
+                        color: a.type == 'expired'
+                            ? context.status.danger
+                            : context.status.warning,
+                      ),
+                      title: a.message,
+                      metas: [
+                        ListMeta(
+                          LucideIcons.info,
                           '${'stock.alert.$a.type'.tr}'
                           '${a.createdAt == null ? '' : ' · ${formatDateTime(a.createdAt)}'}',
-                          style: theme.textTheme.bodySmall,
                         ),
-                        trailing: a.type == 'stale'
-                            ? TextButton(
+                      ],
+                      footer: a.type == 'stale'
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
                                 onPressed: () => controller.resolve(a),
                                 child: Text('stock.alert.resolve'.tr),
-                              )
-                            : const Icon(LucideIcons.chevronRight),
-                        onTap: () => Get.toNamed(Routes.supply(a.supplyId)),
-                      ),
+                              ),
+                            )
+                          : null,
+                      onTap: () => Get.toNamed(Routes.supply(a.supplyId)),
                     );
                   },
                 ),

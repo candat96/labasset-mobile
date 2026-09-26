@@ -12,6 +12,8 @@ import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/list_item_card.dart';
+import '../../core/widgets/section_card.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock_extra.dart';
 import '../../data/repositories/stock_repository.dart';
@@ -24,7 +26,6 @@ class ReceiptsView extends GetView<ReceiptsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('stock.receipts.title'.tr),
@@ -81,30 +82,29 @@ class ReceiptsView extends GetView<ReceiptsController> {
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (_, i) {
                     final r = controller.items[i];
-                    return Card(
-                      child: ListTile(
-                        title: Text(
+                    return ListItemCard(
+                      title:
                           '${r.code} · ${r.totalAmount == '0' ? '' : formatVnd(r.totalAmount)}',
-                        ),
-                        subtitle: Text(
+                      badge: StatusBadge(
+                        tone: switch (r.status) {
+                          'posted' => StatusTone.success,
+                          'cancelled' => StatusTone.danger,
+                          _ => StatusTone.warning,
+                        },
+                        label: 'status.receipt.${r.status}'.tr,
+                      ),
+                      metas: [
+                        ListMeta(
+                          LucideIcons.fileText,
                           '${'stock.receipt.type.${r.type}'.tr}'
                           '${r.invoiceNo == null ? '' : ' · ${r.invoiceNo}'}'
                           '${r.receivedAt == null ? '' : ' · ${formatDate(r.receivedAt)}'}',
-                          style: theme.textTheme.bodySmall,
                         ),
-                        trailing: StatusBadge(
-                          tone: switch (r.status) {
-                            'posted' => StatusTone.success,
-                            'cancelled' => StatusTone.danger,
-                            _ => StatusTone.warning,
-                          },
-                          label: 'status.receipt.${r.status}'.tr,
-                        ),
-                        onTap: () async {
-                          await Get.toNamed('/stock/receipts/${r.id}');
-                          await controller.load();
-                        },
-                      ),
+                      ],
+                      onTap: () async {
+                        await Get.toNamed('/stock/receipts/${r.id}');
+                        await controller.load();
+                      },
                     );
                   },
                 ),
@@ -246,55 +246,52 @@ class _ReceiptDetailViewState extends State<ReceiptDetailView> {
         body: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'stock.receipt.type.${r.type}'.tr,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                        ),
-                        StatusBadge(
-                          tone: r.status == 'posted'
-                              ? StatusTone.success
-                              : r.status == 'cancelled'
-                              ? StatusTone.danger
-                              : StatusTone.warning,
-                          label: 'status.receipt.${r.status}'.tr,
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '${'stock.receipt.total'.tr}: ${formatVnd(r.totalAmount)}',
-                    ),
-                    Text('QC: ${r.qcStatus}'),
-                    if (r.invoiceNo != null)
-                      Text('${'stock.receipt.invoiceNo'.tr}: ${r.invoiceNo}'),
-                  ],
-                ),
+            SectionCard(
+              title: 'stock.receipt.type.${r.type}'.tr,
+              trailing: StatusBadge(
+                tone: r.status == 'posted'
+                    ? StatusTone.success
+                    : r.status == 'cancelled'
+                    ? StatusTone.danger
+                    : StatusTone.warning,
+                label: 'status.receipt.${r.status}'.tr,
+              ),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${'stock.receipt.total'.tr}: ${formatVnd(r.totalAmount)}',
+                  ),
+                  Text('QC: ${r.qcStatus}'),
+                  if (r.invoiceNo != null)
+                    Text('${'stock.receipt.invoiceNo'.tr}: ${r.invoiceNo}'),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             for (final item in r.items)
-              Card(
-                child: ListTile(
-                  title: Text(
+              ListItemCard(
+                title:
                     supplyLabels[item.supplyId] ??
-                        'equipment.supply.unknown'.tr,
+                    'equipment.supply.unknown'.tr,
+                badge: Text(formatVnd(item.unitCost)),
+                metas: [
+                  ListMeta(
+                    LucideIcons.hash,
+                    '${'repairs.parts.quantity'.tr}: ${item.quantity}',
                   ),
-                  subtitle: Text(
-                    '${'repairs.parts.quantity'.tr}: ${item.quantity}'
-                    '${item.lotNo == null ? '' : ' · ${'scan.lot.lotNo'.tr}: ${item.lotNo}'}'
-                    '${item.expiresAt == null ? '' : ' · ${formatDate(item.expiresAt)}'}',
-                  ),
-                  trailing: Text(formatVnd(item.unitCost)),
-                ),
+                  if (item.lotNo != null)
+                    ListMeta(
+                      LucideIcons.tag,
+                      '${'scan.lot.lotNo'.tr}: ${item.lotNo}',
+                    ),
+                  if (item.expiresAt != null)
+                    ListMeta(
+                      LucideIcons.calendarClock,
+                      formatDate(item.expiresAt),
+                    ),
+                ],
               ),
             const SizedBox(height: AppSpacing.md),
             if (r.status == 'draft')

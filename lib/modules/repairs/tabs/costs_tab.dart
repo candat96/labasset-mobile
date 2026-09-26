@@ -11,6 +11,8 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/list_item_card.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../data/models/repair_detail.dart';
@@ -106,29 +108,34 @@ class CostsTab extends GetView<CostsTabController> {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              Card(
-                child: ListTile(
-                  title: Text('repairs.costs.total'.tr),
-                  trailing: Text(
-                    formatVnd(total.toString()),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+              AppCard(
+                child: Row(
+                  children: [
+                    Expanded(child: Text('repairs.costs.total'.tr)),
+                    Text(
+                      formatVnd(total.toString()),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
               for (final c in controller.items)
-                Card(
-                  child: ListTile(
-                    title: Text(c.description),
-                    subtitle: Text(
+                ListItemCard(
+                  title: c.description,
+                  badge: Text(
+                    formatVnd(c.amount),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: context.status.info,
+                    ),
+                  ),
+                  metas: [
+                    ListMeta(
+                      LucideIcons.banknote,
                       '${'repairs.costs.category.${c.category}'.tr}'
                       '${c.invoiceNo == null ? '' : ' · ${c.invoiceNo}'}',
                     ),
-                    trailing: Text(
-                      formatVnd(c.amount),
-                      style: TextStyle(color: context.status.info),
-                    ),
-                  ),
+                  ],
                 ),
             ],
           ),

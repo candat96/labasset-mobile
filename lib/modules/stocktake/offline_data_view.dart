@@ -8,6 +8,7 @@ import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
+import '../../core/widgets/app_card.dart';
 import 'offline_data_controller.dart';
 
 /// Quản lý dữ liệu offline (trong Cá nhân).
@@ -39,7 +40,8 @@ class OfflineDataView extends GetView<OfflineDataController> {
           separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (_, i) {
             final (meta, pending) = controller.sessions[i];
-            return Card(
+            return AppCard(
+              padding: EdgeInsets.zero,
               child: ListTile(
                 title: Text('${meta.code} — ${meta.name}'),
                 subtitle: Text(

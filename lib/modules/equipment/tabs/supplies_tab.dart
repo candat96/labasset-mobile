@@ -9,6 +9,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/loading_list.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/picker_sheet.dart';
 import '../../../data/models/equipment_extras.dart';
 import '../../../data/repositories/equipment_repository.dart';
@@ -142,7 +143,8 @@ class SuppliesTab extends GetView<SuppliesTabController> {
           itemBuilder: (_, i) {
             final l = controller.links[i];
             final runway = controller.runwayOf(l.supplyId);
-            return Card(
+            return AppCard(
+              padding: EdgeInsets.zero,
               child: ListTile(
                 title: Text(
                   controller.supplyLabels[l.supplyId] ??
