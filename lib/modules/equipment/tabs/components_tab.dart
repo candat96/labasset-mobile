@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/format/format.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -137,7 +138,7 @@ class _ComponentCard extends StatelessWidget {
           if (component.serial != null)
             Text('${'equipment.serial'.tr}: ${component.serial}'),
           Text(
-            '${'equipment.component.installed'.tr}: ${component.installedAt ?? '—'}',
+            '${'equipment.component.installed'.tr}: ${component.installedAt == null ? '—' : formatDate(component.installedAt)}',
           ),
           if (pct != null) ...[
             const SizedBox(height: AppSpacing.xs),

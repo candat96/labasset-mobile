@@ -1039,7 +1039,8 @@ const Map<String, String> vi = {
   'errors.STOCKTAKE_CLIENT_ID_REQUIRED': 'Thiếu mã dòng (clientId)',
   'errors.STOCKTAKE_EMPTY_SCOPE': 'Phạm vi đợt không có dòng nào',
 
-  // calendar — lịch  'calendar.title': 'Lịch',
+  // calendar — lịch
+  'calendar.title': 'Lịch',
   'calendar.mine': 'Việc của tôi',
   'calendar.emptyDay': 'Không có sự kiện trong ngày',
   'calendar.type.maintenance': 'Bảo dưỡng',

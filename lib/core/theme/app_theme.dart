@@ -268,16 +268,24 @@ class AppTheme {
         ),
         labelStyle: text.bodyMedium,
       ),
+      // Nút co theo nội dung. TRƯỚC ĐÂY dùng `Size.fromHeight(52)` — đó là
+      // `Size(double.infinity, 52)`, tức mọi nút có bề rộng tối thiểu VÔ HẠN nên
+      // luôn giãn hết hàng: trong `Row` nó nuốt sạch chỗ của `Expanded` bên cạnh
+      // (chữ bị ép xuống mỗi dòng một ký tự ở màn Quét mã), và mọi nút phụ đều
+      // thành khối trải ngang. Muốn nút trải ngang thì bọc `Expanded` hoặc
+      // `SizedBox(width: double.infinity)` ngay tại chỗ.
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(72, 44),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           shape: shape,
           textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(72, 44),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           shape: shape,
           side: BorderSide(color: border),
           foregroundColor: scheme.onSurface,
