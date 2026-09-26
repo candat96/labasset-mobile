@@ -190,7 +190,7 @@ void main() {
       shape.borderRadius,
       const BorderRadius.vertical(top: Radius.circular(16)),
     );
-    expect(AppSheet.topRadius, 16);
+    expect(AppRadius.sheetTop, 16);
     expect(find.text('Nội dung sheet'), findsOneWidget);
     expect(find.text('Lưu'), findsOneWidget);
   });

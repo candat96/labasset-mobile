@@ -98,6 +98,9 @@ class AppRadius {
   static const tile = 12.0;
   static const chip = 999.0;
   static const sheet = 12.0;
+
+  /// Hai góc trên của sheet form — §Chuẩn thành phần chốt 16, khác `sheet` (12).
+  static const sheetTop = 16.0;
   static const hero = 24.0;
 
   // Bí danh tương thích cho widget cũ; vẫn quy về bốn bán kính chuẩn.

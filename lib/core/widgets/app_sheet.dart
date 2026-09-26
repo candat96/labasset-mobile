@@ -16,10 +16,6 @@ import 'form_focus.dart';
 class AppSheet {
   AppSheet._();
 
-  /// Bán kính hai góc trên của sheet (Figma: 16). Ghi chú: `AppRadius.sheet`
-  /// hiện là 12 — cần một token bo 16 ở đợt sau (B3 không sửa theme).
-  static const double topRadius = 16;
-
   static Future<T?> show<T>(
     BuildContext context, {
     required WidgetBuilder builder,
@@ -45,7 +41,9 @@ class AppSheet {
       backgroundColor: Theme.of(context).colorScheme.surface,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(topRadius)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.sheetTop),
+        ),
       ),
       builder: (ctx) {
         // Nội dung sheet có thể cuộn; [footer] (thanh nút) được ghim ở đáy.
