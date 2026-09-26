@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:labasset_mobile/data/models/kpi.dart';
+import 'package:labasset_mobile/core/widgets/status_badge.dart';
 import 'package:labasset_mobile/data/repositories/kpi_repository.dart';
 import 'package:labasset_mobile/modules/kpi/kpi_controller.dart';
 import 'package:labasset_mobile/modules/kpi/kpi_view.dart';
@@ -178,6 +179,21 @@ void main() {
     expect(find.text('Đúng hạn'), findsWidgets);
     expect(find.text('Tốc độ'), findsOneWidget);
     expect(find.text('Chất lượng'), findsOneWidget);
+  });
+
+  testWidgets('KpiView: huy hiệu hạng dùng StatusBadge dùng chung', (
+    tester,
+  ) async {
+    Get.put(KpiController(repo: _FakeKpiRepo(), userId: 'u1'));
+    await _pump(tester);
+
+    expect(
+      find.ancestor(
+        of: find.text('Hạng 8'),
+        matching: find.byType(StatusBadge),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('KpiView: ẩn huy hiệu hạng khi API không trả rank', (

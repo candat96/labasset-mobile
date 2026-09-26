@@ -11,6 +11,7 @@ import '../../core/services/pdf_file_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/attachments_grid.dart';
@@ -202,69 +203,62 @@ class _ChecklistCard extends StatelessWidget {
     return Obx(() {
       final r = controller.results[item.key];
       final missing = controller.missingKeys.contains(item.key);
-      return Card(
-        shape: missing
-            ? RoundedRectangleBorder(
-                side: BorderSide(color: context.status.danger, width: 2),
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-              )
-            : null,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(item.label, style: theme.textTheme.titleSmall),
-                  ),
-                  if (item.optional)
-                    Chip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text('common.optional'.tr),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              switch (item.type) {
-                'measure' => _measure(context, valueController, r),
-                'text' => TextField(
-                  controller: valueController,
-                  onChanged: (v) => controller.setValue(item.key, v),
-                  decoration: const InputDecoration(hintText: '…'),
+      return AppCard(
+        accentColor: missing ? context.status.danger : null,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(item.label, style: theme.textTheme.titleSmall),
                 ),
-                _ => _check(context, r),
-              },
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: noteController,
-                      onChanged: (v) => controller.setNote(item.key, v),
-                      decoration: InputDecoration(
-                        labelText: 'repairs.logs.note'.tr,
-                        isDense: true,
-                      ),
-                    ),
+                if (item.optional)
+                  Chip(
+                    visualDensity: VisualDensity.compact,
+                    label: Text('common.optional'.tr),
                   ),
-                  IconButton(
-                    tooltip: 'repairs.form.addPhoto'.tr,
-                    icon: Icon(
-                      r?.photoFileId == null
-                          ? LucideIcons.camera
-                          : LucideIcons.circleCheck,
-                      color: r?.photoFileId == null
-                          ? null
-                          : context.status.success,
-                    ),
-                    onPressed: () => controller.attachPhoto(item.key),
-                  ),
-                ],
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            switch (item.type) {
+              'measure' => _measure(context, valueController, r),
+              'text' => TextField(
+                controller: valueController,
+                onChanged: (v) => controller.setValue(item.key, v),
+                decoration: const InputDecoration(hintText: '…'),
               ),
-            ],
-          ),
+              _ => _check(context, r),
+            },
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: noteController,
+                    onChanged: (v) => controller.setNote(item.key, v),
+                    decoration: InputDecoration(
+                      labelText: 'repairs.logs.note'.tr,
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'repairs.form.addPhoto'.tr,
+                  icon: Icon(
+                    r?.photoFileId == null
+                        ? LucideIcons.camera
+                        : LucideIcons.circleCheck,
+                    color: r?.photoFileId == null
+                        ? null
+                        : context.status.success,
+                  ),
+                  onPressed: () => controller.attachPhoto(item.key),
+                ),
+              ],
+            ),
+          ],
         ),
       );
     });

@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/action_grid_sheet.dart';
 import '../../core/widgets/app_buttons.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/attachments_grid.dart';
@@ -202,8 +203,9 @@ class _Overview extends StatelessWidget {
         ),
         if (d.calibrationRequired) ...[
           const SizedBox(height: AppSpacing.sm),
-          Card(
-            color: context.status.warning.withValues(alpha: 0.12),
+          AppCard(
+            color: context.status.warningBackground,
+            padding: EdgeInsets.zero,
             child: ListTile(
               leading: Icon(
                 LucideIcons.badgeCheck,

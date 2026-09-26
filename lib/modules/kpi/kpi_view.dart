@@ -216,33 +216,10 @@ class _RankBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.status;
     final top3 = rank <= 3;
-    final color = top3 ? status.warning : status.info;
-    final background = top3 ? status.warningBackground : status.infoBackground;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(AppRadius.chip),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(LucideIcons.trophy, size: 18, color: color),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            'kpi.rankBadge'.trParams({'rank': '${rank.toInt()}'}),
-            style: context.appText.label.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
-      ),
+    return StatusBadge(
+      tone: top3 ? StatusTone.warning : StatusTone.info,
+      label: 'kpi.rankBadge'.trParams({'rank': '${rank.toInt()}'}),
     );
   }
 }

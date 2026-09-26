@@ -5,9 +5,12 @@ import 'package:labasset_mobile/core/cache/kv_cache.dart';
 import 'package:labasset_mobile/core/services/attachment_service.dart';
 import 'package:labasset_mobile/core/stocktake/stocktake_local_store.dart';
 import 'package:labasset_mobile/core/sync/outbox_service.dart';
+import 'package:labasset_mobile/core/widgets/app_card.dart';
 import 'package:labasset_mobile/core/widgets/empty_state.dart';
 import 'package:labasset_mobile/core/widgets/error_state.dart';
+import 'package:labasset_mobile/data/models/maintenance.dart';
 import 'package:labasset_mobile/data/models/my_tasks.dart';
+import 'package:labasset_mobile/data/models/notification_item.dart';
 import 'package:labasset_mobile/data/models/report.dart';
 import 'package:labasset_mobile/data/repositories/ai_repository.dart';
 import 'package:labasset_mobile/data/repositories/catalogs_repository.dart';
@@ -31,6 +34,7 @@ import 'package:labasset_mobile/modules/home/home_view.dart';
 import 'package:labasset_mobile/modules/maintenance/maintenance_task_controller.dart';
 import 'package:labasset_mobile/modules/maintenance/maintenance_task_view.dart';
 import 'package:labasset_mobile/modules/notifications/notifications_controller.dart';
+import 'package:labasset_mobile/modules/notifications/notifications_view.dart';
 import 'package:labasset_mobile/modules/repairs/repair_detail_controller.dart';
 import 'package:labasset_mobile/modules/repairs/repair_detail_view.dart';
 import 'package:labasset_mobile/modules/repairs/repairs_controller.dart';
@@ -238,6 +242,47 @@ void main() {
     c.error.value = Exception('load');
     await tester.pumpWidget(wrap(const MaintenanceTaskView()));
     expect(find.byType(ErrorState), findsOneWidget);
+  });
+
+  testWidgets('maintenance_task_view dùng AppCard cho thẻ checklist', (
+    tester,
+  ) async {
+    final c = Get.put<MaintenanceTaskController>(_MaintenanceTask());
+    c.loading.value = false;
+    c.item.value = const MaintenanceTask(
+      id: 't1',
+      code: 'BD-1',
+      equipmentId: 'e1',
+      scheduledAt: '2026-09-19T08:00:00Z',
+      templateItems: [
+        ChecklistItem(key: 'k1', label: 'Kiểm tra bơm', type: 'check'),
+      ],
+    );
+    await tester.pumpWidget(wrap(const MaintenanceTaskView()));
+    expect(find.text('Kiểm tra bơm'), findsOneWidget);
+    expect(find.byType(AppCard), findsWidgets);
+  });
+
+  testWidgets('notifications_view dùng AppCard cho mục thông báo', (
+    tester,
+  ) async {
+    final c = Get.put(
+      NotificationsController(repo: _NotificationsRepo(), store: fakeStore()),
+    );
+    c.loading.value = false;
+    c.items.add(
+      const NotificationItem(
+        id: 'n1',
+        createdAt: '2026-09-26T08:00:00Z',
+        type: 'repair.created',
+        title: 'Phiếu sửa chữa mới',
+        body: 'Máy ly tâm cần xử lý',
+      ),
+    );
+    await tester.pumpWidget(wrap(const NotificationsView()));
+    await tester.pump();
+    expect(find.text('Phiếu sửa chữa mới'), findsOneWidget);
+    expect(find.byType(AppCard), findsWidgets);
   });
 
   testWidgets('stock_overview_view render dữ liệu', (tester) async {

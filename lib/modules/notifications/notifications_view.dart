@@ -6,6 +6,7 @@ import '../../core/format/format.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
@@ -185,89 +186,62 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final unread = !item.isRead;
-    return Material(
-      color: scheme.surface,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: context.isDark
-              ? AppColors.cardBorderDark
-              : AppColors.cardBorder,
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: 3,
-                color: unread ? scheme.primary : Colors.transparent,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _NotificationIcon(type: item.type),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (unread) ...[
-                                  Container(
-                                    width: 7,
-                                    height: 7,
-                                    margin: const EdgeInsets.only(top: 6),
-                                    decoration: BoxDecoration(
-                                      color: scheme.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                ],
-                                Expanded(
-                                  child: Text(
-                                    notificationTitle(item),
-                                    style: context.appText.bodyStrong.copyWith(
-                                      fontWeight: unread
-                                          ? FontWeight.w700
-                                          : FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  formatRelative(item.createdAt),
-                                  style: context.appText.caption,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              notificationBody(item.body),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.appText.label,
-                            ),
-                          ],
+    return AppCard(
+      onTap: onTap,
+      accentColor: unread ? scheme.primary : null,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _NotificationIcon(type: item.type),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (unread) ...[
+                      Container(
+                        width: 7,
+                        height: 7,
+                        margin: const EdgeInsets.only(top: 6),
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          shape: BoxShape.circle,
                         ),
                       ),
+                      const SizedBox(width: AppSpacing.sm),
                     ],
-                  ),
+                    Expanded(
+                      child: Text(
+                        notificationTitle(item),
+                        style: context.appText.bodyStrong.copyWith(
+                          fontWeight: unread
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      formatRelative(item.createdAt),
+                      style: context.appText.caption,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  notificationBody(item.body),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.appText.label,
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
