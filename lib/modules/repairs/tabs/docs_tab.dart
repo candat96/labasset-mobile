@@ -14,6 +14,8 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/attachments_grid.dart';
 import '../../../core/widgets/signature_pad.dart';
 import '../../../data/repositories/repairs_repository.dart';
+import '../../../data/repositories/signing_repository.dart';
+import '../../signing/signed_documents_section.dart';
 
 /// Tab "Ảnh & chữ ký" + xuất biên bản PDF.
 class DocsTab extends StatefulWidget {
@@ -91,6 +93,12 @@ class _DocsTabState extends State<DocsTab> {
               ),
             ],
           ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        SignedDocumentsSection(
+          repo: Get.find<SigningRepository>(),
+          docType: SigningDocType.repairCompletion,
+          id: widget.ticketId,
         ),
       ],
     );

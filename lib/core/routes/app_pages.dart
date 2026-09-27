@@ -8,6 +8,8 @@ import '../../modules/demand/demand_controller.dart';
 import '../../modules/home/home_controller.dart';
 import '../../modules/placeholder/placeholder_view.dart';
 import '../../modules/repairs/repairs_controller.dart';
+import '../../modules/signing/signing_profile_controller.dart';
+import '../../modules/signing/signing_profile_view.dart';
 import '../../modules/stock/stock_overview_controller.dart';
 import '../../modules/shell/shell_controller.dart';
 import '../../modules/shell/shell_view.dart';
@@ -17,6 +19,7 @@ import '../../data/repositories/me_repository.dart';
 import '../../data/repositories/repairs_repository.dart';
 import '../../data/repositories/requests_repository.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../data/repositories/signing_repository.dart';
 import '../../data/repositories/stock_repository.dart';
 import '../../data/repositories/tasks_repository.dart';
 import '../cache/kv_cache.dart';
@@ -88,6 +91,16 @@ class AppPages {
       name: Routes.placeholder,
       page: () => const PlaceholderView(),
       middlewares: _protected,
+    ),
+    GetPage(
+      name: Routes.signingProfile,
+      page: () => const SigningProfileView(),
+      middlewares: _protected,
+      binding: BindingsBuilder(
+        () => Get.lazyPut(
+          () => SigningProfileController(repo: Get.find<SigningRepository>()),
+        ),
+      ),
     ),
     ...authPages(),
     ...featurePages(),

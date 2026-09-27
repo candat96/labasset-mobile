@@ -21,7 +21,9 @@ import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/maintenance.dart';
+import '../../data/repositories/signing_repository.dart';
 import '../../data/repositories/tasks_repository.dart';
+import '../signing/signed_documents_section.dart';
 import 'maintenance_task_controller.dart';
 
 /// Chi tiết công việc bảo dưỡng: bắt đầu bằng quét QR + checklist + hoàn thành.
@@ -106,6 +108,12 @@ class MaintenanceTaskView extends GetView<MaintenanceTaskController> {
                     const SizedBox(height: AppSpacing.md),
                     for (final item in t.templateItems)
                       _ChecklistCard(item: item, controller: controller),
+                    const SizedBox(height: AppSpacing.md),
+                    SignedDocumentsSection(
+                      repo: Get.find<SigningRepository>(),
+                      docType: SigningDocType.maintenanceTask,
+                      id: t.id,
+                    ),
                   ],
                 ),
               ),

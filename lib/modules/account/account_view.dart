@@ -42,6 +42,12 @@ class AccountView extends GetView<AccountController> {
               child: Column(
                 children: [
                   AppListTile(
+                    icon: LucideIcons.penLine,
+                    title: 'account.signing'.tr,
+                    onTap: () => Get.toNamed(Routes.signingProfile),
+                    showDivider: true,
+                  ),
+                  AppListTile(
                     icon: LucideIcons.keyRound,
                     title: 'account.changePassword'.tr,
                     onTap: () => Get.toNamed(Routes.changePassword),

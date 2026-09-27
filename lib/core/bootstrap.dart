@@ -25,6 +25,7 @@ import '../data/repositories/requests_repository.dart';
 import '../data/repositories/reports_repository.dart';
 import '../data/repositories/search_repository.dart';
 import '../data/repositories/settings_repository.dart';
+import '../data/repositories/signing_repository.dart';
 import '../data/repositories/stock_repository.dart';
 import '../data/repositories/stocktakes_repository.dart';
 import '../data/repositories/supplies_repository.dart';
@@ -71,6 +72,7 @@ Future<void> bootstrap() async {
   Get.put(NotificationsRepository(dio), permanent: true);
   Get.put(DeviceRepository(dio), permanent: true);
   Get.put(SettingsRepository(dio), permanent: true);
+  Get.put(SigningRepository(dio), permanent: true);
   Get.put(AttachmentsRepository(dio), permanent: true);
   Get.put(FilesRepository(dio), permanent: true);
   Get.put(MeRepository(dio), permanent: true);

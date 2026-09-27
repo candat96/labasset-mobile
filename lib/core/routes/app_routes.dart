@@ -62,6 +62,7 @@ class Routes {
   static const sync = '/sync';
   static const sessions = '/sessions';
   static const profile = '/profile';
+  static const signingProfile = '/signing-profile';
   static const placeholder = '/placeholder/:key';
   static String placeholderFor(String key) => '/placeholder/$key';
 

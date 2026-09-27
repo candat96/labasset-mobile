@@ -26,6 +26,7 @@ import 'package:labasset_mobile/data/repositories/repairs_repository.dart';
 import 'package:labasset_mobile/data/repositories/requests_repository.dart';
 import 'package:labasset_mobile/data/repositories/reports_repository.dart';
 import 'package:labasset_mobile/data/repositories/settings_repository.dart';
+import 'package:labasset_mobile/data/repositories/signing_repository.dart';
 import 'package:labasset_mobile/data/repositories/stock_repository.dart';
 import 'package:labasset_mobile/data/repositories/stocktakes_repository.dart';
 import 'package:labasset_mobile/data/repositories/supplies_repository.dart';
@@ -62,6 +63,8 @@ import '../../helpers/test_helpers.dart';
 class _RepairsRepo extends Mock implements RepairsRepository {}
 
 class _TasksRepo extends Mock implements TasksRepository {}
+
+class _SigningRepo extends Mock implements SigningRepository {}
 
 class _RequestsRepo extends Mock implements RequestsRepository {}
 
@@ -278,7 +281,13 @@ void main() {
         ChecklistItem(key: 'k1', label: 'Kiểm tra bơm', type: 'check'),
       ],
     );
+    final signing = _SigningRepo();
+    when(
+      () => signing.signedDocuments(any(), any()),
+    ).thenAnswer((_) async => const []);
+    Get.put<SigningRepository>(signing);
     await tester.pumpWidget(wrap(const MaintenanceTaskView()));
+    await tester.pumpAndSettle();
     expect(find.text('Kiểm tra bơm'), findsOneWidget);
     expect(find.byType(AppCard), findsWidgets);
   });

@@ -204,6 +204,16 @@ class Ep {
   static String stocktakeItems(String id) => '/v1/stocktakes/$id/items';
   static String stocktakeExtras(String id) => '/v1/stocktakes/$id/extras';
 
+  // Chữ ký số — hồ sơ theo tài khoản, tra chứng thư, ký và bản đã ký.
+  static const signingProfile = '/v1/me/signing-profile';
+  static const signingProfileSessionClear =
+      '/v1/me/signing-profile/session/clear';
+  static const signingCertificates = '/v1/signing/certificates';
+  static String documentSign(String docType, String id) =>
+      '/v1/documents/${Uri.encodeComponent(docType)}/${Uri.encodeComponent(id)}/sign';
+  static String documentSigned(String docType, String id) =>
+      '/v1/documents/${Uri.encodeComponent(docType)}/${Uri.encodeComponent(id)}/signed';
+
   static const attachments = '/v1/attachments';
   static String attachment(String id) => '/v1/attachments/$id';
 
