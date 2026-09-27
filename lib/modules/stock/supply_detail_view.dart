@@ -10,11 +10,13 @@ import '../../core/widgets/app_buttons.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/field_shell.dart';
 import '../../core/widgets/loading_list.dart';
 import '../../core/widgets/qty_field.dart';
 import '../../core/widgets/section_card.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../data/models/stock.dart';
+import '../../data/models/supply.dart';
 import '../../data/repositories/departments_repository.dart';
 import 'supply_detail_controller.dart';
 
@@ -65,6 +67,8 @@ class SupplyDetailView extends GetView<SupplyDetailController> {
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+              ..._profileSections(context, controller, s),
               const SizedBox(height: AppSpacing.md),
               SectionCard(
                 title: 'stock.supply.balances'.tr,
@@ -123,6 +127,260 @@ class SupplyDetailView extends GetView<SupplyDetailController> {
         ),
       );
     });
+  }
+}
+
+/// Các khối hồ sơ vật tư (chỉ đọc): pháp lý, BHYT, thầu, quy đổi, hạn dùng,
+/// vật tư thay thế. Khối rỗng bị ẩn.
+List<Widget> _profileSections(
+  BuildContext context,
+  SupplyDetailController c,
+  SupplySummary s,
+) {
+  final parts = <Widget?>[
+    _infoSection(context, 'stock.supply.legal'.tr, [
+      _Field('stock.supply.circulationNumber'.tr, s.circulationNumber),
+      _Field(
+        'stock.supply.circulationValidTo'.tr,
+        _validToText(context, s.circulationValidTo),
+        color: _validToColor(context, s.circulationValidTo),
+      ),
+      _Field(
+        'stock.supply.riskClass'.tr,
+        s.riskClass == null
+            ? null
+            : 'stock.supply.riskClassValue'.trParams({'class': s.riskClass!}),
+      ),
+      _Field('stock.supply.countryOfOrigin'.tr, s.countryOfOrigin),
+    ]),
+    _infoSection(context, 'stock.supply.insurance'.tr, [
+      _Field('stock.supply.insuranceCode'.tr, s.insuranceCode),
+      _Field('stock.supply.insuranceName'.tr, s.insuranceName),
+      _Field(
+        'stock.supply.insuranceRate'.tr,
+        s.insuranceRate == null ? null : '${formatDecimal(s.insuranceRate)}%',
+      ),
+      _Field('stock.supply.insurancePrice'.tr, formatVnd(s.insurancePrice)),
+    ]),
+    _infoSection(context, 'stock.supply.bid'.tr, [
+      _Field('stock.supply.bidPackage'.tr, s.bidPackage),
+      _Field('stock.supply.bidDecisionNo'.tr, s.bidDecisionNo),
+      _Field('stock.supply.bidPrice'.tr, formatVnd(s.bidPrice)),
+      _Field(
+        'stock.supply.bidValidTo'.tr,
+        _validToText(context, s.bidValidTo),
+        color: _validToColor(context, s.bidValidTo),
+      ),
+    ]),
+    _ConversionSection(controller: c, supply: s),
+    _infoSection(context, 'stock.supply.shelfLife'.tr, [
+      _Field(
+        'stock.supply.minShelfLifeDays'.tr,
+        s.minShelfLifeDays == null
+            ? null
+            : 'stock.supply.shelfLifeDays'.trParams({
+                'days': s.minShelfLifeDays.toString(),
+              }),
+      ),
+    ]),
+    _SubstitutesSection(controller: c),
+  ];
+
+  final visible = parts.whereType<Widget>().toList();
+  return [
+    for (var i = 0; i < visible.length; i++) ...[
+      if (i > 0) const SizedBox(height: AppSpacing.md),
+      visible[i],
+    ],
+  ];
+}
+
+/// Khối nhãn/giá trị chỉ đọc; trả `null` khi mọi trường đều rỗng.
+Widget? _infoSection(BuildContext context, String title, List<_Field> fields) {
+  final visible = fields
+      .where((f) => f.value != null && f.value!.isNotEmpty)
+      .toList();
+  if (visible.isEmpty) return null;
+  return SectionCard(
+    title: title,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < visible.length; i++) ...[
+          if (i > 0) const SizedBox(height: AppSpacing.md),
+          _ReadOnlyField(
+            label: visible[i].label,
+            value: visible[i].value,
+            valueColor: visible[i].color,
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+/// Diễn giải hạn hiệu lực kèm cảnh báo: đã qua → đỏ, ≤ 60 ngày → vàng.
+String? _validToText(BuildContext context, String? date) {
+  if (date == null || date.isEmpty) return null;
+  final base = formatDate(date);
+  if (base.isEmpty) return null;
+  return switch (validityTone(date)) {
+    ValidityTone.expired => '$base (${'stock.supply.validTo.expired'.tr})',
+    ValidityTone.soon => '$base (${'stock.supply.validTo.soon'.tr})',
+    ValidityTone.none => base,
+  };
+}
+
+Color? _validToColor(BuildContext context, String? date) =>
+    switch (validityTone(date)) {
+      ValidityTone.expired => context.status.danger,
+      ValidityTone.soon => context.status.warning,
+      ValidityTone.none => null,
+    };
+
+class _Field {
+  const _Field(this.label, this.value, {this.color});
+  final String label;
+  final String? value;
+  final Color? color;
+}
+
+/// Một dòng nhãn/giá trị chỉ đọc theo chuẩn ô nhập (nhãn trên, giá trị dưới).
+class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  final String label;
+  final String? value;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FieldLabel(label: label),
+        Text(
+          value == null || value!.isEmpty
+              ? 'stock.supply.valueEmpty'.tr
+              : value!,
+          style: context.appText.body.copyWith(
+            fontWeight: FontWeight.w600,
+            color: valueColor ?? scheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Quy đổi đơn vị mua ↔ đơn vị dùng kèm diễn giải "1 Thùng = 100 Cái".
+class _ConversionSection extends StatelessWidget {
+  const _ConversionSection({required this.controller, required this.supply});
+
+  final SupplyDetailController controller;
+  final SupplySummary supply;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = controller.conversionLabel;
+    final fields = <_Field>[
+      if (supply.purchaseUnitId != null)
+        _Field(
+          'stock.supply.purchaseUnit'.tr,
+          controller.unitName(supply.purchaseUnitId),
+        ),
+      if (supply.conversionFactor != null)
+        _Field(
+          'stock.supply.conversionFactor'.tr,
+          formatDecimal(supply.conversionFactor),
+        ),
+    ].where((f) => f.value != null && f.value!.isNotEmpty).toList();
+    if (fields.isEmpty && label == null) return const SizedBox.shrink();
+
+    final children = <Widget>[
+      for (final f in fields) ...[
+        _ReadOnlyField(label: f.label, value: f.value),
+        if (f != fields.last || label != null)
+          const SizedBox(height: AppSpacing.md),
+      ],
+      if (label != null)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              LucideIcons.arrowRightLeft,
+              size: 16,
+              color: context.status.info,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                label,
+                style: context.appText.bodyStrong.copyWith(
+                  color: context.status.info,
+                ),
+              ),
+            ),
+          ],
+        ),
+    ];
+    return SectionCard(
+      title: 'stock.supply.conversion'.tr,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+}
+
+/// Danh sách vật tư thay thế (chỉ đọc, chạm để mở vật tư đó).
+class _SubstitutesSection extends StatelessWidget {
+  const _SubstitutesSection({required this.controller});
+
+  final SupplyDetailController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = controller.substitutes;
+    return SectionCard(
+      title: 'stock.supply.substitutes'.tr,
+      child: items.isEmpty
+          ? Text(
+              'stock.supply.substitutesEmpty'.tr,
+              style: context.appText.label,
+            )
+          : Column(
+              children: [
+                for (final sub in items)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      LucideIcons.replace,
+                      color: context.status.info,
+                    ),
+                    title: Text(sub.name),
+                    subtitle: Text(
+                      [
+                        sub.code,
+                        if (sub.unitName != null && sub.unitName!.isNotEmpty)
+                          sub.unitName!,
+                        if (sub.notes != null && sub.notes!.isNotEmpty)
+                          sub.notes!,
+                      ].join(' · '),
+                    ),
+                    trailing: const Icon(LucideIcons.chevronRight),
+                    onTap: () => Get.toNamed(Routes.supply(sub.id)),
+                  ),
+              ],
+            ),
+    );
   }
 }
 

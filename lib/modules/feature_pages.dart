@@ -301,6 +301,7 @@ List<GetPage<dynamic>> featurePages() {
           () => SupplyDetailController(
             supplies: Get.find<SuppliesRepository>(),
             stock: Get.find<StockRepository>(),
+            catalogs: Get.find<CatalogsRepository>(),
             id: id,
             isAdmin: Get.find<SessionStore>().hasRole(const ['HOSPITAL_ADMIN']),
           ),

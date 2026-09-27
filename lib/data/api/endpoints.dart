@@ -61,6 +61,7 @@ class Ep {
   static String supply(String id) => '/v1/supplies/$id';
   static String supplyStock(String id) => '/v1/supplies/$id/stock';
   static String supplyEquipment(String id) => '/v1/supplies/$id/equipment';
+  static String supplySubstitutes(String id) => '/v1/supplies/$id/substitutes';
   static const repairs = '/v1/repairs';
   static const repairStats = '/v1/repairs/stats';
   static const repairWorkload = '/v1/repairs/workload';

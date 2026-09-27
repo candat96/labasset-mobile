@@ -46,4 +46,13 @@ class SuppliesRepository {
         .map(SupplyEquipment.fromJson)
         .toList();
   }
+
+  /// Vật tư thay thế (đọc hai chiều): `GET /v1/supplies/:id/substitutes`.
+  Future<List<SupplySubstitute>> substitutes(String id) async {
+    final res = await _dio.get<List<dynamic>>(Ep.supplySubstitutes(id));
+    return (res.data ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(SupplySubstitute.fromJson)
+        .toList();
+  }
 }

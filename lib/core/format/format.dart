@@ -107,3 +107,37 @@ String formatNumber(num? n, {int digits = 0}) {
     decimalDigits: digits,
   ).format(n);
 }
+
+/// Rút gọn số thập phân của API: bỏ số 0 thừa, dấu phẩy thập phân kiểu Việt.
+/// `"100.0000"` → `"100"`, `"2.5000"` → `"2,5"`.
+String formatDecimal(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '';
+  final d = Decimal.tryParse(raw.trim());
+  if (d == null) return raw;
+  return d.toString().replaceAll('.', ',');
+}
+
+/// Mức cảnh báo hạn hiệu lực (số lưu hành, hợp đồng thầu…).
+enum ValidityTone {
+  /// Không có hạn hoặc còn xa.
+  none,
+
+  /// Còn trong ngưỡng cảnh báo (mặc định ≤ 60 ngày).
+  soon,
+
+  /// Đã qua hạn.
+  expired,
+}
+
+/// Phân loại hạn hiệu lực: đã qua → [ValidityTone.expired]; còn ≤ [withinDays]
+/// ngày → [ValidityTone.soon]; còn lại [ValidityTone.none].
+ValidityTone validityTone(Object? v, {int withinDays = 60, DateTime? now}) {
+  final d = _parse(v);
+  if (d == null) return ValidityTone.none;
+  final ref = now ?? DateTime.now();
+  if (d.isBefore(ref)) return ValidityTone.expired;
+  if (!d.isAfter(ref.add(Duration(days: withinDays)))) {
+    return ValidityTone.soon;
+  }
+  return ValidityTone.none;
+}

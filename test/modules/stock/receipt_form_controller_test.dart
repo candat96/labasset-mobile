@@ -218,6 +218,11 @@ void main() {
         ),
       );
       when(() => supplies.equipment('s1')).thenAnswer((_) async => []);
+      when(() => supplies.substitutes('s1')).thenAnswer(
+        (_) async => const [
+          SupplySubstitute(id: 's2', code: 'VT2', name: 'Bơm tiêm'),
+        ],
+      );
       when(() => stock.forecast('s1')).thenAnswer(
         (_) async => const StockForecast(supplyId: 's1', daysLeft: 12),
       );
@@ -229,6 +234,7 @@ void main() {
       final c = SupplyDetailController(
         supplies: supplies,
         stock: stock,
+        catalogs: _MockCatalogs(),
         id: 's1',
         isAdmin: true,
       );
@@ -236,6 +242,7 @@ void main() {
       expect(c.supply.value?.code, 'VT1');
       expect(c.stockInfo.value?.lots.single.lotNo, 'L1');
       expect(c.forecast.value?.daysLeft, 12);
+      expect(c.substitutes.single.name, 'Bơm tiêm');
 
       expect(await c.openLot(c.stockInfo.value!.lots.single), isTrue);
       verify(() => stock.openLot('l1')).called(1);

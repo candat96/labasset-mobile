@@ -30,4 +30,29 @@ void main() {
       '2 ngày nữa',
     );
   });
+
+  test('formatDecimal bỏ số 0 thừa, dấu phẩy kiểu Việt', () {
+    expect(formatDecimal('100.0000'), '100');
+    expect(formatDecimal('2.5000'), '2,5');
+    expect(formatDecimal('0.5'), '0,5');
+    expect(formatDecimal(null), '');
+    expect(formatDecimal(''), '');
+  });
+
+  test('validityTone: quá hạn đỏ, ≤ 60 ngày vàng', () {
+    final now = DateTime(2026, 9, 19, 12);
+    expect(validityTone(null, now: now), ValidityTone.none);
+    expect(
+      validityTone('2026-11-17', now: now, withinDays: 60),
+      ValidityTone.soon,
+    );
+    expect(
+      validityTone('2026-09-18', now: now, withinDays: 60),
+      ValidityTone.expired,
+    );
+    expect(
+      validityTone('2027-01-01', now: now, withinDays: 60),
+      ValidityTone.none,
+    );
+  });
 }

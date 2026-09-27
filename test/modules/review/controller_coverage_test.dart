@@ -272,6 +272,7 @@ void main() {
     final c = SupplyDetailController(
       supplies: supplies,
       stock: _Stock(),
+      catalogs: _Catalogs(),
       id: 's1',
     );
     await c.load();
