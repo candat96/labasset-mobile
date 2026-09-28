@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Build APK phát hành của MedOne rồi gửi vào nhóm Telegram.
 #
-#   tool/release.sh              # build + gửi vào cả hai nhóm đã cấu hình
-#   tool/release.sh --no-send    # chỉ build
-#   tool/release.sh --group BAPP # chỉ gửi một nhóm
+#   tool/release.sh                 # tăng patch, build + gửi vào nhóm đã cấu hình
+#   tool/release.sh --no-send       # chỉ build
+#   tool/release.sh --group BAPP    # chỉ gửi một nhóm
+#   tool/release.sh --version 1.1.0 # đặt số phiên bản cụ thể
+#   tool/release.sh --no-bump       # giữ nguyên số phiên bản đang có
 #
 # Bí mật đọc từ .env.release (ngoài git). Xem tool/README-release.md.
 set -euo pipefail
@@ -16,10 +18,14 @@ set -a; . ./.env.release; set +a
 
 SEND=1
 ONLY_GROUP=""
+BUMP=1
+SET_VERSION=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --no-send) SEND=0 ;;
     --group) ONLY_GROUP="$2"; shift ;;
+    --version) SET_VERSION="$2"; BUMP=0; shift ;;
+    --no-bump) BUMP=0 ;;
     *) echo "Tham số lạ: $1"; exit 2 ;;
   esac
   shift
@@ -30,8 +36,35 @@ if [ -x "$HOME/fvm/versions/3.47.5/bin/flutter" ]; then
   export PATH="$HOME/fvm/versions/3.47.5/bin:$PATH"
 fi
 
+CURRENT=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+NAME=${CURRENT%%+*}
+
+# Số phiên bản người dùng nhìn thấy. Android cho cài đè khi versionCode tăng và
+# CHỮ KÝ không đổi — versionName không ảnh hưởng — nhưng số tăng dần giúp người
+# dùng và người hỗ trợ biết máy đang chạy bản nào.
+if [ -n "$SET_VERSION" ]; then
+  NAME="$SET_VERSION"
+elif [ "$BUMP" = "1" ]; then
+  case "$NAME" in
+    *.*.*) NAME="${NAME%.*}.$(( ${NAME##*.} + 1 ))" ;;
+    *) echo "Số phiên bản '$NAME' không theo dạng X.Y.Z — dùng --version để đặt tay"; exit 2 ;;
+  esac
+fi
+
+if [ "$NAME+" != "${CURRENT%%+*}+" ] || [ "$BUMP" = "1" ] || [ -n "$SET_VERSION" ]; then
+  # Ghi vào pubspec rồi commit ngay: bản đã phát hành phải tra ngược được ra commit.
+  BUILD_NEXT=$(( ${GITHUB_RUN_NUMBER:-$(git rev-list --count HEAD)} + 1 ))
+  if [ "$NAME" != "${CURRENT%%+*}" ]; then
+    /usr/bin/sed -i '' "s/^version: .*/version: $NAME+$BUILD_NEXT/" pubspec.yaml
+    git add pubspec.yaml
+    git commit -q -m "chore(release): phiên bản $NAME (build $BUILD_NEXT)"
+    echo "• pubspec: ${CURRENT} → $NAME+$BUILD_NEXT (đã commit)"
+  fi
+fi
+
 VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
 # versionCode của Android tối đa 2100000000, nên dùng số commit (tăng dần, nhỏ gọn).
+# Đây mới là thứ quyết định cài đè được hay phải gỡ ra cài lại.
 BUILD_NO=${GITHUB_RUN_NUMBER:-$(git rev-list --count HEAD)}
 STAMP=$(date +%y%m%d-%H%M)
 COMMIT=$(git rev-parse --short HEAD)
