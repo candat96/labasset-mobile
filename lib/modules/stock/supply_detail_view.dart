@@ -83,11 +83,11 @@ class SupplyDetailView extends GetView<SupplyDetailController> {
                           b.warehouseName ?? 'stock.warehouse.unknown'.tr,
                         ),
                         subtitle: Text(
-                          '${'stock.supply.onHand'.tr}: ${formatVnd(b.qtyOnHand, symbol: false)}'
-                          ' · ${'stock.supply.reserved'.tr}: ${formatVnd(b.qtyReserved, symbol: false)}',
+                          '${'stock.supply.onHand'.tr}: ${formatQty(b.qtyOnHand)}'
+                          ' · ${'stock.supply.reserved'.tr}: ${formatQty(b.qtyReserved)}',
                         ),
                         trailing: Text(
-                          formatVnd(b.available, symbol: false),
+                          formatQty(b.available),
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
@@ -423,8 +423,8 @@ class _LotTile extends StatelessWidget {
             ],
           ),
           Text(
-            '${'stock.supply.onHand'.tr}: ${formatVnd(lot.qtyOnHand, symbol: false)}'
-            ' · ${'stock.supply.available'.tr}: ${formatVnd(lot.available, symbol: false)}',
+            '${'stock.supply.onHand'.tr}: ${formatQty(lot.qtyOnHand)}'
+            ' · ${'stock.supply.available'.tr}: ${formatQty(lot.available)}',
             style: theme.textTheme.bodySmall,
           ),
           if (lot.expiresAt != null)

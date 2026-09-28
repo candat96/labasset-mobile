@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:labasset_mobile/core/format/format.dart';
 
 void main() {
+  _qtyTests();
   test('formatVnd groups with dots and keeps precision', () {
     expect(formatVnd('1250000'), '1.250.000 ₫');
     expect(formatVnd('1250000.50'), '1.250.000,50 ₫');
@@ -54,5 +55,23 @@ void main() {
       validityTone('2027-01-01', now: now, withinDays: 60),
       ValidityTone.none,
     );
+  });
+}
+
+void _qtyTests() {
+  group('formatQty', () {
+    test('số lượng không bị đọc nhầm thành hàng nghìn', () {
+      // numeric(14,3): mười cái về từ API là "10.000".
+      expect(formatQty('10.000'), '10');
+      expect(formatQty('250.000'), '250');
+      expect(formatQty('1500.500'), '1.500,5');
+      expect(formatQty('0.250'), '0,25');
+    });
+
+    test('rỗng và chuỗi lạ giữ nguyên', () {
+      expect(formatQty(null), '');
+      expect(formatQty(''), '');
+      expect(formatQty('—'), '—');
+    });
   });
 }

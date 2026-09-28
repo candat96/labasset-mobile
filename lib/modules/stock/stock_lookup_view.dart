@@ -104,7 +104,7 @@ class StockLookupView extends GetView<StockLookupController> {
                       ListTile(
                         title: Text('${'scan.lot.lotNo'.tr}: ${l.lotNo}'),
                         subtitle: Text(
-                          '${'scan.lot.qty'.tr}: ${formatVnd(l.available, symbol: false)}'
+                          '${'scan.lot.qty'.tr}: ${formatQty(l.available)}'
                           '${l.expiresAt == null ? '' : ' · ${'scan.lot.expiry'.tr}: ${formatDate(l.expiresAt)}'}',
                         ),
                         trailing: StatusBadge(

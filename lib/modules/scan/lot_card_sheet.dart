@@ -78,11 +78,7 @@ class _LotCardViewState extends State<_LotCardView> {
           ),
           _row(context, 'scan.lot.lotNo'.tr, lot.lotNo),
           _row(context, 'scan.lot.warehouse'.tr, lot.warehouseId ?? '—'),
-          _row(
-            context,
-            'scan.lot.qty'.tr,
-            formatVnd(lot.available, symbol: false),
-          ),
+          _row(context, 'scan.lot.qty'.tr, formatQty(lot.available)),
           _row(context, 'scan.lot.expiry'.tr, formatDate(expiring)),
           Row(
             children: [

@@ -108,6 +108,27 @@ String formatNumber(num? n, {int digits = 0}) {
   ).format(n);
 }
 
+/// Số lượng hàng hoá: bỏ số 0 thừa rồi nhóm hàng nghìn.
+///
+/// KHÔNG dùng [formatVnd] cho số lượng. Tồn kho về từ API là `numeric(14,3)`,
+/// nên 10 cái là chuỗi `"10.000"`; đưa qua hàm tiền sẽ ra `"10,000"` và người
+/// đọc hiểu thành mười nghìn.
+String formatQty(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '';
+  final d = Decimal.tryParse(raw.trim());
+  if (d == null) return raw;
+  final text = d.toString();
+  final parts = text.split('.');
+  final negative = parts[0].startsWith('-');
+  final digits = negative ? parts[0].substring(1) : parts[0];
+  final grouped = digits.replaceAllMapped(
+    RegExp(r'\B(?=(\d{3})+(?!\d))'),
+    (_) => '.',
+  );
+  final sign = negative ? '-' : '';
+  return parts.length > 1 ? '$sign$grouped,${parts[1]}' : '$sign$grouped';
+}
+
 /// Rút gọn số thập phân của API: bỏ số 0 thừa, dấu phẩy thập phân kiểu Việt.
 /// `"100.0000"` → `"100"`, `"2.5000"` → `"2,5"`.
 String formatDecimal(String? raw) {

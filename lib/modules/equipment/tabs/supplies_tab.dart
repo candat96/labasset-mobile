@@ -158,9 +158,9 @@ class SuppliesTab extends GetView<SuppliesTabController> {
                       Text(
                         [
                           if (l.normQtyPerDay != null)
-                            '${'equipment.supply.normPerDay'.tr}: ${formatVnd(l.normQtyPerDay, symbol: false)}',
+                            '${'equipment.supply.normPerDay'.tr}: ${formatQty(l.normQtyPerDay)}',
                           if (l.normQtyPerTest != null)
-                            '${'equipment.supply.normPerTest'.tr}: ${formatVnd(l.normQtyPerTest, symbol: false)}',
+                            '${'equipment.supply.normPerTest'.tr}: ${formatQty(l.normQtyPerTest)}',
                         ].join(' · '),
                       ),
                     if (runway != null)
